@@ -1,0 +1,164 @@
+{
+  "runtimeTarget": {
+    "name": ".NETCoreApp,Version=v9.0/win-x86",
+    "signature": ""
+  },
+  "compilationOptions": {},
+  "targets": {
+    ".NETCoreApp,Version=v9.0": {},
+    ".NETCoreApp,Version=v9.0/win-x86": {
+      "Reloaded.Mod.Loader/1.29.2": {
+        "dependencies": {
+          "Colorful.Console": "1.2.2-reloaded",
+          "DotNet.ReproducibleBuilds": "1.2.25",
+          "Indieteur.SteamAppsManAndVDFAPI": "1.0.5",
+          "McMaster.NETCore.Plugins": "2.0.0",
+          "Microsoft.NET.ILLink.Tasks": "9.0.3",
+          "Reloaded.Mod.Interfaces": "2.4.0",
+          "Reloaded.Mod.Loader.IO": "2.8.0",
+          "Reloaded.SharedLib.Hooks": "1.9.0"
+        },
+        "runtime": {
+          "Reloaded.Mod.Loader.dll": {}
+        }
+      },
+      "Colorful.Console/1.2.2-reloaded": {
+        "runtime": {
+          "lib/netcoreapp3.1/Colorful.Console.dll": {
+            "assemblyVersion": "1.2.2.0",
+            "fileVersion": "1.2.2.0"
+          }
+        }
+      },
+      "DotNet.ReproducibleBuilds/1.2.25": {},
+      "Indieteur.SteamAppsManAndVDFAPI/1.0.5": {
+        "runtime": {
+          "lib/Indieteur.SAMAPI.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          },
+          "lib/Indieteur.VDFAPI.dll": {
+            "assemblyVersion": "1.0.0.0",
+            "fileVersion": "1.0.0.0"
+          }
+        }
+      },
+      "McMaster.NETCore.Plugins/2.0.0": {
+        "runtime": {
+          "lib/net8.0/McMaster.NETCore.Plugins.dll": {
+            "assemblyVersion": "2.0.0.0",
+            "fileVersion": "2.0.0.0"
+          }
+        }
+      },
+      "Microsoft.NET.ILLink.Tasks/9.0.3": {},
+      "Reloaded.Hooks.Definitions/1.11.0": {},
+      "Reloaded.Memory/9.4.2": {
+        "runtime": {
+          "lib/net8.0/Reloaded.Memory.dll": {
+            "assemblyVersion": "9.4.2.0",
+            "fileVersion": "9.4.2.0"
+          }
+        }
+      },
+      "Reloaded.SharedLib.Hooks/1.9.0": {
+        "dependencies": {
+          "Reloaded.Hooks.Definitions": "1.11.0"
+        }
+      },
+      "Reloaded.Mod.Interfaces/2.4.0": {
+        "runtime": {
+          "Reloaded.Mod.Interfaces.dll": {
+            "assemblyVersion": "2.4.0.0",
+            "fileVersion": "2.4.0.0"
+          }
+        }
+      },
+      "Reloaded.Mod.Loader.IO/2.8.0": {
+        "dependencies": {
+          "Reloaded.Memory": "9.4.2",
+          "Reloaded.Mod.Interfaces": "2.4.0"
+        },
+        "runtime": {
+          "Reloaded.Mod.Loader.IO.dll": {
+            "assemblyVersion": "2.8.0.0",
+            "fileVersion": "2.8.0.0"
+          }
+        }
+      }
+    }
+  },
+  "libraries": {
+    "Reloaded.Mod.Loader/1.29.2": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Colorful.Console/1.2.2-reloaded": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-OwcSaDQMo5G8PK7mIGL106GXUQ0ZEM68BXg4/J4zB7qsOExMARmiIDgTdkOCAG3O9evtKirRp/VEj0LpdiXMwA==",
+      "path": "colorful.console/1.2.2-reloaded",
+      "hashPath": "colorful.console.1.2.2-reloaded.nupkg.sha512"
+    },
+    "DotNet.ReproducibleBuilds/1.2.25": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg==",
+      "path": "dotnet.reproduciblebuilds/1.2.25",
+      "hashPath": "dotnet.reproduciblebuilds.1.2.25.nupkg.sha512"
+    },
+    "Indieteur.SteamAppsManAndVDFAPI/1.0.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-YPpZ0PKmc9O1OJuIFe1AmtyYEx2EJCnKXmf9oXTYcEfcaM2rrXvblJdedicRy5GAyPmuzOShegS88/M5+ATphA==",
+      "path": "indieteur.steamappsmanandvdfapi/1.0.5",
+      "hashPath": "indieteur.steamappsmanandvdfapi.1.0.5.nupkg.sha512"
+    },
+    "McMaster.NETCore.Plugins/2.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-pmmrI3qPE53xEJEcg575jQeDNPzMWfNJO8/SASlB9PLPrGVrsyVNFRrvfo+3BzcbQxfUBF1//gTOiJ82dOTlTw==",
+      "path": "mcmaster.netcore.plugins/2.0.0",
+      "hashPath": "mcmaster.netcore.plugins.2.0.0.nupkg.sha512"
+    },
+    "Microsoft.NET.ILLink.Tasks/9.0.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1rqGTfubVg0qj2PsK6esyq3PIxtYJYrN3LsYUV9RrvH3anmt3fT3ozYdAZZH4U8JU/pt5pPIUk8NBSu26wtekA==",
+      "path": "microsoft.net.illink.tasks/9.0.3",
+      "hashPath": "microsoft.net.illink.tasks.9.0.3.nupkg.sha512"
+    },
+    "Reloaded.Hooks.Definitions/1.11.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-/z0AwcCvVTQHlQ9SMMMBqKEIrm5t/yBFPylySW2Rnr7uRGV9jGfoACFe79KZKF976dhtkyy2xl0HIXz5hRUkng==",
+      "path": "reloaded.hooks.definitions/1.11.0",
+      "hashPath": "reloaded.hooks.definitions.1.11.0.nupkg.sha512"
+    },
+    "Reloaded.Memory/9.4.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-yrjimngdXs7evlk/ZFbzP0uppTf0Og+LFFonITgpzZ94HmVOi8b+29YFfYdWTbf68qUzGP0D4s0VsMhaGerg5g==",
+      "path": "reloaded.memory/9.4.2",
+      "hashPath": "reloaded.memory.9.4.2.nupkg.sha512"
+    },
+    "Reloaded.SharedLib.Hooks/1.9.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-AEDTDhCnYxJGuLrdZCZPoiqrdl/lW4XwA6bb5dntOvkyw4RBBm/gqoNlHS7RJS7k+kt36ES+UFZAtBeyusYtgw==",
+      "path": "reloaded.sharedlib.hooks/1.9.0",
+      "hashPath": "reloaded.sharedlib.hooks.1.9.0.nupkg.sha512"
+    },
+    "Reloaded.Mod.Interfaces/2.4.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    },
+    "Reloaded.Mod.Loader.IO/2.8.0": {
+      "type": "project",
+      "serviceable": false,
+      "sha512": ""
+    }
+  }
+}

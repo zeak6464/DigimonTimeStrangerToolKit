@@ -1,0 +1,2 @@
+function OnCheckNPC(npc)
+end

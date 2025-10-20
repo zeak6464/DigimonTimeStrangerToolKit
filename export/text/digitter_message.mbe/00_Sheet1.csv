@@ -1,0 +1,73 @@
+string2 0,string 1
+"main_010_010_010","Can you see this message? This is a communication system
+called ""Digiline."""
+"main_010_010_020","You can view the messages on your Digivice. We'll make
+good use of Digiline going forward."
+"main_010_010_030","Document: ""Digiline""
+
+View {decision}"
+"main_010_020_010","Document: ""Navigation System""
+
+View {decision}"
+"main_010_080_010","Good work. As you can see, coming into contact with Digimon
+triggers a battle."
+"main_010_080_011","Battles like this are unavoidable, I'm afraid. Authorizing
+use of DigiAttack {r2}."
+"main_010_080_012","Document: ""DigiAttacks""
+
+View {decision}"
+"main_010_080_020","Elimination of target object confirmed. Continue heading
+for the target coordinates."
+"main_010_120_010","That girl said that something was going to happen on the
+roof."
+"main_010_120_011","She seems to have more information than we do. It might
+be a good idea to stay with her."
+"main_020_030_010","Why not take a rest? Your Digivice comes with a recovery
+feature."
+"main_020_030_020","Just stay still and don't move. Your Digimon should be healed."
+"main_020_030_030","Document: ""Regeneration Mode""
+
+View {decision}"
+"main_020_070_010","What happened here? Is this what the Wall was built to hide?"
+"main_020_070_011","Cast aside common sense here. Anomalies always go in
+unexpected directions."
+"main_020_070_020","Document: ""Conversion & Scan Rate""
+
+View {decision}"
+"main_020_070_030","With progressive enhancement, eventually the preemptive
+strike of your DigiAttack {r2} will at times be enough to end
+the battle before it even begins."
+"main_020_070_031","That will help you complete your mission more efficiently,
+so I hope you put it to good use."
+"main_020_120_010","I'm going to continue upward. I'm worried about our little
+friend!"
+"main_020_120_011","Let's meet up later on the roof!"
+"main_020_160_010","Interactions with an unknown phase electron lifeform...
+Should be a valuable sample."
+"main_020_160_011","We'll have the analysis department examine the data.
+Continue your investigation."
+"field_14_020_1","Unknown phase electron lifeform detected. It may know
+something. Try and make contact."
+"field_14_040_0","No going back now. You just have to find an elevator and
+press onward."
+"field_14_040_1","Analyze {l2} should help you find any weak spots in the wall.
+View the document if you want to know how to use it."
+"field_14_040_2","Document: ""Analyze Mode""
+
+View {decision}"
+"recovery_start","Regeneration Mode activated. Digimon HP/SP will be fully
+recovered in {n0} seconds..."
+"recovery_end","Regeneration Mode terminated. Digimon HP/SP fully recovered."
+"full_recovery","Digimon medical check complete.
+Digimon HP/SP fully recovered."
+"evolution_possible","A Digimon is {fc9now eligible for Digivolution}. View its details via
+{fc15Digivice > Digimon > Digivolution}."
+"kizuna_possible","New {fc9Agent Skills} are now available to learn. View them under
+{fc15Digivice > Agent > Agent Skills}."
+"digifarm_training_01","{fc9{d0}} has completed their training.
+If you would like it to continue training, just say the word."
+"digifarm_training_02","Very well. It will continue with the same training. Be sure to
+check in on the Digifarm from time to time."
+"tut_2006","Document: ""Attachment Skills""
+
+View {decision}"

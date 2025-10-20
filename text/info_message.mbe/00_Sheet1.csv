@@ -1,0 +1,181 @@
+string2 0,string 1
+"1003","Saving..."
+"1004","Save complete."
+"1005","Not enough free space.
+Either delete or overwrite save data."
+"1006","Not enough free space.
+Either delete or overwrite other save data."
+"1007","Save failed."
+"1008","Loading..."
+"1009","Load complete."
+"1010","Load failed."
+"1011","File is corrupted."
+"1012","Deleting save data..."
+"1013","Delete complete."
+"1014","Delete failed."
+"1015","Unable to load add-on content.
+Please try downloading the content from PlayStation®Store again."
+"1016","Settings saved."
+"1050","The name you have entered includes inappropriate words."
+"1202","Unable to select this Digimon.
+This would remove all battle members from your party."
+"1203","Unable to Convert any more Digimon.
+You have reached the maximum number of Digimon."
+"1211","Once Digivolved or De-Digivolved, Digimon can't be changed back.
+Make sure that's what you want to do before Digivolving or De-Digivolving."
+"1212","Can't move this Digimon. You would no longer
+have any Digimon who can fight."
+"1215","Equipment removed from all members!"
+"1216","Accessories removed from all members!"
+"1217","No locations available to move to."
+"1218","No scanned Digimon available."
+"1219","No ridable Digimon available."
+"1220","This Digimon is protected and can't be selected."
+"1221","Can't select any more."
+"1222","Unable to De-Digivolve.
+Your box is full."
+"1300","This location is currently inaccessible."
+"1400","Checking system data..."
+"1500","Insufficient Anomaly Points to learn this skill."
+"1701","SCAN: {n0}% > {n1}%"
+"1702","SCAN: {n0}% > {n1}%, Convertible"
+"1703","SCAN: {n0}% > {n1}%, Max"
+"1704","{d0} Lv. {n0} > Lv. {n1}"
+"1800","Personality has changed to ""{d0}."""
+"1801","Obtained {n0} YEN!"
+"1900","Can't use this now."
+"1901","Using this would have no effect."
+"1903","{n0} EXP {n1} YEN"
+"1904","{d0}'s Bond has grown to {fc9{n0}}."
+"1905","{d0}'s Personality has changed to {fc9{d1}}."
+"1906","{d0}'s cumulative {d1} has been increased."
+"1907","Increased level cap of {d0}."
+"1913","But you can't carry anything more and have to leave it behind."
+"1914","Obtained {fc9{d0}}."
+"1915","Obtained {fc9{d0} x{n0}}."
+"1916","Handed over {fc9{d0}}."
+"1917","Handed over {fc9{d0} x{n0}}."
+"1918","Used {fc9{d0} x{n0}}."
+"1919","You can't carry any more {fc9{d0}}."
+"1920","{fc9}{d0}"
+"1921","Not enough SP."
+"1922","{d0}'s Growth Limit"
+"1923","Received {fc9{d1} x{n0}} from {d0}."
+"2300","You will no longer have any Digimon who can fight."
+"2400","You are now able to go to {d0}."
+"2600","Maximum number of skills exceeded. 
+Moving to the skill replacement screen."
+"2601",""
+"5051","The party's HP and SP have been fully recovered!"
+"8000","Paid {fc9{n0} YEN}."
+"9000","Press the button you want to assign to the selected action."
+"9001","Press the button you want to assign to the selected action.
+Cancel and return to the previous screen using the Esc key."
+"9002","Some controls have not been set.
+Please ensure that all controls have been configured."
+"10000","{fc9{d0}} joined the party."
+"10110100","You received {fc9HP Capsule I x5}."
+"info_message_nickname","Please enter the Digimon's nickname."
+"info_message_reinforcement_01","Unable to select any more material Digimon.
+The enhancement limit for this Digimon has been reached."
+"info_message_reinforcement_02","Skill Disc obtained."
+"info_message_reinforcement_03","Guest members cannot be enhanced."
+"info_message_reinforcement_04","Unable to enhance.
+No Digimon available to use as enhancement material."
+"info_message_conversion_01","*Unused"
+"info_message_conversion_02","Unable to select this Digimon.
+This would remove all battle members from your party."
+"info_message_conversion_03","Money obtained."
+"info_message_xartsset_01","You must progress further in the story to unlock
+Cross Arts."
+"info_message_setup_01","Unable to move. Your box is full."
+"info_message_digimoncard_deck_01","You must progress further in the story to unlock
+Cards."
+"info_message_battle_change_01","Can't replace. You would no longer have any Digimon who can fight."
+"info_message_playername","Inscribe thy name, and thou shalt be reborn into the world below...
+
+<{fc9{d0} Yuki}>"
+"info_message_playername_option","Please enter the protagonist's name.
+
+<{fc9{d0} Yuki}>"
+"info_message_item_skilldisc_0010","This Skill Disc is equipped to all Digimon. Remove it
+from an equipped Digimon with Skill Disc Controls to
+equip it to another Digimon."
+"info_message_item_equipment_0010","This equipment is equipped to all Digimon. Remove it
+from an equipped Digimon with Equipment Controls
+to equip it to another Digimon."
+"info_message_digifarm_0050","No food can be given during training."
+"info_message_kizunaskill_01","You must progress further in the story to unlock
+Agent Skills."
+"info_message_kizunaskill_02","You have unlocked {fc9Cross Arts} in battle."
+"info_message_kizunaskill_03","You have reached Agent Rank{fc9 {d0}}.
+
+{fc15Tip: Check the Digivolution menu to see if there are
+any new Digivolution options for your Digimon.}"
+"info_message_ngword","Contains an inappropriate word."
+"info_message_lockmenu_01","You must progress further in the story to unlock
+Digivolution."
+"info_message_lockmenu_02","You must progress further in the story to unlock
+Load Enhancements."
+"info_message_lockmenu_03","You must progress further in the story to unlock
+Return to Data."
+"info_message_lockmenu_10","You must progress further in the story to unlock
+this function."
+"info_message_personality_skill","{fc9{d0}} has learned a new Personality Skill!"
+"info_message_mission_01","This mission cannot currently be advanced.
+Please progress further in your Main Mission first."
+"90000","Game data is being installed.
+Please wait until installation is complete."
+"info_message_unequip_01","Removed skill discs and equipment from box
+farm members."
+"info_message_save_error_01","Not enough free space to save data.
+Please free up some space and try again."
+"info_message_save_error_02","Not enough free space to save data.
+Please free up some space and try again."
+"info_message_save_error_03","Unable to overwrite save data of other users."
+"info_message_save_error_04","An unknown error has occurred."
+"info_message_save_error_05","The game cannot be started due to
+insufficient free space for auto save. Please
+free up some space and try again."
+"info_message_save_error_06","The save data list is corrupted."
+"info_message_load_error_01","The save data is corrupted."
+"info_message_load_error_02","The save data of other users cannot be
+loaded."
+"info_message_load_error_03","An unknown error has occurred."
+"info_message_item_tp","Received{fc9 {d1}} {fc13{d0}Anomaly Points}."
+"info_message_setup_error",""
+"info_message_reinforcement_error","No Digimon that fit the criteria for Auto-Select available.
+
+{fc9Note: Only Digimon at Lv. 1 with no cumulative bonuses will be selected.}"
+"info_message_reinforcement_none","Unable to perform Auto-Select.
+This Digimon has reached their maximum level."
+"info_message_demo_01","This feature is not available in the demo version."
+"info_message_demo_02","You can import your save data from the demo version
+into the retail version of the game."
+"info_message_demo_03","This mode lets you experience an adventure in Central Town,
+located at the heart of the Digital World of Iliad.
+
+This mode is available once you have completed the
+Digimon Story: The Time Stranger Demo."
+"info_message_demo_04","You can now play ""Central Town - Adventure Trial"" by
+selecting it from the title screen.
+
+Enjoy the unique features offered by the retail version
+of the game, including collecting, raising, and battling
+Digimon, as well as exploring the Digital World."
+"info_message_demo_05","This mode lets you experience an adventure in Central Town, 
+located in the middle of the Digital World of Iliad, as well as 
+collect, raise and battle Digimon and explore the Digital World.
+
+{fc9This mode has no save function and the data cannot be imported into the retail version.}"
+"info_message_demo_06","You are attempting to overwrite save data that can be
+imported into the retail version of the game with your
+""Central Town - Adventure Trial"" save data.
+
+Please save your data to another slot, or if there are
+no free slots available, try deleting other data in order
+to free up space."
+"info_message_demo_07","This concludes the demo version.
+
+Note: You can import your demo version save data
+into the retail version of the game."

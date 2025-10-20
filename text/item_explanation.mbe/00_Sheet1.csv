@@ -1,0 +1,558 @@
+string2 0,string 1
+"40","Increases a Digimon's EXP by 5000."
+"41","Increases a Digimon's EXP by 10000."
+"42","Increases a Digimon's EXP by 25000."
+"43","Increases a Digimon's EXP by 50000."
+"44","Increases a Digimon's EXP by 100000."
+"45","Increases a Digimon's Bond by 3%."
+"46","Increases a Digimon's Bond by 5%."
+"47","Increases a Digimon's Bond by 1%."
+"49","An inspiring heroine stands strong against all forms of adversity
+/Changes personality to ""Determined"""
+"50","I am Kokuto, guardian of Seiryu
+/Changes personality to ""Aloof"""
+"51","A depiction of the suffering that a firebird goes through until it accepts its own child
+/Changes personality to ""Serious"""
+"52","The vengeance of a man who is trapped in a cave and transforms into a golem
+/Changes personality to ""Hard-hearted"""
+"53","The tale of a lone dragon that comes into its own with the help of a stubborn man
+/Changes personality to ""Caring"""
+"54","A dark king who descends into hell himself in order to punish the wicked
+/Changes personality to ""Stern"""
+"55","A heartwarming tale about me and a mysterious boy who calls himself a prince
+/Changes personality to ""Innocent"""
+"56","A tale of a black goat that rampages when it wakes from sleep having transformed into a demon
+/Changes personality to ""Naughty"""
+"57","A fallen warrior who becomes a fiend who devours others in order to survive
+/Changes personality to ""Sly"""
+"58","Whimsical nuns solve a mystery at their convent
+/Changes personality to ""Capricious"""
+"59","Increases a Digimon's Talent by 2."
+"60","Increases a Digimon's Talent by 5."
+"61","Increases a Digimon's cumulative Max HP by 50."
+"62","Increases a Digimon's cumulative Max HP by 150."
+"63","Increases a Digimon's cumulative Max HP by 300."
+"64","Increases a Digimon's cumulative Max SP by 50."
+"65","Increases a Digimon's cumulative Max SP by 150."
+"66","Increases a Digimon's cumulative Max SP by 300."
+"67","Increases a Digimon's cumulative ATK by 30."
+"68","Increases a Digimon's cumulative ATK by 50."
+"69","Increases a Digimon's cumulative ATK by 100."
+"70","Increases a Digimon's cumulative DEF by 30."
+"71","Increases a Digimon's cumulative DEF by 50."
+"72","Increases a Digimon's cumulative DEF by 100."
+"73","Increases a Digimon's cumulative INT by 30."
+"74","Increases a Digimon's cumulative INT by 50."
+"75","Increases a Digimon's cumulative INT by 100."
+"76","Increases a Digimon's cumulative SPI by 30."
+"77","Increases a Digimon's cumulative SPI by 50."
+"78","Increases a Digimon's cumulative SPI by 100."
+"79","Increases a Digimon's cumulative SPD by 30."
+"80","Increases a Digimon's cumulative SPD by 50."
+"81","Increases a Digimon's cumulative SPD by 100."
+"82","A gem symbolizing prosperity.
+Can be sold for a high price."
+"83","A gem harvested from shellfish. Not to be confused with black
+pearls produced by Syakomon.
+Can be sold for a high price."
+"84","A translucent, sky-blue gem of the beryl family.
+Can be sold for a high price."
+"85","A gem that is said to bring about rebirth.
+Can be sold for a high price."
+"86","A gem which changes color to blue-green in sunlight and red
+under artificial light.
+Can be sold for a high price."
+"87","A scarlet gem of hardness rivaled only by diamond.
+Can be sold for a high price."
+"88","A gem that comes in all colors other than red, of hardness
+rivaled only by diamond.
+Can be sold for a high price."
+"89","A vividly green gem of the beryl family.
+Can be sold for a high price."
+"90","A dreary old killjoy would say it's made of the same stuff as
+what's in an ordinary pencil.
+Can be sold for a high price."
+"91","An incredibly rare and mysterious gem.
+Can be sold for a high price."
+"99","Allows movement far away in an instant"
+"105","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"106","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"107","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"108","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"109","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"110","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"111","Food loved by Digimon
+/For Digifarm use"
+"112","Food loved by Digimon
+/For Digifarm use"
+"201","A plugin that completes farm training and exploration
+/For Digifarm use"
+"202","A kit that adds more farm islands
+/For Digifarm use"
+"203","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"204","Food loved by Digimon
+/For Digifarm use"
+"205","Food loved by Digimon
+/For Digifarm use"
+"206","Food loved by Digimon
+/For Digifarm use"
+"207","Food loved by Digimon
+/For Digifarm use"
+"208","Food loved by Digimon
+/For Digifarm use"
+"209","Food loved by Digimon
+/For Digifarm use"
+"210","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"211","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"212","Food loved by Digimon
+/For Digifarm use"
+"213","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"214","Food loved by Digimon
+/For Digifarm use"
+"215","Food loved by Digimon
+/For Digifarm use"
+"216","Food loved by Digimon
+/For Digifarm use"
+"217","Food loved by Digimon
+/For Digifarm use"
+"218","Food loved by Digimon
+/For Digifarm use"
+"219","Food loved by Digimon
+/For Digifarm use"
+"220","Food loved by Digimon
+/For Digifarm use"
+"221","Food loved by Digimon
+/For Digifarm use"
+"222","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"223","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"301","Synthesis material for farm items.
+Rarity: ★"
+"302","Synthesis material for farm items.
+Rarity: ★★"
+"303","Synthesis material for farm items.
+Rarity: ★★★"
+"311","Synthesis material for farm items.
+Rarity: ★"
+"312","Synthesis material for farm items.
+Rarity: ★★"
+"313","Synthesis material for farm items.
+Rarity: ★★★"
+"321","Synthesis material for farm items.
+Rarity: ★"
+"322","Synthesis material for farm items.
+Rarity: ★★"
+"323","Synthesis material for farm items.
+Rarity: ★★★"
+"331","Synthesis material for farm items.
+Rarity: ★"
+"332","Synthesis material for farm items.
+Rarity: ★★"
+"333","Synthesis material for farm items.
+Rarity: ★★★"
+"341","Synthesis material for farm items.
+Rarity: ★"
+"342","Synthesis material for farm items.
+Rarity: ★★"
+"343","Synthesis material for farm items.
+Rarity: ★★★"
+"351","Synthesis material for farm items.
+Rarity: ★"
+"352","Synthesis material for farm items.
+Rarity: ★★"
+"353","Synthesis material for farm items.
+Rarity: ★★★"
+"354","A highly precious and mysterious egg."
+"501","Increases EXP gained for Fire-element Digimon
+/Farm item"
+"502","Increases EXP gained for Water-element Digimon
+/Farm item"
+"503","Increases EXP gained for Plant-element Digimon
+/Farm item"
+"504","Increases EXP gained for Earth-element Digimon
+/Farm item"
+"505","Increases EXP gained for Electricity-element Digimon
+/Farm item"
+"506","Increases EXP gained for Wind-element Digimon
+/Farm item"
+"507","Increases EXP gained for Light-element Digimon
+/Farm item"
+"508","Increases EXP gained for Dark-element Digimon
+/Farm item"
+"509","Increases EXP gained for Null-element Digimon
+/Farm item"
+"520","Item description text 01
+/Farm item"
+"521","Item description text 02
+/Farm item"
+"522","Item description text 03
+/Farm item"
+"523","Item description text 04
+/Farm item"
+"524","Item description text 05
+/Farm item"
+"525","Item description text 06
+/Farm item"
+"526","Item description text 07
+/Farm item"
+"527","Item description text 08
+/Farm item"
+"528","Item description text 09
+/Farm item"
+"529","Item description text 10
+/Farm item"
+"530","Item description text 11
+/Farm item"
+"531","Item description text 12
+/Farm item"
+"532","Item description text 13
+/Farm item"
+"533","Item description text 14
+/Farm item"
+"534","Item description text 15
+/Farm item"
+"535","Increases max SP value greatly when enhanced through training
+/Farm item"
+"536","Increases ATK value greatly when enhanced through training
+/Farm item"
+"537","Increases DEF value greatly when enhanced through training
+/Farm item"
+"538","Increases INT value greatly when enhanced through training
+/Farm item"
+"539","Increases SPD value greatly when enhanced through training
+/Farm item"
+"701","Key item 1 description"
+"702","Key item 2 description"
+"703","Key item 3 description"
+"704","Key item 4 description"
+"705","Key item 5 description"
+"706","Key item 6 description"
+"707","Key item 7 description"
+"708","Key item 8 description"
+"709","Key item 9 description"
+"710","Key item 10 description"
+"711","Key item 11 description"
+"712","Key item 12 description"
+"713","Key item 13 description"
+"714","Key item 14 description"
+"715","Key item 15 description"
+"716","Key item 16 description"
+"717","Key item 17 description"
+"718","Key item 18 description"
+"719","Key item 19 description"
+"720","Key item 20 description"
+"801","Costume.
+The regular outfit."
+"803","Costume.
+An outfit with a white and turquoise blue T-shirt."
+"901","A Digi-Egg engraved with the Crest of Courage."
+"902","A Digi-Egg engraved with the Crest of Friendship."
+"903","A Digi-Egg engraved with the Crest of Love."
+"904","A Digi-Egg engraved with the Crest of Sincerity."
+"905","A Digi-Egg engraved with the Crest of Knowledge."
+"906","A Digi-Egg engraved with the Crest of Reliability."
+"907","A Digi-Egg engraved with the Crest of Hope."
+"908","A Digi-Egg engraved with the Crest of Light."
+"909","A Digi-Egg engraved with the Crest of Miracles."
+"910","A Digi-Egg engraved with the Crest of Destiny."
+"911","A Digi-Egg engraved with the Crest of Kindness."
+"1001","Boosts HP by 1
+/Equipment"
+"1002","HP boost 2
+/Equipment"
+"1003","HP boost 3
+/Equipment"
+"1004","Boosts SP by 1
+/Equipment"
+"1005","SP boost 2
+/Equipment"
+"1006","SP boost 3
+/Equipment"
+"1007","Boosts ATK by 1
+/Equipment"
+"1008","ATK boost 2
+/Equipment"
+"1009","ATK boost 3
+/Equipment"
+"1010","Boosts DEF by 1
+/Equipment"
+"1011","DEF boost 2
+/Equipment"
+"1012","DEF boost 3
+/Equipment"
+"1013","Boosts INT by 1
+/Equipment"
+"1014","INT boost 2
+/Equipment"
+"1015","INT boost 3
+/Equipment"
+"1016","Boosts SPI by 1
+/Equipment"
+"1017","SPI boost 2
+/Equipment"
+"1018","SPI boost 3
+/Equipment"
+"1019","Boosts SPD by 1
+/Equipment"
+"1020","SPD boost 2
+/Equipment"
+"1021","SPD boost 3
+/Equipment"
+"1022","ACU boost 1
+/Equipment"
+"1023","ACU boost 2
+/Equipment"
+"1024","Boosts EVA by 1
+/Equipment"
+"1025","EVA boost 2
+/Equipment"
+"1026","CRI boost 1
+/Equipment"
+"1027","CRI boost 2
+/Equipment"
+"1028","HP and SP boost 1
+/Equipment"
+"1029","HP and SP boost 2
+/Equipment"
+"1030","ATK and DEF boost 1
+/Equipment"
+"1031","ATK and DEF boost 2
+/Equipment"
+"1032","ATK and INT boost 1
+/Equipment"
+"1033","ATK and INT boost 2
+/Equipment"
+"1034","INT and SPI boost 1
+/Equipment"
+"1035","INT and SPI boost 2
+/Equipment"
+"1036","DEF and SPI boost 1
+/Equipment"
+"1037","DEF and SPI boost 2
+/Equipment"
+"1038","ACU and EVA boost 1
+/Equipment"
+"1039","ACU and EVA boost 2
+/Equipment"
+"1040","ATK and CRI boost 1
+/Equipment"
+"1041","ATK and CRI boost 2
+/Equipment"
+"1042","INT and CRI boost 1
+/Equipment"
+"1043","INT and CRI boost 2
+/Equipment"
+"1044","SP, ATK and INT boost 1
+/Equipment"
+"1045","SP, ATK and INT boost 2
+/Equipment"
+"1046","HP, DEF and SPI boost 1
+/Equipment"
+"1047","HP, DEF and SPI boost 2
+/Equipment"
+"1048","Fire damage reduction
+/Equipment"
+"1049","Fire damage reduction 2
+/Equipment"
+"1050","Water damage reduction
+/Equipment"
+"1051","Water damage reduction 2
+/Equipment"
+"1052","Ice damage reduction
+/Equipment"
+"1053","Ice damage reduction 2
+/Equipment"
+"1054","Plant damage reduction
+/Equipment"
+"1055","Plant damage reduction 2
+/Equipment"
+"1056","Reduces damage from Electricity attacks
+/Equipment"
+"1057","Electricity damage reduction 2
+/Equipment"
+"1058","Earth damage reduction
+/Equipment"
+"1059","Earth damage reduction 2
+/Equipment"
+"1060","Steel damage reduction
+/Equipment"
+"1061","Steel damage reduction 2
+/Equipment"
+"1062","Wind damage reduction
+/Equipment"
+"1063","Wind damage reduction 2
+/Equipment"
+"1064","Light damage reduction
+/Equipment"
+"1065","Light damage reduction 2
+/Equipment"
+"1066","Dark damage reduction
+/Equipment"
+"1067","Dark damage reduction 2
+/Equipment"
+"1068","Null damage reduction
+/Equipment"
+"1069","Null damage reduction 2
+/Equipment"
+"1070","Boosts {is28}{image(ui_icon_skill_001)} Fire & {is28}{image(ui_icon_skill_003)} Plant resistance."
+"1071","Boosts {is28}{image(ui_icon_skill_004)} Water & {is28}{image(ui_icon_skill_002)} Ice resistance."
+"1072","Boosts {is28}{image(ui_icon_skill_005)} Electricity & {is28}{image(ui_icon_skill_007)} Wind Resistance."
+"1073","Boosts {is28}{image(ui_icon_skill_008)} Earth & {is28}{image(ui_icon_skill_006)} Steel Resistance."
+"1074","Boosts {is28}{image(ui_icon_skill_009)} Light & {is28}{image(ui_icon_skill_010)} Dark resistance."
+"1075","Fire damage boost and element skill SP cost reduction
+/Equipment"
+"1076","Water damage boost and element skill SP cost reduction
+/Equipment"
+"1077","Ice damage boost and element skill SP cost reduction
+/Equipment"
+"1078","Plant damage boost and element skill SP cost reduction
+/Equipment"
+"1079","Electricity damage boost and element skill SP cost reduction
+/Equipment"
+"1080","Earth damage boost and element skill SP cost reduction
+/Equipment"
+"1081","Steel damage boost and element skill SP cost reduction
+/Equipment"
+"1082","Wind damage boost and element skill SP cost reduction
+/Equipment"
+"1083","Light damage boost and element skill SP cost reduction
+/Equipment"
+"1084","Dark damage boost and element skill SP cost reduction
+/Equipment"
+"1085","Null damage boost and element skill SP cost reduction
+/Equipment"
+"1086","Fire and Plant damage boost and element skill SP cost reduction
+/Equipment"
+"1087","Water and Ice damage boost and element skill SP cost reduction
+/Equipment"
+"1088","Electricity and Wind damage boost and element skill SP cost reduction
+/Equipment"
+"1089","Steel and Earth damage boost and element skill SP cost reduction
+/Equipment"
+"1090","Light and Dark damage boost and element skill SP cost reduction
+/Equipment"
+"1091","Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison."
+"1092","Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion."
+"1093","Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis."
+"1094","Nullifies {is28}{image(ui_icon_btlStatus_004)} Sleep."
+"1095","Nullifies crystallization
+/Equipment"
+"1096","Nullifies reversed
+/Equipment"
+"1097","Nullifies instant death
+/Equipment"
+"1098","Nullifies stat debuffs."
+"1099","Nullifies all status abnormalities."
+"1100",""
+"1101","Boosts EXP gained for the wearer
+/Equipment"
+"1102","Boosts Bond Points gained for the wearer
+/Equipment"
+"1103","Boosts item drop rate (stackable by number of wearers)
+/Equipment"
+"1104","Boosts amount of money obtained (stackable by number of wearers)
+/Equipment"
+"1105","Recovers HP at the start of the wearer's turn
+/Equipment"
+"1106","Recovers SP at the start of the wearer's turn
+/Equipment"
+"1107","Recovers HP at end of battle
+/Equipment"
+"1108","Recovers SP at end of battle
+/Equipment"
+"1109","Boosts effect when recovering HP in battle
+/Equipment"
+"1110","Boosts effect when recovering SP in battle
+/Equipment"
+"1111","Enhances damage reduction rate when guarding
+/Equipment"
+"1112","Boosts chance of not taking damage when guarding
+/Equipment"
+"1113","Drains HP when attacking
+/Equipment"
+"1114","Drains SP when attacking
+/Equipment"
+"1115","Adds poison to attack
+/Equipment"
+"1116","Adds confusion to attack
+/Equipment"
+"1117","Adds paralysis to attack
+/Equipment"
+"1118","Adds sleep to attack
+/Equipment"
+"1119","Adds crystallization to attack
+/Equipment"
+"1120","Adds magic to attack *Can't stack multiple pieces of equipment that change attack type
+/Equipment"
+"1121","Adds SPD to attack *Can't stack multiple pieces of equipment that change attack type
+/Equipment"
+"1122","Boosts chance of attacks hitting twice
+/Equipment"
+"1123","SP cost reduction 1
+/Equipment"
+"1124","SP cost reduction 2
+/Equipment"
+"1125","Increases SP cost but increases skill damage
+/Equipment"
+"1126","Consumes SP to reduce all damage *No effect when not enough SP
+/Equipment"
+"1127","Nullifies order-of-action changes caused by attacks
+/Equipment"
+"1128","Converts physical damage taken to SP
+/Equipment"
+"1129","Converts magic damage taken to SP
+/Equipment"
+"1130","Nullifies any damage below a certain percentage of max HP
+/Equipment"
+"1131","Boosts critical damage multiplier
+/Equipment"
+"1132","Boosts damage to breaking targets
+/Equipment"
+"1133","Boosts weak point damage multiplier
+/Equipment"
+"1134","Enhances Cross Art power (stackable by number of wearers)
+/Equipment"
+"1135","Enhances Attack Rush power (stackable by number of wearers)
+/Equipment"
+"1136","Increases Rush Gauge default value (stackable by number of wearers)
+/Equipment"
+"1137","Enhances all effects while breaking
+/Equipment"
+"1138","Reduces damage from Data type
+/Equipment"
+"1139","Reduces damage from Virus type
+/Equipment"
+"1140","Reduces damage from Vaccine type
+/Equipment"
+"1141","Reduces damage from Free type
+/Equipment"
+"1142","Reduces damage from Variable type
+/Equipment"
+"1143","Reduces damage from {is28}{image(ui_icon_type_040)} Virus Attribute Digimon by 30%."
+"1171","Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison/{is28}{image(ui_icon_btlStatus_005)} Deadly Poison."
+"1172","Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion/{is28}{image(ui_icon_btlStatus_007)} Chaos."
+"1173","Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis/{is28}{image(ui_icon_btlStatus_008)} Immobilization."
+"1174","Nullifies {is28}{image(ui_icon_btlStatus_004)} Sleep/{is28}{image(ui_icon_btlStatus_009)} Deep Slumber."

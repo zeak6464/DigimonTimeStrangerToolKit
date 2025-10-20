@@ -1,0 +1,23 @@
+{
+  "runtimeOptions": {
+    "tfm": "net9.0",
+    "rollForward": "Disable",
+    "frameworks": [
+      {
+        "name": "Microsoft.NETCore.App",
+        "version": "9.0.4"
+      },
+      {
+        "name": "Microsoft.WindowsDesktop.App",
+        "version": "9.0.4"
+      }
+    ],
+    "configProperties": {
+      "System.Globalization.UseNls": true,
+      "System.Net.SocketsHttpHandler.Http3Support": false,
+      "System.Reflection.Metadata.MetadataUpdater.IsSupported": false,
+      "System.Runtime.Serialization.EnableUnsafeBinaryFormatterSerialization": false,
+      "CSWINRT_USE_WINDOWS_UI_XAML_PROJECTIONS": false
+    }
+  }
+}

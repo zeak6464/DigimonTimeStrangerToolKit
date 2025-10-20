@@ -1,0 +1,41 @@
+string2 0,string 1
+"29001","Boosts {fc9HP}.
+Shifts Personality toward {fc9Heart}."
+"29002","Boosts {fc9SP}.
+Shifts Personality toward {fc9Understanding}."
+"29003","Boosts {fc9ATK}.
+Shifts Personality toward {fc9Heart} and {fc9Affection}."
+"29004","Greatly boosts {fc9ATK}.
+Greatly shifts Personality toward {fc9Heart} and {fc9Affection}."
+"29005","Boosts {fc9DEF}.
+Shifts Personality toward {fc9Heart} and {fc9Companionship}."
+"29006","Boosts {fc9INT}.
+Shifts Personality toward {fc9Understanding} and
+{fc9Companionship}."
+"29007","Boosts {fc9SPI}.
+Shifts Personality toward {fc9Understanding} and {fc9Affection}."
+"29008","Boosts {fc9SPD}.
+Shifts Personality toward {fc9Heart} and {fc9Companionship}."
+"29009","Greatly boosts {fc9HP}.
+Greatly shifts Personality toward {fc9Heart}."
+"29010","Greatly boosts {fc9SP}.
+Greatly shifts Personality toward {fc9Understanding}."
+"29011","Greatly boosts {fc9DEF}.
+Greatly shifts Personality toward {fc9Heart} and
+{fc9Companionship}."
+"29012","Greatly boosts {fc9INT}.
+Greatly shifts Personality toward {fc9Understanding} and
+{fc9Companionship}."
+"29013","Greatly boosts {fc9SPI}.
+Greatly shifts Personality toward {fc9Understanding} and
+{fc9Affection}."
+"29014","Greatly boosts {fc9SPD}.
+Greatly shifts Personality toward {fc9Heart} and
+{fc9Companionship}."
+"29015","Vastly boosts {fc9HP}."
+"29016","Vastly boosts {fc9SP}."
+"29017","Vastly boosts {fc9ATK}."
+"29018","Vastly boosts {fc9DEF}."
+"29019","Vastly boosts {fc9INT}."
+"29020","Vastly boosts {fc9SPI}."
+"29021","Vastly boosts {fc9SPD}."

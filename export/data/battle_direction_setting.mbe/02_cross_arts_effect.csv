@@ -1,0 +1,8 @@
+int 0,int 1,int 2,string3 3,string3 4,string3 5,string3 6
+1,3,-1,"ef_b_car_001","","",""
+2,3,0,"ef_b_car_010","ef_c","ef_c1",""
+3,3,1,"ef_b_car_011","ef_l","ef_l1",""
+4,3,2,"ef_b_car_012","ef_r","ef_r1",""
+5,2,-1,"ef_b_car_001","","",""
+6,2,0,"ef_b_car_013","ef_l","ef_l1",""
+7,2,1,"ef_b_car_014","ef_r","ef_r1",""

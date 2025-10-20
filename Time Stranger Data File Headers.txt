@@ -1,0 +1,402 @@
+const hardDefinedHeadersTS = {
+    "main/digimon_status.mbe/00_digimon_status_data.csv": {
+      "id": 0,
+      "strKey": 2,
+      //signature skills
+      "signatureSkillId1": 72,
+      "signatureSkillSlot1": 74,
+      "signatureSkillId2": 75,
+      "signatureSkillSlot2": 77,
+      "signatureSkillId3": 78,
+      "signatureSkillSlot3": 80,
+      "signatureSkillId4": 81,
+      "signatureSkillSlot4": 83,
+      "signatureSkillId5": 84,
+      "signatureSkillSlot5": 86,
+      "signatureSkillId6": 87,
+      "signatureSkillSlot6": 89,
+      "signatureSkillId7": 90,
+      "signatureSkillSlot7": 92,
+      "signatureSkillId8": 93,
+      "signatureSkillSlot8": 95,
+      "signatureSkillId9": 96,
+      "signatureSkillSlot9": 98,
+      "signatureSkillId10": 99,
+      "signatureSkillSlot10": 101,
+      "signatureSkillId11": 102,
+      "signatureSkillSlot11": 104,
+      "signatureSkillId12": 105,
+      "signatureSkillSlot12": 107,
+      //generic skills
+      "gSkill1Id": 108,
+      "gSkill1Level": 110,
+      "gSkill2Id": 111,
+      "gSkill2Level": 113,
+      "gSkill3Id": 114,
+      "gSkill3Level": 116,
+      "gSkill4Id": 117,
+      "gSkill4Level": 119,
+      //base stats
+      "stageId": 4,
+      "typeId": 6,
+      "basePersonality": 61,
+      "baseHP": 64,
+      "baseSP": 65,
+      "baseATK": 66,
+      "baseDEF": 67,
+      "baseINT": 68,
+      "baseSPI": 69,
+      "baseSPD": 70,
+      //traits
+      "traitsBaseIdx": 19,//next 41 are trait bool flags
+      //elemental resistance
+      "resNull": 7,
+      "resFire": 8,
+      "resWater": 9,
+      "resIce": 10,
+      "resGrass": 11,
+      "resWind": 12,
+      "resElec": 13,
+      "resGround": 14,
+      "resSteel": 15,
+      "resLight": 16,
+      "resDark": 17,
+      "fieldGuideId": 131,
+      "scriptId": 132
+    },
+    "main/evolution.mbe/01_evolution_to.csv": {
+      "idx": 0,
+      "idFrom": 1,
+      "idTo": 3
+    },
+    "main/evolution.mbe/00_evolution_condition.csv": {
+      "dbId": 0,
+      "tamerLevel": 2,
+      "HP": 4,
+      "SP": 5,
+      "ATK": 6,
+      "DEF": 7,
+      "INT": 8,
+      "SPI": 9,
+      "SPD": 10,
+      "unknown1": 11,
+      "skillCountValor": 13,
+      "skillCountPhilantropy": 14,
+      "skillCountAmicable": 15,
+      "skillCountWisdom": 16,
+      //other
+      "needsItem": 22,
+      "jogressDbIdA": 24,
+      "jogressPersonalityA": 26,
+      "jogressDbIdB": 27,
+      "jogressPersonalityB": 29
+    },   
+    "main/battle_skill.mbe/00_battle_skill_list.csv": {
+      "skillId": 0,
+      "nameId": 4,
+      
+      "skillFixedDescId": 5,
+      "bool_7": 7,
+      "bool_8": 8,
+      "effectId": 16,
+      "unk_0": 21,
+      "dmgType": 22,//?? 0:none/self, 1: physical, 2: magic, 4: fixed damage at, 5:fixed %, 6: buff, 11: 'Major Damage'
+      "power": 23,
+      "additionalProperty_1": 26,//???
+      "additionalProperty": 27,
+      "element": 28,
+      "increasedDmgAgainstClass": 29,
+      "unusued_0": 30, //always -1
+      "unusued_1": 31, //always -1
+      "menu_icon": 32, //-1: damage elem, 11: heal, 12: buff, 13: debuff
+      "targetType": 33,
+      "minHits": 34,
+      "maxHits": 35,
+      "SPCost": 36,
+      "unk_1": 37,
+      "unk_2": 38,
+      "alwaysHits": 39,
+      "accuracy": 40,
+      "unk_3": 41,//1-0
+      "critRate": 42,
+      "HPDrain": 43,
+      "SPDrain": 44,//??
+      "recoil": 45,      
+      "skillConditionalType": 46, //13: If target is KO'ed
+      "skillEffectIfConditional": 47, //
+      "empty_0": 48,
+      "skillConditionalArg": 49, //used for effects like "if virus attribute apply effect" or "if target dmg is less than 50%"
+      "skillEffectArg": 50,
+      "empty_1": 51,
+      "buffSet_0": 52, //id into main\battle_skill.mbe\02_buff_set.csv
+      "buffSet_1": 54, //id into main\battle_skill.mbe\02_buff_set.csv
+      "buffSet_2": 56, //id into main\battle_skill.mbe\02_buff_set.csv
+      "buffSet_3": 58, //id into main\battle_skill.mbe\02_buff_set.csv
+      "buffSet_4": 60, //id into main\battle_skill.mbe\02_buff_set.csv
+      "jogressIdA": 64,
+      "jogressIdB": 66,
+      //remaing fields are anim/etc related?
+    },   
+
+    /*
+    =============================================================
+      # (int 26) additionalProperty_1 
+      Note: 1-13, fields not listed are currently only used on enemy skills?
+      ## 1
+      The lower the user's HP, the higher the damage.
+
+      ## 2
+      The lower all allies' HP, the greater the damage.
+
+      ## 3
+      The lower the user's HP, the lower the damage
+
+      ## 4
+      The lower all allies' HP, the lower the damage.
+
+      ## 5 
+      The lower the user's SP, the greater the damage.
+
+      ## 6
+      The lower all allies' SP, the greater the damage.
+
+      ## 7
+      The lower the user's SP, the lower the damage.
+
+      ## 8
+      The lower all allies' SP, the lower the damage.
+
+      ## 9
+      The more battle members are KO'd, the greater the damage.
+
+      ## 10
+      The more allies are KO'd, the greater the damage.
+
+      ## 11
+      The more it is used, the greater the damage.
+
+      ## 12
+      The more rounds have passed, the greater the damage.
+
+      ## 13
+      The greater the user's stat buffs, the greater the damage.
+
+    =============================================================
+      # (int 27) additionalProperty
+
+      ##1
+      No Effect described
+      
+      ## 2
+      No Effect described
+
+      ## 3
+      Nullifies unfavorable compatibility
+
+      ## 4
+      No effect described
+
+      ## 5        
+      Inverts all stat changes of the target.
+
+      ## 6
+      Steals all stat changes from the target.
+
+      ## 7
+      Recovers beyond the target's Max HP.
+
+      ## 8
+      Consumes all SP.
+
+      ## 9
+      Nullifies unfavorable attribute compatibility
+
+      ## 10
+      Attack treated as Vaccine.
+
+      ## 11
+      Attack treated as Data
+
+      ## 12
+      Attack treated as Virus
+
+      ## 13
+      Attack treated as Free
+
+      ## 14
+      Attack treated as Variable
+
+      Other indices seem to be one enemy only skills mostly
+
+    =============================================================
+      # skillConditionalTypes
+      ## 1
+      If user is affected by (de)buff
+
+      skillConditionalArg: none
+      buffSet_0: (de)buffs required for activation
+
+      ## 2
+      If target is affected by (de)buff
+      skillConditionalArg: none
+      buffSet_0: (de)buffs required for activation
+
+      ## 3
+      If target is of attribute
+      skillConditionalArg: which attribute
+
+      ## 4
+      If target is of element
+      skillConditionalArg: elment
+
+      ## 5
+      If target's Generation is greater than user's
+      skillConditionalArg: none
+
+      ## 6
+      If target's Generation is lesser than user's
+      skillConditionalArg: none
+
+      ## 7
+      If target has already acted
+      skillConditionalArg: none
+
+      ## 8
+      If target has yet to act
+      skillConditionalArg: none
+
+      ## 9
+      If target's HP is 50% or higher
+      skillConditionalArg: none
+
+      ## 10
+      If target's HP is X% or less
+      skillConditionalArg: HP Percent
+
+      ## 11
+      If target's SP is X% or higher
+      skillConditionalArg: SP Percent
+
+      ## 12
+      If target's SP is X% or less
+      skillConditionalArg: SP Percent
+
+      ## 13
+      If target is KO'd
+      skillConditionalArg: none     
+
+     =============================================================  
+      # skillEffectIfConditional
+      ## 0
+      None      
+      
+      ## 1
+      +X% damage
+      skillEffectArg: increase percent
+
+      ## 2
+      Increased Damage
+      skillEffectArg: none
+
+      ## 3
+      CRT Rate up
+      skillEffectArg: percent
+
+      ## 4
+      None
+      skillEffectArg: none
+
+      ## 5
+      Restore HP
+      skillEffectArg: percent restored
+
+      ## 6
+      Restore SP
+      skillEffectArg: percent restored
+
+      ## 7
+      Restore SP/HP
+      skillEffectArg: percent restored
+
+      ## 8
+      Reduce Target's SP by X%
+      skillEffectArg: percent reduced
+
+    */
+
+    "main/battle_skill.mbe/02_buff_set.csv": {
+      "setId": 0,
+      "unk0": 1,
+      "unk1": 2,
+      "unk2": 3,
+
+      "buff0_eff": 6,
+      "buff0_rate": 7,
+      "buff0_changePercent": 8,
+      "buff0_turnOverride": 9,
+
+      "buff1_eff": 11,
+      "buff1_rate": 12,
+      "buff1_changePercent": 13,
+      "buff1_turnOverride": 14,
+      "buff2_eff": 16,
+      "buff2_rate": 17,
+      "buff2_changePercent": 18,
+      "buff2_turnOverride": 19,
+      "buff3_eff": 21,
+      "buff3_rate": 22,
+      "buff3_changePercent": 23,
+      "buff3_turnOverride": 24,
+      "buff4_eff": 26,
+      "buff4_rate": 27,
+      "buff4_changePercent": 28,
+      "buff4_turnOverride": 29,
+      "buff5_eff": 31,
+      "buff5_rate": 32,
+      "buff5_changePercent": 33,
+      "buff5_turnOverride": 34,
+      "buff6_eff": 36,
+      "buff6_rate": 37,
+      "buff6_changePercent": 38,
+      "buff6_turnOverride": 39,
+      "buff7_eff": 41,
+      "buff7_rate": 42,
+      "buff7_changePercent": 43,
+      "buff7_turnOverride": 44,
+      "buff8_eff": 46,
+      "buff8_rate": 47,
+      "buff8_changePercent": 48,
+      "buff8_turnOverride": 49,
+      "buff9_eff": 51,
+      "buff9_rate": 52,
+      "buff9_changePercent": 53,
+      "buff9_turnOverride": 54,
+      "buff10_eff": 56,
+      "buff10_rate": 57,
+      "buff10_changePercent": 58,
+      "buff10_turnOverride": 59
+    }
+  }
+
+  const locales = [
+    "txt_eng",
+    "txt_jpn"
+  ]
+
+  const localizedStringFiles = [
+    "/jogress_skill_name.mbe/00_Sheet1.csv",
+    "/skill_explanation.mbe/00_Sheet1.csv",
+    "/skill_auto_explanation.mbe/00_Sheet1.csv",
+    "/generation_name.mbe/00_Sheet1.csv",
+    "/digimon_type.mbe/00_Sheet1.csv",
+    "/element.mbe/00_Sheet1.csv",
+    "/personality_name.mbe/00_Sheet1.csv",
+    "/item_name.mbe/00_Sheet1.csv",
+    "/belong.mbe/00_Sheet1.csv",
+    "/digimon_class_name.mbe/00_Sheet1.csv",
+    "/char_name.mbe/00_Sheet1.csv",
+    "/digimon_profile.mbe/00_Sheet1.csv",
+    "/skill_name.mbe/00_Sheet1.csv",
+    "/buff_name.mbe/00_Sheet1.csv",
+    "/status_name.mbe/00_Sheet1.csv"
+  ]

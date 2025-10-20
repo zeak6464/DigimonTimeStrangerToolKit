@@ -1,0 +1,457 @@
+string2 0,string 1
+"1","Unlocks Valor-based bonds with your Digimon, allowing you to
+enhance Brave, Zealous, Daring, and Reckless Digimon."
+"2","Boosts the SPD of Brave, Zealous, Daring, and Reckless Digimon by
+{d6}%."
+"3","Boosts the SPD of Brave, Zealous, Daring, and Reckless Digimon by
+{d6}%."
+"4","Boosts the SPD of Brave, Zealous, Daring, and Reckless Digimon by
+{d6}%."
+"5","Boosts the EXP gained in battle by Brave, Zealous, Daring, and
+Reckless battle and reserve Digimon by {d0}% for each Agent Rank."
+"6","Boosts the appearance rate of rare Personality Skills for Brave,
+Zealous, Daring, and Reckless Digimon when changing Personalities."
+"7","Boosts ATK-augmenting equipment effects on Reckless Digimon by
+{d0}%."
+"8","Boosts the SP of Brave, Zealous, Daring, and Reckless Digimon by
+{d1}%."
+"9","Boosts the SP of Brave, Zealous, Daring, and Reckless Digimon by
+{d1}%."
+"10","When Digivolving Brave, Zealous, Daring, and Reckless Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"11","Boosts the SPI of Brave, Zealous, Daring, and Reckless Digimon by
+{d5}%."
+"12","Boosts the initial Talent of each Generation when Converting Brave,
+Zealous, Daring, and Reckless Digimon by {d0}."
+"13","Boosts the SP of Brave, Zealous, Daring, and Reckless Digimon by
+{d1}%."
+"14","Boosts the SP/SPD of Reckless Digimon by {d1}%."
+"15","Boosts the DEF of Brave, Zealous, Daring, and Reckless Digimon by
+{d3}%."
+"16","Reduces the training time of Brave, Zealous, Daring, and Reckless
+Digimon by {d0}%."
+"17","Boosts the damage dealt by Extra Strikes of Brave, Zealous, Daring,
+and Reckless Digimon by {d0}%."
+"18","When Digivolving Brave, Zealous, Daring, and Reckless Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"19","Boosts the EXP gained in battle by Brave, Zealous, Daring, and
+Reckless battle and reserve Digimon by {d0}% for each Agent Rank."
+"20","Boosts the DEF of Brave, Zealous, Daring, and Reckless Digimon by
+{d3}%."
+"21","Zealous Digimon recover HP by {d0}% when Guarding."
+"22","Boosts the DEF of Brave, Zealous, Daring, and Reckless Digimon by
+{d3}%."
+"23","Boosts the HP of Brave, Zealous, Daring, and Reckless Digimon by
+{d0}%."
+"24","Reduces the skill SP cost of Brave, Zealous, Daring, and Reckless
+Digimon by {d0}% for each Agent Rank."
+"25","Boosts the HP of Brave, Zealous, Daring, and Reckless Digimon by
+{d0}%."
+"26","Brave, Zealous, Daring, and Reckless Digimon gain Talent more easily."
+"27","Boosts the HP of Brave, Zealous, Daring, and Reckless Digimon by
+{d0}%."
+"28","Boosts the HP/DEF of Zealous Digimon by {d0}%."
+"29","Boosts the SPI of Brave, Zealous, Daring, and Reckless Digimon by
+{d5}%."
+"30","Boosts the damage dealt by Extra Strikes of Brave, Zealous, Daring,
+and Reckless Digimon by {d0}%."
+"31","Boosts the ATK of Brave, Zealous, Daring, and Reckless Digimon by
+{d2}%."
+"32","Boosts the ATK of Brave, Zealous, Daring, and Reckless Digimon by
+{d2}%."
+"33","Boosts the EXP gained in battle by Brave, Zealous, Daring, and
+Reckless battle and reserve Digimon by {d0}% for each Agent Rank."
+"34","When Digivolving Brave, Zealous, Daring, and Reckless Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"35","Brave Digimon attacks ignore {d0}% of the target's DEF for each Agent
+Rank."
+"36","Boosts the ATK of Brave, Zealous, Daring, and Reckless Digimon by
+{d2}%."
+"37","Boosts the HP/ATK of Brave Digimon by 25%."
+"38","Boosts the INT of Brave, Zealous, Daring, and Reckless Digimon by
+{d4}%."
+"39","The Personality of Brave, Zealous, Daring, and Reckless Digimon
+will more likely shift toward Heart and Affection when training on the
+Digifarm."
+"40","Boosts the INT of Brave, Zealous, Daring, and Reckless Digimon by
+{d4}%."
+"41","Boosts the SPI of Brave, Zealous, Daring, and Reckless Digimon by
+{d5}%."
+"42","Boosts the EXP gained in battle by Brave, Zealous, Daring, and
+Reckless battle and reserve Digimon by {d0}% for each Agent Rank."
+"43","Boosts the INT of Brave, Zealous, Daring, and Reckless Digimon by
+{d4}%."
+"44","Boosts the ATK/INT of Daring Digimon by {d2}%."
+"45","Reduces physical damage taken by Daring Digimon when Guarding by
+an additional {d0}% for each Agent Rank."
+"46","When Digivolving Brave, Zealous, Daring, and Reckless Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"47",""
+"48",""
+"49",""
+"50",""
+"51","Unlocks Philanthropy-based bonds with your Digimon, allowing you
+to enhance Adoring, Devoted, Tolerant, and Overprotective Digimon."
+"52","Boosts the SPI of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d5}%."
+"53","Boosts the SPI of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d5}%."
+"54","Boosts the EXP gained in battle by Adoring, Devoted, Tolerant, and
+Overprotective battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"55","Boosts the appearance rate of rare Personality Skills for Adoring,
+Devoted, Tolerant, and Overprotective Digimon when changing
+Personalities."
+"56","When Digivolving Adoring, Devoted, Tolerant, and Overprotective
+Digimon, reduces required stat values by {d0}% if current Personality
+and Digivolution target's Base Personality match."
+"57","Boosts HP-augmenting equipment effects on Adoring Digimon by
+{d0}%."
+"58","Boosts the SPI of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d5}%."
+"59","Boosts the DEF of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d3}%."
+"60","Boosts the DEF of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d3}%."
+"61","Boosts the DEF of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d3}%."
+"62","The Personality of Adoring, Devoted, Tolerant, and Overprotective
+Digimon will more likely shift toward Understanding and Affection
+when training on the Digifarm."
+"63","Boosts the EXP gained in battle by Adoring, Devoted, Tolerant, and
+Overprotective battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"64","Boosts the effects of HP recovery items used on Devoted Digimon
+during battle by {d0}%."
+"65","When Digivolving Adoring, Devoted, Tolerant, and Overprotective
+Digimon, reduces required stat values by {d0}% if current Personality
+and Digivolution target's Base Personality match."
+"66","Boosts the damage dealt by Extra Strikes of Adoring, Devoted,
+Tolerant, and Overprotective Digimon by {d0}%."
+"67","Boosts the DEF/SPI of Adoring Digimon by {d3}%."
+"68","Boosts the SPD of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d6}%."
+"69","Boosts the SP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d1}%."
+"70","Boosts the SP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d1}%."
+"71","Boosts the SP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d1}%."
+"72","Boosts the SP/SPI of Overprotective Digimon by {d1}%."
+"73","Boosts the INT of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d4}%."
+"74","Boosts the HP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d0}%."
+"75","Boosts the EXP gained in battle by Adoring, Devoted, Tolerant, and
+Overprotective battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"76","Boosts the HP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d0}%."
+"77","Boosts the SPD of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d6}%."
+"78","Boosts the initial Talent of each Generation when Converting Adoring,
+Devoted, Tolerant, and Overprotective Digimon by {d0}."
+"79","Boosts the HP of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d0}%."
+"80","Boosts the damage dealt by Extra Strikes of Adoring, Devoted,
+Tolerant, and Overprotective Digimon by {d0}%."
+"81","Boosts the INT of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d4}%."
+"82","When Digivolving Adoring, Devoted, Tolerant, and Overprotective
+Digimon, reduces required stat values by {d0}% if current Personality
+and Digivolution target's Base Personality match."
+"83","Adoring, Devoted, Tolerant, and Overprotective Digimon gain Talent
+more easily."
+"84","Boosts SP-augmenting equipment effects on Tolerant Digimon by
+{d0}%."
+"85","Boosts the INT of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d4}%."
+"86","Boosts the HP/INT of Tolerant Digimon by {d0}%."
+"87","Boosts the ATK of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d2}%."
+"88","Reduces the training time of Adoring, Devoted, Tolerant, and
+Overprotective Digimon by {d0}%."
+"89","Reduces the skill SP cost of Adoring, Devoted, Tolerant, and
+Overprotective Digimon by {d0}% for each Agent Rank."
+"90","Boosts the ATK of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d2}%."
+"91","Boosts the EXP gained in battle by Adoring, Devoted, Tolerant, and
+Overprotective battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"92","Boosts the SPD of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d6}%."
+"93","When Digivolving Adoring, Devoted, Tolerant, and Overprotective
+Digimon, reduces required stat values by {d0}% if current Personality
+and Digivolution target's Base Personality match."
+"94","Boosts the recovery of Overprotective Digimon when using HP
+recovery skills by {d0}%."
+"95","Boosts the ATK of Adoring, Devoted, Tolerant, and Overprotective
+Digimon by {d2}%."
+"96","Boosts the SP/ATK of Devoted Digimon by {d1}%."
+"97",""
+"98",""
+"99",""
+"100",""
+"101","Unlocks Amicability-based bonds with your Digimon, allowing you
+to enhance Compassionate, Sociable, Friendly, and Opportunistic
+Digimon."
+"102","Boosts the DEF of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d3}%."
+"103","Boosts the DEF of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d3}%."
+"104","Reduces the training time of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d0}%."
+"105","Items used during the turn of a Compassionate Digimon have a {d0}%
+chance of not being consumed."
+"106","Boosts the EXP gained in battle by Compassionate, Sociable, Friendly,
+and Opportunistic battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"107","Boosts the DEF of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d3}%."
+"108","Boosts the SPD of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d6}%."
+"109","Boosts the damage dealt by Extra Strikes of Compassionate, Sociable,
+Friendly, and Opportunistic Digimon by {d0}%."
+"110","Boosts the INT of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d4}%."
+"111","Boosts the SPD of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d6}%."
+"112","When Digivolving Compassionate, Sociable, Friendly, and
+Opportunistic Digimon, reduces required stat values by {d0}% if
+current Personality and Digivolution target's Base Personality match."
+"113","Boosts the SPD of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d6}%."
+"114","Reduces the skill SP cost of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d0}% for each Agent Rank."
+"115","Boosts the chance of Personality Skills changing by {d0}% when talking
+with or training a Friendly Digimon on the Digifarm."
+"116","Boosts the EXP gained in battle by Compassionate, Sociable, Friendly,
+and Opportunistic battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"117","Boosts the DEF/SPD of Compassionate Digimon by {d3}%."
+"118","Boosts the SPI of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d5}%."
+"119","Boosts the SPI of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d5}%."
+"120","Boosts the SPI of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d5}%."
+"121","When Digivolving Compassionate, Sociable, Friendly, and
+Opportunistic Digimon, reduces required stat values by {d0}% if
+current Personality and Digivolution target's Base Personality match."
+"122","When Digivolving Compassionate, Sociable, Friendly, and
+Opportunistic Digimon, reduces required stat values by {d0}% if
+current Personality and Digivolution target's Base Personality match."
+"123","Boosts the DEF/SPI of Opportunistic Digimon by {d3}%."
+"124","Boosts the appearance rate of rare Personality Skills for
+Compassionate, Sociable, Friendly, and Opportunistic Digimon when
+changing Personality."
+"125","Boosts the INT of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d4}%."
+"126","Boosts the initial Talent of each Generation when Converting
+Compassionate, Sociable, Friendly, and Opportunistic Digimon by {d0}."
+"127","Boosts the HP of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d0}%."
+"128","Boosts the HP of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d0}%."
+"129","Boosts the HP of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d0}%."
+"130","Boosts the SP of Compassionate, Sociable, Friendly, and Opportunistic
+Digimon by {d1}%."
+"131","Boosts the SP of Compassionate, Sociable, Friendly, and Opportunistic
+Digimon by {d1}%."
+"132","Boosts the SP of Compassionate, Sociable, Friendly, and Opportunistic
+Digimon by {d1}%."
+"133","When Digivolving Compassionate, Sociable, Friendly, and
+Opportunistic Digimon, reduces required stat values by {d0}% if
+current Personality and Digivolution target's Base Personality match."
+"134","Boosts the HP/SP of Friendly Digimon by {d0}%."
+"135","While in reserve, Opportunistic Digimon recover {d0}% of their HP and
+{d1}% of their SP every 3 rounds."
+"136","Compassionate, Sociable, Friendly, and Opportunistic Digimon gain
+Talent more easily."
+"137","Boosts the damage dealt by Extra Strikes of Compassionate, Sociable,
+Friendly, and Opportunistic Digimon by {d0}%."
+"138","Boosts the INT of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d4}%."
+"139","Boosts the EXP gained in battle by Compassionate, Sociable, Friendly,
+and Opportunistic battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"140","Boosts the ATK of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d2}%."
+"141","Boosts the ATK of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d2}%."
+"142","The Personality of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon will more likely shift toward Heart and
+Companionship when training on the Digifarm."
+"143","Doubles the effects of buff items used during the turn of a Sociable
+Digimon."
+"144","Boosts the ATK of Compassionate, Sociable, Friendly, and
+Opportunistic Digimon by {d2}%."
+"145","Boosts the EXP gained in battle by Compassionate, Sociable, Friendly,
+and Opportunistic battle and reserve Digimon by {d0}% for each Agent
+Rank."
+"146","Boosts the ATK/SPI of Sociable Digimon by {d2}%."
+"147",""
+"148",""
+"149",""
+"150",""
+"151","Unlocks Wisdom-based bonds with your Digimon, allowing you to
+enhance Astute, Strategic, Enlightened, and Sly Digimon."
+"152","Boosts the appearance rate of rare Personality Skills for Astute,
+Strategic, Enlightened, and Sly Digimon when changing Personalities."
+"153","Boosts the HP of Astute, Strategic, Enlightened, and Sly Digimon by
+{d0}%."
+"154","Boosts the EXP gained in battle by Astute, Strategic, Enlightened,
+and Sly battle and reserve Digimon by {d0}% for each Agent Rank."
+"155","Reduces the training time of Astute, Strategic, Enlightened, and Sly
+Digimon by {d0}%."
+"156","Boosts the damage dealt by Extra Strikes of Astute, Strategic,
+Enlightened, and Sly Digimon by {d0}%."
+"157","Boosts the SPD of Astute, Strategic, Enlightened, and Sly Digimon by
+{d6}%."
+"158","Boosts the SPD of Astute, Strategic, Enlightened, and Sly Digimon by
+{d6}%."
+"159","Boosts the SPD of Astute, Strategic, Enlightened, and Sly Digimon by
+{d6}%."
+"160","When Digivolving Astute, Strategic, Enlightened, and Sly Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"161","Astute, Strategic, Enlightened, and Sly Digimon gain Talent more
+easily."
+"162","When Digivolving Astute, Strategic, Enlightened, and Sly Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"163","Reduces the skill SP cost of Astute, Strategic, Enlightened, and Sly
+Digimon by {d0}% for each Agent Rank."
+"164","Boosts the HP of Astute, Strategic, Enlightened, and Sly Digimon by
+{d0}%."
+"165","Boosts the ATK of Astute, Strategic, Enlightened, and Sly Digimon by
+{d2}%."
+"166","Boosts the HP of Astute, Strategic, Enlightened, and Sly Digimon by
+{d0}%."
+"167","Reduces magic damage taken by Strategic Digimon by {d0}% for each
+Agent Rank."
+"168","Boosts the INT of Astute, Strategic, Enlightened, and Sly Digimon by
+{d4}%."
+"169","Boosts the initial Talent of each Generation when Converting Astute,
+Strategic, Enlightened, and Sly Digimon by {d0}."
+"170","Boosts the INT of Astute, Strategic, Enlightened, and Sly Digimon by
+{d4}%."
+"171","Boosts the INT of Astute, Strategic, Enlightened, and Sly Digimon by
+{d4}%."
+"172","Boosts the HP/INT of Strategic Digimon by {d0}%."
+"173","Boosts the SPI of Astute, Strategic, Enlightened, and Sly Digimon by
+{d5}%."
+"174","Boosts the ATK of Astute, Strategic, Enlightened, and Sly Digimon by
+{d2}%."
+"175","Boosts the SPI of Astute, Strategic, Enlightened, and Sly Digimon by
+{d5}%."
+"176","Astute Digimon attacks ignore {d0}% of the target's SPI for each Agent
+Rank."
+"177","When Digivolving Astute, Strategic, Enlightened, and Sly Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"178","Boosts the EXP gained in battle by Astute, Strategic, Enlightened,
+and Sly battle and reserve Digimon by {d0}% for each Agent Rank."
+"179","Boosts the SPI of Astute, Strategic, Enlightened, and Sly Digimon by
+{d5}%."
+"180","Boosts the INT/SPI of Astute Digimon by {d4}%."
+"181","Boosts the SP of Astute, Strategic, Enlightened, and Sly Digimon by 
+{d1}%."
+"182","Boosts the SP of Astute, Strategic, Enlightened, and Sly Digimon by 
+{d1}%."
+"183","Boosts the SP of Astute, Strategic, Enlightened, and Sly Digimon by 
+{d1}%."
+"184","Boosts the SP/SPI of Enlightened Digimon by {d1}%."
+"185","Boosts the damage dealt by Extra Strikes of Astute, Strategic,
+Enlightened, and Sly Digimon by {d0}%."
+"186","Boosts the ATK of Astute, Strategic, Enlightened, and Sly Digimon by
+{d2}%."
+"187","Boosts the amount of items dropped by enemies defeated by
+Enlightened Digimon by {d0}%."
+"188","Boosts the EXP gained in battle by Astute, Strategic, Enlightened,
+and Sly battle and reserve Digimon by {d0}% for each Agent Rank."
+"189","The Personality of Astute, Strategic, Enlightened, and Sly Digimon
+will more likely shift toward Understanding and Companionship
+when training on the Digifarm."
+"190","Boosts the DEF of Astute, Strategic, Enlightened, and Sly Digimon by
+{d3}%."
+"191","Boosts the DEF of Astute, Strategic, Enlightened, and Sly Digimon by
+{d3}%."
+"192","Boosts the DEF of Astute, Strategic, Enlightened, and Sly Digimon by
+{d3}%."
+"193","Boosts the DEF/SPD of Sly Digimon by {d3}%."
+"194","When Digivolving Astute, Strategic, Enlightened, and Sly Digimon,
+reduces required stat values by {d0}% if current Personality and
+Digivolution target's Base Personality match."
+"195","Boosts the EXP gained in battle by Astute, Strategic, Enlightened,
+and Sly battle and reserve Digimon by {d0}% for each Agent Rank."
+"196","Boosts YEN dropped by enemies defeated by Sly Digimon by {d0}%."
+"197",""
+"198",""
+"199",""
+"200",""
+"201","Unlocks Cross Art: Field.
+Effect: Greatly boosts all allies' stats for 2 turns.
+Cross Arts can be activated once the CP Gauge is maxed."
+"202","Boosts the EXP gained in battle by all battle and reserve Digimon by
+{d0}% for each Agent Rank."
+"203","Start battle with CP Gauge charged by {d0} for each Agent Rank."
+"204","Teaches Cross Art: Burst.
+Effect: Deals major damage to all enemies.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"205","Boosts the EXP gained in battle by all In-Training battle and reserve
+Digimon by {d0}% for each Agent Rank."
+"206","Boosts the EXP gained in battle by all Rookie battle and reserve
+Digimon by {d0}% for each Agent Rank."
+"207","Boosts the EXP gained in battle by all Champion and Armor battle
+and reserve Digimon by {d0}% for each Agent Rank."
+"208","Boosts the EXP gained in battle by all Ultimate and Hybrid battle and
+reserve Digimon by {d0}% for each Agent Rank."
+"209","Start battle with CP Gauge charged by {d0} for each Agent Rank."
+"210","Teaches Cross Art: Reverse.
+Effect: Deals moderate damage to all enemies. Applies {is28}{image(ui_icon_btlStatus_011)} Reverse.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"211","Teaches Cross Art: Strike.
+Effect: Deals extreme damage to 1 enemy.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"212","Teaches Cross Art: Aura.
+Effect: Moderately recovers HP of all allies. Applies {is28}{image(ui_icon_btlStatus_040)} Status
+Abnormality Immunity and {is28}{image(ui_icon_btlStatus_041)} Stat Debuff Immunity.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"213","Teaches Cross Art: High Field.
+Effect: Greatly boosts all allies' stats for 3 turns and nullifies
+physical/magic damage for 1 turn."
+"214","Teaches Cross Art: Break.
+Effect: Deals minor damage to all enemies and moderately reduces
+ATK/DEF/INT/SPI for 4 turns.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"215","For all In-Training Digimon:
+Boosts HP/SP by {d0} for each Agent Rank.
+Boosts all stats by {d2} for each Agent Rank."
+"216","For all Rookie Digimon:
+Boosts HP/SP by {d0} for each Agent Rank.
+Boosts all stats by {d2} for each Agent Rank."
+"217","For all Champion & Armor Digimon:
+Boosts HP/SP by {d0} for each Agent Rank.
+Boosts all stats by {d2} for each Agent Rank."
+"218","For all Ultimate & Hybrid Digimon:
+Boosts HP/SP by {d0} for each Agent Rank.
+Boosts all stats by {d2} for each Agent Rank."
+"219","Start battle with CP Gauge charged by {d0} for each Agent Rank."
+"220","Boosts the damage of Cross Arts by {d0}% for each Agent Rank."
+"221","Teaches Cross Art: Heal.
+Effect: Fully recovers HP and SP of one ally beyond their max value.
+{fc9Note: Select via the Cross Arts menu to use.}"
+"222","Teaches Cross Art: Revive.
+Effect: Revives all allies from KO and slightly recovers HP.
+Applies {is28}{image(ui_icon_btlStatus_042)} Guts (survive at 1 HP when taking fatal damage).
+{fc9Note: Select via the Cross Arts menu to use.}"
+"223","Boosts the effects of buff/debuff-type Cross Arts by {d0}% for each
+Agent Rank."
+"224","Boosts the effects of recovery-type Cross Arts by {d0}% for each Agent
+Rank."

@@ -1,0 +1,27 @@
+{
+  "AppId": "digimon story time stranger.exe",
+  "AppName": "Digimon Story Time Stranger.exe",
+  "AppLocation": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Digimon Story Time Stranger\\Digimon Story Time Stranger.exe",
+  "AppArguments": "",
+  "AppIcon": "Icon.png",
+  "AutoInject": false,
+  "EnabledMods": [
+    "DSTS.ModLoader",
+    "MVGL.FileLoader.Reloaded",
+    "NewGameZ",
+    "Randomizer",
+    "CITRAMON"
+  ],
+  "WorkingDirectory": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Digimon Story Time Stranger",
+  "PluginData": {},
+  "SortedMods": [
+    "DSTS.ModLoader",
+    "MVGL.FileLoader.Reloaded",
+    "NewGameZ",
+    "Randomizer",
+    "CITRAMON"
+  ],
+  "PreserveDisabledModOrder": true,
+  "DontInject": false,
+  "IsMsStore": false
+}

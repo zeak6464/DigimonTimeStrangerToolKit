@@ -1,0 +1,151 @@
+string2 0,string 1
+"1000","Overwrite save data?"
+"1001","Load this save data?"
+"1002","Delete this save data?
+
+{fc2Note: This action cannot be undone.}"
+"1003",""
+"1004","Return to the title screen?
+
+{fc2Note: Any unsaved progress will be lost.}"
+"1005",""
+"1100",""
+"1101",""
+"1201","{fc7Digivolve} to {d0}?"
+"1202","Fuse with {d0} and perform DNA Digivolution?"
+"1203","{fc2De-Digivolve} to {d0}?
+
+{fc15Tip: This Digimon will become weaker and cannot immediately be
+restored to its previous state. Use caution when performing this action.}"
+"1204","Perform Mode Change on {d0}?"
+"1206","Convert {fc9{d0}}?
+
+{fc15Tip: The closer the Scan Rate is to 200%, the higher
+this Digimon's Max HP and Talent will be.}"
+"1210","Proceed with DNA De-Digivolution?
+
+Cumulative stats will be divided evenly between Primary and
+Secondary Digimon. Equipment, Personality and certain stats
+will be inherited only by the main Digimon."
+"1211","Perform Mode Change on {d0}?"
+"1300","Learn the following skill?
+
+{fc9 {d0}} "
+"1501",""
+"1502",""
+"1700",""
+"1900","Return to base?"
+"3001","Leave the Digifarm?"
+"5055","Do you want to save?"
+"10000","Yes"
+"10001","No"
+"20005","Discard name change and return to the previous screen?"
+"20100","Restore default settings for{fc9 {d0}}?"
+"20101","This setting is duplicated by other controls.
+Apply this setting to the selected button?"
+"20102","Graphics settings have been applied. Save these settings?
+
+Reverting to previous settings in {d0} second(s) if confirmation is not made.
+
+{fc9Note: Changes to certain settings will be applied after relaunching the game.}"
+"yesno_quest_0010","{fc9 {d0} }
+
+Would you like to view the mission details?"
+"yesno_reinforcement_0010","This action will consume the selected Digimon
+as materials to enhance the base Digimon.
+{fc9The material Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_reinforcement_0020","{fc2CAUTION!
+There are battle/reserve members among the selected Digimon.}
+
+This action will consume the selected Digimon
+as materials to enhance the base Digimon.
+{fc9The material Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_reinforcement_0030","The equipment currently equipped to the material Digimon
+will exceed your maximum inventory capacity.
+
+{fc2This equipment will be lost} if you proceed with synthesis.
+
+Do you want to proceed?"
+"yesno_conversion_0010","This action will convert the selected Digimon into:
+{is28}{image(ui_icon_item_075)}{fc9 {d0}}
+{fc9The converted Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_conversion_0020","{fc2CAUTION!
+There are battle/reserve members among the selected Digimon.}
+
+This action will convert the selected Digimon into:
+{is28}{image(ui_icon_item_075)}{fc9 {d0}}
+{fc9The converted Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_conversion_0030","The equipment currently equipped to the selected Digimon
+will exceed your maximum inventory capacity.
+
+{fc2This equipment will be lost} if you proceed with conversion.
+
+Do you want to proceed?"
+"yesno_shop_0010","Buy {fc9{d0} x{d1}}?"
+"yesno_shop_0020","Sell {fc9{d0} x{d1}}?"
+"yesno_shop_0030","Create {fc9{d0} x{d1}}?"
+"yesno_shop_0040","Take apart {fc9{d0} x{d1}}?"
+"yesno_shop_0050","The materials below will exceed your maximum inventory capacity.
+{{fc2The portion exceeding the maximum capacity will be lost}.
+
+Do you want to proceed?"
+"yesno_gameover_0010","Lower the difficulty to {fc9{d0}} and retry the battle?
+
+{fc8*Retry with HP and SP fully recovered.
+*The game will remain at the lowered difficulty after the battle ends.
+You can return to the previous difficulty setting via the Options screen.}"
+"yesno_gameover_0020","Retry the battle in Invincible Mode?
+
+{fc9*Enemies will no longer inflict damage, and you will no longer consume SP.
+*Retry with HP and SP fully recovered.
+*Invincible Mode applies only to this battle.}"
+"yesno_gameover_0030","This will reset your additional episode progress
+and return you to the lobby.
+
+Do you want to proceed?"
+"yesno_gameover_0040","Any unsaved progress will be lost.
+Return to the title screen?"
+"yesno_kizunaskill_0010","Unlock {fc9{d0}}?"
+"yesno_title_0010","Exit the game?"
+"yesno_title_0030","Start the game with this name and appearance?
+
+{fc9Note: You can change your name and appearance later.}"
+"yesno_systemmenu_0010","Do you want to exit the game?
+
+{fc2Note: Any unsaved progress will be lost.}"
+"yesno_digimonselect_0010","Select {fc9{d0}} as your partner Digimon?"
+"yesno_unequip_0010","Remove all Skill Discs and equipment
+from the Digimon in your Box and farm?
+
+{fc9Note: Protected Digimon will not have
+their Skill Discs and equipment removed.}"
+"yesno_language_0010","In order to change the display language, your game progress
+will be saved and you will be returned to the title screen.
+Do you want to proceed?
+
+{fc9The names of the protagonist and Digimon will remain in the
+previous language. Additionally, since the font data will be
+changed, the names of the protagonist and Digimon may
+not display correctly. (You can change these names later.)}"
+"yesno_language_0020","In order to change the display language, your game progress
+will be saved and you will be returned to the title screen.
+Do you want to proceed?
+
+{fc9The names of the protagonist and Digimon will remain in the
+previous language. (You can change these names later.)}"
+"yesno_language_0030","To change the display language, your settings will be saved
+and the game will relaunch. Do you want to proceed?"
+"yesno_giveup_0010","Give up on this battle?"
+"yesno_demo_0010","This will end the demo version without saving your data.
+Do you want to proceed?
+
+Note: Save data from the demo version can be imported
+into the retail version of the game."

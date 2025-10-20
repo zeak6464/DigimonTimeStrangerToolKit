@@ -1,0 +1,101 @@
+string2 0,string 1
+"0","–"
+"1","Reduces SP cost for physical attack skills by 10%."
+"2","Slightly boosts CP gained."
+"3",""
+"4",""
+"5","Recovers HP equal to 10% of physical attack skill damage
+dealt."
+"6","Performs an additional attack when Extra Strikes is activated."
+"7",""
+"8",""
+"9","Always acts first."
+"10","Boosts {is28}{image(ui_icon_btlStatus_016)} ATK for the first 3 rounds. (The earlier the round,
+the greater the boost to {is28}{image(ui_icon_btlStatus_016)} ATK.)"
+"11",""
+"12",""
+"13","Boosts {is28}{image(ui_icon_btlStatus_030)} CRT Rate by 5%."
+"14","Boosts DEF based on user's HP."
+"15",""
+"16",""
+"17","Boosts {is28}{image(ui_icon_btlStatus_016)} ATK when HP is 90% or lower. (The lower the HP,
+the greater the boost to {is28}{image(ui_icon_btlStatus_016)} ATK.)"
+"18","Chance of countering  with an Attack when being attacked.
+(The lower the HP, the greater the chance to counter.)"
+"19",""
+"20",""
+"21","Reduces SP cost for recovery skills by 10%."
+"22","Also recovers 10% of target's Max SP when using skills to
+recover an ally's HP."
+"23",""
+"24",""
+"25","Always acts last."
+"26","Slightly recovers HP of all allies at the start of each round."
+"27",""
+"28",""
+"29","Boosts {is28}{image(ui_icon_btlStatus_020)} INT from round 4 onward. (The more rounds pass,
+the greater the boost to {is28}{image(ui_icon_btlStatus_020)} INT.)"
+"30","Also removes target's {is28}{image(ui_icon_btlStatus_012)} Injury when using skills to recover
+an ally's HP."
+"31",""
+"32",""
+"33","Boosts {is28}{image(ui_icon_btlStatus_018)} DEF when HP is 90% or lower. (The lower the HP,
+the greater the boost to {is28}{image(ui_icon_btlStatus_018)} DEF.)"
+"34","Revives with 50% HP when KO'd (once per battle)."
+"35",""
+"36",""
+"37","Always acts first."
+"38","Overheals to up to 200% of target's Max HP when using
+recovery skills."
+"39",""
+"40",""
+"41","At start of battle, boosts {is28}{image(ui_icon_btlStatus_016)} ATK and {is28}{image(ui_icon_btlStatus_020)} INT for all allies
+based on the total Bond of all battle members."
+"42","Boosts the probability rate of skill debuff effects."
+"43",""
+"44",""
+"45","Boosts {is28}{image(ui_icon_btlStatus_016)} ATK based on user's HP."
+"46","Extends the duration of buff effects applied by the user's
+skills by 2 turns."
+"47",""
+"48",""
+"49","Extends the duration of debuff effects applied by the user's
+skills by 2 turns."
+"50","Boosts damage dealt by the user when hitting an enemy
+weak point after an ally does."
+"51",""
+"52",""
+"53","Boosts {is28}{image(ui_icon_btlStatus_030)} CRT Rate by 5%."
+"54","Also boosts all of target's stats when using skills to recover
+an ally's HP."
+"55",""
+"56",""
+"57","Boosts {is28}{image(ui_icon_btlStatus_016)} ATK from round 4 onward. (The more rounds pass,
+the greater the boost to {is28}{image(ui_icon_btlStatus_016)} ATK.)"
+"58","At start of battle, reduces {is28}{image(ui_icon_btlStatus_019)} DEF and {is28}{image(ui_icon_btlStatus_023)} SPI for all enemies
+based on the total Bond of all battle members."
+"59",""
+"60",""
+"61","Reduces SP cost for magic attack skills by 10%."
+"62","Attacking deals magic damage."
+"63",""
+"64",""
+"65","Boosts {is28}{image(ui_icon_btlStatus_020)} INT when HP is 90% or lower. (The lower the HP,
+the greater the boost to {is28}{image(ui_icon_btlStatus_020)} INT.)"
+"66","Recovers SP equal to 10% of magic attack skill damage dealt."
+"67",""
+"68",""
+"69","Always acts last."
+"70","Slightly recovers SP of all allies at the start of each round."
+"71",""
+"72",""
+"73","Boosts CRT damage by 20%."
+"74","Boosts {is28}{image(ui_icon_btlStatus_020)} INT for the first 3 rounds. (The earlier the round,
+the greater the boost to {is28}{image(ui_icon_btlStatus_020)} INT.)"
+"75",""
+"76",""
+"77","Boosts {is28}{image(ui_icon_btlStatus_022)} SPI based on user's HP."
+"78","Chance of activating skill again when using a magic attack
+skill. (The lower the HP, the greater the chance.)"
+"79",""
+"80",""

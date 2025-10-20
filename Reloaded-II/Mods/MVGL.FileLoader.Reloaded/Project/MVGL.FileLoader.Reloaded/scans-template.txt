@@ -1,0 +1,6 @@
+[Scans]
+;PackFileResource_ReadFile=
+;PackFileResource_ReadFile_RESULT=
+
+;PackFileResource_GetFileSize=
+;PackFileResource_GetFileSize_RESULT=
