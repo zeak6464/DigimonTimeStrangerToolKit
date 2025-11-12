@@ -1,0 +1,48 @@
+require("include")
+
+function m440_050()
+  Fade_Out(0, 0)
+  EVENT_BEGIN()
+  Talk.Load("m440")
+  SetEventCutNo("1")
+  if Debug.IsEventView() then
+    SetTimeZone("Noon")
+    SetTimeAxis("P2028_daft_440")
+    SetMapStatus("Enable")
+    LoadMap("d0990b")
+  end
+  LoadEffectScript("ef_e_com_250_01", "ef_e_com_250")
+  LoadSceneViewerResource("c1.0", "d0990b_ta")
+  LoadEnvironmentFile("c1.0", "es_m440_050_c1.0")
+  WaitVistaLoad()
+  SetCamera(-2, 6.634, 89.651, 0, 50, "LINEAR", 0, false, 0)
+  SetCameraTarget(-1.39, 9.423, 112.251, "LINEAR", 0, false, 0)
+  SetCamera(-2.118, 6.8, 89.651, -1, 50, "LINEAR", 120, false, 0)
+  SetCameraTarget(-1.39, 9.423, 112.251, "LINEAR", 120, false, 0)
+  PlayEffect("ef_e_com_250_01", true, 0)
+  SetPosition("ef_e_com_250_01", -60, 45, 200, "LINEAR", 0, 0)
+  SetRotation("ef_e_com_250_01", 53, -12, 40, "LINEAR", 0, 0)
+  SetScale("ef_e_com_250_01", 0.4, 1.8, 0.8)
+  SetPosition("ef_e_com_250_01", 3, 15.5, 155.343, "ACCEL", 300, 0)
+  SetRotation("ef_e_com_250_01", 30, -12, 40, "ACCEL", 300, 0)
+  SetScale("ef_e_com_250_01", 1.5, 1.8, 1.3)
+  SetEnv_All("c1.0", 0)
+  FIELD_SET()
+  EVENT_START()
+  CUT("1.0")
+  Fade_In(0, FADE_TIME)
+  WaitFrame(FADE_TIME)
+  Event_PlayBGM(322, 0, 1)
+  WaitFrame(120)
+  Fade_OutNoLoadingWithWait(1, FADE_TIME)
+  Vista.SetKeepBGM()
+  EVENT_END()
+end
+
+function CUT(cut_no)
+  CUT_START(cut_no)
+end
+
+function main()
+  m440_050()
+end

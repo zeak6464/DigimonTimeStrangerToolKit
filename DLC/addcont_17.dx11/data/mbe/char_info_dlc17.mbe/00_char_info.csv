@@ -7,3 +7,4 @@ string2 0,empty 1,empty 2,string2 3,string2 4,empty 5,int 6,int 7,string2 8,int 
 "char_GABUMON_BK","","","chr713","1713","",0,0,"cmb001",0,"",0,"",0
 "char_GARURUMON_BK","","","chr714","1714","",0,0,"ymb005",0,"",0,"",0
 "char_WEREGARURUMON_BK","","","chr715","1715","",0,0,"ymb005",0,"",0,"",0
+"char_DIGIMON_1000","","","chr1000","10000","",0,0,"",0,"",0,"",0

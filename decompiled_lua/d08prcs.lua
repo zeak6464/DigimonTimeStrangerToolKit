@@ -1,0 +1,1 @@
+gGimText = "field_text"

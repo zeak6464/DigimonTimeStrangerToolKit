@@ -1,9 +1,9 @@
 {
-  "ModId": "CITRAMON",
-  "ModName": "Citramon",
+  "ModId": "NewDigimon",
+  "ModName": "NewDigimon",
   "ModAuthor": "Zeak6464",
   "ModVersion": "1.0.0",
-  "ModDescription": "New Digimon Citramon",
+  "ModDescription": "New Digimon",
   "ModDll": "",
   "ModIcon": "Preview.png",
   "ModR2RManagedDll32": "",
@@ -14,7 +14,7 @@
   "CanUnload": null,
   "HasExports": null,
   "IsLibrary": false,
-  "ReleaseMetadataFileName": "Citramon.ReleaseMetadata.json",
+  "ReleaseMetadataFileName": "NewDigimon.ReleaseMetadata.json",
   "PluginData": {
     "GitHubDependencies": {
       "IdToConfigMap": {

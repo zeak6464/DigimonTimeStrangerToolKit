@@ -1,0 +1,6 @@
+[Scans]
+;"CRI AtomEx/PC" String=
+;"CRI AtomEx/PC" String_RESULT=
+
+;HCADecoder_SetDecryptionTable=
+;HCADecoder_SetDecryptionTable_RESULT=

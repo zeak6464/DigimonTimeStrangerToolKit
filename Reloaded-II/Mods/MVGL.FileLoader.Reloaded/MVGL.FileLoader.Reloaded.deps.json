@@ -8,7 +8,10 @@
     ".NETCoreApp,Version=v9.0": {
       "MVGL.FileLoader.Reloaded/1.0.0": {
         "dependencies": {
-          "MVGL.FileLoader.Interfaces": "1.1.0",
+          "FileEmulationFramework.Lib": "1.1.1",
+          "MVGL.FileLoader.Interfaces": "1.3.0",
+          "MVLibraryNET": "1.2.2",
+          "MVLibraryNET.Definitions": "1.1.1",
           "Reloaded.Memory.SigScan.ReloadedII.Interfaces": "1.2.0",
           "Reloaded.Mod.Interfaces": "2.4.0",
           "Reloaded.SharedLib.Hooks": "1.9.0",
@@ -16,6 +19,14 @@
         },
         "runtime": {
           "MVGL.FileLoader.Reloaded.dll": {}
+        }
+      },
+      "csFastFloat/4.1.5": {
+        "runtime": {
+          "lib/net9.0/csFastFloat.dll": {
+            "assemblyVersion": "4.1.5.0",
+            "fileVersion": "4.1.5.0"
+          }
         }
       },
       "ExtendedNumerics.BigDecimal/3000.0.3.40": {
@@ -26,11 +37,30 @@
           }
         }
       },
+      "FileEmulationFramework.Lib/1.1.1": {
+        "dependencies": {
+          "Reloaded.Mod.Interfaces": "2.4.0"
+        },
+        "runtime": {
+          "lib/net5.0/FileEmulationFramework.Lib.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      },
       "ini-parser-netstandard/2.5.2": {
         "runtime": {
           "lib/netstandard2.0/INIFileParser.dll": {
             "assemblyVersion": "2.5.2.0",
             "fileVersion": "2.5.2.0"
+          }
+        }
+      },
+      "K4os.Compression.LZ4/1.3.8": {
+        "runtime": {
+          "lib/net6.0/K4os.Compression.LZ4.dll": {
+            "assemblyVersion": "1.3.8.0",
+            "fileVersion": "1.3.8.0"
           }
         }
       },
@@ -192,6 +222,27 @@
           }
         }
       },
+      "MVLibraryNET/1.2.2": {
+        "dependencies": {
+          "K4os.Compression.LZ4": "1.3.8",
+          "MVLibraryNET.Definitions": "1.1.1",
+          "Sep": "0.11.3"
+        },
+        "runtime": {
+          "lib/net9.0/MVLibraryNET.dll": {
+            "assemblyVersion": "1.2.2.0",
+            "fileVersion": "1.2.2.0"
+          }
+        }
+      },
+      "MVLibraryNET.Definitions/1.1.1": {
+        "runtime": {
+          "lib/net9.0/MVLibraryNET.Definitions.dll": {
+            "assemblyVersion": "1.1.1.0",
+            "fileVersion": "1.1.1.0"
+          }
+        }
+      },
       "NCalc.Core/5.4.2": {
         "dependencies": {
           "ExtendedNumerics.BigDecimal": "3000.0.3.40",
@@ -280,12 +331,26 @@
           }
         }
       },
+      "Sep/0.11.3": {
+        "dependencies": {
+          "csFastFloat": "4.1.5"
+        },
+        "runtime": {
+          "lib/net9.0/Sep.dll": {
+            "assemblyVersion": "0.11.0.0",
+            "fileVersion": "0.11.3.0"
+          }
+        }
+      },
       "System.Collections.Immutable/9.0.4": {},
-      "MVGL.FileLoader.Interfaces/1.1.0": {
+      "MVGL.FileLoader.Interfaces/1.3.0": {
+        "dependencies": {
+          "MVLibraryNET.Definitions": "1.1.1"
+        },
         "runtime": {
           "MVGL.FileLoader.Interfaces.dll": {
-            "assemblyVersion": "1.1.0.0",
-            "fileVersion": "1.1.0.0"
+            "assemblyVersion": "1.3.0.0",
+            "fileVersion": "1.3.0.0"
           }
         }
       }
@@ -297,6 +362,13 @@
       "serviceable": false,
       "sha512": ""
     },
+    "csFastFloat/4.1.5": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-TugPHQzrbr2iruO8lshMekUXoFIyBOZQLqNCwQF6BHv4FE6mBeMa41pj5cXW6FKlk9uHypIAAy4UmTFivWFjPA==",
+      "path": "csfastfloat/4.1.5",
+      "hashPath": "csfastfloat.4.1.5.nupkg.sha512"
+    },
     "ExtendedNumerics.BigDecimal/3000.0.3.40": {
       "type": "package",
       "serviceable": true,
@@ -304,12 +376,26 @@
       "path": "extendednumerics.bigdecimal/3000.0.3.40",
       "hashPath": "extendednumerics.bigdecimal.3000.0.3.40.nupkg.sha512"
     },
+    "FileEmulationFramework.Lib/1.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-zXn1MUcKmDszxW2GUM4RTSQhh4nCcELbUzTCZTSZtqFq347gzaRTv0+sV7jz4SWA5R4gpVxmSbkN9p3ratPvWg==",
+      "path": "fileemulationframework.lib/1.1.1",
+      "hashPath": "fileemulationframework.lib.1.1.1.nupkg.sha512"
+    },
     "ini-parser-netstandard/2.5.2": {
       "type": "package",
       "serviceable": true,
       "sha512": "sha512-rTyGzgT/a+mD2HxopOGpb/yWWhu5TTPgF59XUlHjhlNv7dbt9DME/qozIR7HreVAVpNnZSqP9A8TeViK5s949g==",
       "path": "ini-parser-netstandard/2.5.2",
       "hashPath": "ini-parser-netstandard.2.5.2.nupkg.sha512"
+    },
+    "K4os.Compression.LZ4/1.3.8": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-LhwlPa7c1zs1OV2XadMtAWdImjLIsqFJPoRcIWAadSRn0Ri1DepK65UbWLPmt4riLqx2d40xjXRk0ogpqNtK7g==",
+      "path": "k4os.compression.lz4/1.3.8",
+      "hashPath": "k4os.compression.lz4.1.3.8.nupkg.sha512"
     },
     "Microsoft.Extensions.Configuration/9.0.4": {
       "type": "package",
@@ -402,6 +488,20 @@
       "path": "microsoft.extensions.primitives/9.0.4",
       "hashPath": "microsoft.extensions.primitives.9.0.4.nupkg.sha512"
     },
+    "MVLibraryNET/1.2.2": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-l+jJ5O2niVhb6V8QqFVRqPmDKRbX2C1ja5nCv3pINtdTa6ktChKwu7ZTHJfoREIjUWGdLZCVkT1R+wxytR7YaA==",
+      "path": "mvlibrarynet/1.2.2",
+      "hashPath": "mvlibrarynet.1.2.2.nupkg.sha512"
+    },
+    "MVLibraryNET.Definitions/1.1.1": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-tOusnYolI3/w9Yc1oS641yLlYegQjB1HwVxxh4MzeVsx+or3LQr8yJUlLHoiQoQZmWuKvI89ngwIo/lMil7N9g==",
+      "path": "mvlibrarynet.definitions/1.1.1",
+      "hashPath": "mvlibrarynet.definitions.1.1.1.nupkg.sha512"
+    },
     "NCalc.Core/5.4.2": {
       "type": "package",
       "serviceable": true,
@@ -465,6 +565,13 @@
       "path": "ryotune.reloaded/4.2.0",
       "hashPath": "ryotune.reloaded.4.2.0.nupkg.sha512"
     },
+    "Sep/0.11.3": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-EGl2xMHy023rmnI+3qavyf8+thvQx5uCtoXFa2pMzivi0KddIJPckNfZSitHrzMYb+A5OqQMRIyi0cP6e6Z6pg==",
+      "path": "sep/0.11.3",
+      "hashPath": "sep.0.11.3.nupkg.sha512"
+    },
     "System.Collections.Immutable/9.0.4": {
       "type": "package",
       "serviceable": true,
@@ -472,7 +579,7 @@
       "path": "system.collections.immutable/9.0.4",
       "hashPath": "system.collections.immutable.9.0.4.nupkg.sha512"
     },
-    "MVGL.FileLoader.Interfaces/1.1.0": {
+    "MVGL.FileLoader.Interfaces/1.3.0": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

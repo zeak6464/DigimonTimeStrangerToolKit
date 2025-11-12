@@ -515,7 +515,8 @@ class MBELoader:
         self._load_extended_character_data(digimon)
     
     def _load_char_info_data(self, digimon: DigimonData):
-        """Load character info data"""
+        """Load character info data - checks both base game and DLC"""
+        # Check base game first
         char_file = self.data_path / "char_info.mbe" / "00_char_info.csv"
         if char_file.exists():
             char_rows = self.load_csv(char_file)
@@ -537,44 +538,101 @@ class MBELoader:
                         "empty4": row[12] if len(row) > 12 else "",
                         "flag4": int(row[13]) if len(row) > 13 and row[13] else 0
                     }
+                    return
+        
+        # Check DLC files if not found in base game
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        dlc_char_file = dlc_data / "char_info_dlc17.mbe" / "00_char_info.csv"
+        if dlc_char_file.exists():
+            char_rows = self.load_csv(dlc_char_file)
+            for row in char_rows[1:]:  # Skip header
+                if len(row) > 0 and row[0].strip('"') == digimon.char_key:
+                    digimon.char_info_data = {
+                        "char_key": row[0].strip('"') if len(row) > 0 else "",
+                        "empty1": row[1].strip('"') if len(row) > 1 else "",
+                        "empty2": row[2].strip('"') if len(row) > 2 else "",
+                        "chr_id": row[3].strip('"') if len(row) > 3 else "",
+                        "numeric_id": row[4].strip('"') if len(row) > 4 else "",
+                        "empty3": row[5].strip('"') if len(row) > 5 else "",
+                        "gender_flag": int(row[6]) if len(row) > 6 and row[6] else 0,
+                        "flag1": int(row[7]) if len(row) > 7 and row[7] else 0,
+                        "motion_ref": row[8].strip('"') if len(row) > 8 else "",
+                        "flag2": int(row[9]) if len(row) > 9 and row[9] else 0,
+                        "model_ref": row[10].strip('"') if len(row) > 10 else "",
+                        "flag3": int(row[11]) if len(row) > 11 and row[11] else 0,
+                        "empty4": row[12].strip('"') if len(row) > 12 else "",
+                        "flag4": int(row[13]) if len(row) > 13 and row[13] else 0
+                    }
                     break
     
     def _load_model_setting_data(self, digimon: DigimonData):
-        """Load model setting data"""
+        """Load model setting data - checks both base game and DLC"""
+        # Check base game first
         model_file = self.data_path / "model_setting.mbe" / "00_model_setting.csv"
         if model_file.exists():
             model_rows = self.load_csv(model_file)
             for row in model_rows[1:]:  # Skip header
-                if len(row) > 0 and (row[0] == digimon.chr_id or row[0] == f'"{digimon.chr_id}"'):
+                if len(row) > 0 and (row[0].strip('"') == digimon.chr_id.strip('"')):
                     digimon.model_id = row[0]
-                    # Store full model setting data (simplified for now)
+                    # Store full model setting data
                     digimon.model_setting_data = {
                         "chr_id": row[0] if len(row) > 0 else "",
                         "raw_data": row  # Store full row for export
                     }
+                    return
+        
+        # Check DLC files if not found in base game
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        dlc_model_file = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+        if dlc_model_file.exists():
+            model_rows = self.load_csv(dlc_model_file)
+            for row in model_rows[1:]:  # Skip header
+                if len(row) > 0 and (row[0].strip('"') == digimon.chr_id.strip('"')):
+                    digimon.model_id = row[0]
+                    digimon.model_setting_data = {
+                        "chr_id": row[0] if len(row) > 0 else "",
+                        "raw_data": row
+                    }
                     break
     
     def _load_model_locator_data(self, digimon: DigimonData):
-        """Load model locator data"""
-        # Load 00_model_locator.csv
+        """Load model locator data - checks both base game and DLC"""
+        chr_id_clean = digimon.chr_id.strip('"')
+        
+        # Check base game first
         locator_file = self.data_path / "model_locator.mbe" / "00_model_locator.csv"
         if locator_file.exists():
             locator_rows = self.load_csv(locator_file)
             for row in locator_rows[1:]:  # Skip header
-                if len(row) > 0 and (row[0] == digimon.chr_id or row[0] == f'"{digimon.chr_id}"'):
+                if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
                     digimon.model_locator_data = {
                         "chr_id": row[0],
                         "locator_ref": row[1] if len(row) > 1 else ""
                     }
                     break
         
-        # Load 01_model_locator_motion.csv
+        # Check DLC files if not found in base game
+        if not digimon.model_locator_data:
+            dlc_exporter = DLCExporter(self)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_locator_file = dlc_data / "model_locator_dlc17.mbe" / "00_model_locator.csv"
+            if dlc_locator_file.exists():
+                locator_rows = self.load_csv(dlc_locator_file)
+                for row in locator_rows[1:]:  # Skip header
+                    if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
+                        digimon.model_locator_data = {
+                            "chr_id": row[0],
+                            "locator_ref": row[1] if len(row) > 1 else ""
+                        }
+                        break
+        
+        # Load 01_model_locator_motion.csv - check base game first
         motion_file = self.data_path / "model_locator.mbe" / "01_model_locator_motion.csv"
         if motion_file.exists():
             motion_rows = self.load_csv(motion_file)
             digimon.model_locator_motion_data = []
-            # Strip quotes from chr_id before building prefix
-            chr_id_clean = digimon.chr_id.strip('"')
             chr_prefix = f"{chr_id_clean}_"
             
             for row in motion_rows[1:]:  # Skip header
@@ -585,15 +643,37 @@ class MBELoader:
                             "motion_key": row[0],
                             "motion_name": row[1] if len(row) > 1 else ""
                         })
+        
+        # Check DLC files for motion data if not found or to append
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        dlc_motion_file = dlc_data / "model_locator_dlc17.mbe" / "01_model_locator_motion.csv"
+        if dlc_motion_file.exists():
+            motion_rows = self.load_csv(dlc_motion_file)
+            chr_prefix = f"{chr_id_clean}_"
+            
+            for row in motion_rows[1:]:  # Skip header
+                if len(row) > 0:
+                    row_0_stripped = row[0].strip('"')
+                    if row_0_stripped.startswith(chr_prefix):
+                        # Check if already added from base game
+                        motion_key = row[0]
+                        if not any(m.get('motion_key') == motion_key for m in digimon.model_locator_motion_data):
+                            digimon.model_locator_motion_data.append({
+                                "motion_key": row[0],
+                                "motion_name": row[1] if len(row) > 1 else ""
+                            })
     
     def _load_lod_data(self, digimon: DigimonData):
-        """Load LOD (Level of Detail) data"""
-        # Load 00_lod.csv
+        """Load LOD (Level of Detail) data - checks both base game and DLC"""
+        chr_id_clean = digimon.chr_id.strip('"')
+        
+        # Load 00_lod.csv - check base game first
         lod_file = self.data_path / "lod_chara.mbe" / "00_lod.csv"
         if lod_file.exists():
             lod_rows = self.load_csv(lod_file)
             for row in lod_rows[1:]:  # Skip header
-                if len(row) > 0 and (row[0] == digimon.chr_id or row[0] == f'"{digimon.chr_id}"'):
+                if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
                     digimon.lod_data = {
                         "chr_id": row[0],
                         "lod_distance_1": float(row[1]) if len(row) > 1 and row[1] else 0,
@@ -602,29 +682,62 @@ class MBELoader:
                     }
                     break
         
-        # Load 01_lod_model.csv
+        # Check DLC files if not found in base game
+        if not digimon.lod_data:
+            dlc_exporter = DLCExporter(self)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_lod_file = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+            if dlc_lod_file.exists():
+                lod_rows = self.load_csv(dlc_lod_file)
+                for row in lod_rows[1:]:  # Skip header
+                    if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
+                        digimon.lod_data = {
+                            "chr_id": row[0],
+                            "lod_distance_1": float(row[1]) if len(row) > 1 and row[1] else 0,
+                            "lod_distance_2": float(row[2]) if len(row) > 2 and row[2] else 0,
+                            "lod_distance_3": float(row[3]) if len(row) > 3 and row[3] else 0
+                        }
+                        break
+        
+        # Load 01_lod_model.csv - check base game first
         lod_model_file = self.data_path / "lod_chara.mbe" / "01_lod_model.csv"
         if lod_model_file.exists():
             lod_model_rows = self.load_csv(lod_model_file)
             for row in lod_model_rows[1:]:  # Skip header
-                if len(row) > 0 and (row[0] == digimon.chr_id or row[0] == f'"{digimon.chr_id}"'):
+                if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
                     digimon.lod_model_data = {
                         "chr_id": row[0],
                         "lod_model_ref": row[2] if len(row) > 2 else "",
                         "raw_data": row  # Store full row
                     }
                     break
+        
+        # Check DLC files if not found in base game
+        if not digimon.lod_model_data:
+            dlc_exporter = DLCExporter(self)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_lod_model_file = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+            if dlc_lod_model_file.exists():
+                lod_model_rows = self.load_csv(dlc_lod_model_file)
+                for row in lod_model_rows[1:]:  # Skip header
+                    if len(row) > 0 and (row[0].strip('"') == chr_id_clean):
+                        digimon.lod_model_data = {
+                            "chr_id": row[0],
+                            "lod_model_ref": row[2] if len(row) > 2 else "",
+                            "raw_data": row
+                        }
+                        break
     
     
     def _load_field_anime_data(self, digimon: DigimonData):
-        """Load field animation data"""
-        # Load 00_field_move_animation.csv only
+        """Load field animation data - checks both base game and DLC"""
+        chr_id_clean = digimon.chr_id.strip('"')
+        
+        # Check base game first
         move_file = self.data_path / "field_anime.mbe" / "00_field_move_animation.csv"
         if move_file.exists():
             move_rows = self.load_csv(move_file)
             digimon.field_move_animation_data = []
-            # Strip quotes from chr_id
-            chr_id_clean = digimon.chr_id.strip('"')
             
             for row in move_rows[1:]:  # Skip header
                 if len(row) > 0:
@@ -637,6 +750,28 @@ class MBELoader:
                             "motion3": row[3] if len(row) > 3 else "",
                             "raw_data": row
                         })
+        
+        # Check DLC files and append any additional entries
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        dlc_move_file = dlc_data / "field_anime_dlc17.mbe" / "00_field_move_animation.csv"
+        if dlc_move_file.exists():
+            move_rows = self.load_csv(dlc_move_file)
+            
+            for row in move_rows[1:]:  # Skip header
+                if len(row) > 0:
+                    row_0_stripped = row[0].strip('"')
+                    if chr_id_clean in row_0_stripped:
+                        # Check if already added from base game
+                        anim_key = row[0]
+                        if not any(a.get('animation_key') == anim_key for a in digimon.field_move_animation_data):
+                            digimon.field_move_animation_data.append({
+                                "animation_key": row[0],
+                                "motion1": row[1] if len(row) > 1 else "",
+                                "motion2": row[2] if len(row) > 2 else "",
+                                "motion3": row[3] if len(row) > 3 else "",
+                                "raw_data": row
+                            })
     
     def _load_extended_character_data(self, digimon: DigimonData):
         """Load all extended character data (evolution, battle, quest, etc.)"""
@@ -649,7 +784,12 @@ class MBELoader:
     
     def _load_evolution_data(self, digimon: DigimonData):
         """Load evolution paths and conditions"""
+        # Check both base game and DLC files
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        
         # Load evolution targets (what this Digimon can evolve into)
+        # Check base game first
         evolution_to_file = self.data_path / "evolution.mbe" / "01_evolution_to.csv"
         if evolution_to_file.exists():
             rows = self.load_csv(evolution_to_file)
@@ -663,7 +803,22 @@ class MBELoader:
                         "raw_data": row
                     })
         
+        # Check DLC files
+        dlc_evolution_to_file = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+        if dlc_evolution_to_file.exists():
+            rows = self.load_csv(dlc_evolution_to_file)
+            for row in rows[1:]:  # Skip header
+                if len(row) > 1 and row[1] == str(digimon.id):
+                    digimon.evolution_paths.append({
+                        "evolution_id": int(row[0]) if row[0] else 0,
+                        "from_id": int(row[1]) if row[1] else 0,
+                        "to_id": int(row[3]) if len(row) > 3 and row[3] else 0,
+                        "condition_flags": row[5:] if len(row) > 5 else [],
+                        "raw_data": row
+                    })
+        
         # Load evolution conditions
+        # Check base game first
         evolution_cond_file = self.data_path / "evolution.mbe" / "00_evolution_condition.csv"
         if evolution_cond_file.exists():
             rows = self.load_csv(evolution_cond_file)
@@ -680,9 +835,39 @@ class MBELoader:
                                 "raw_data": row
                             })
         
+        # Check DLC files
+        dlc_evolution_cond_file = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+        if dlc_evolution_cond_file.exists():
+            rows = self.load_csv(dlc_evolution_cond_file)
+            for row in rows[1:]:  # Skip header
+                if len(row) > 0:
+                    # Find conditions that apply to this Digimon's evolution paths
+                    for evo_path in digimon.evolution_paths:
+                        if str(evo_path["evolution_id"]) == row[0]:
+                            digimon.evolution_conditions.append({
+                                "evolution_id": int(row[0]) if row[0] else 0,
+                                "level_req": int(row[2]) if len(row) > 2 and row[2] else 0,
+                                "hp_req": int(row[4]) if len(row) > 4 and row[4] else 0,
+                                "conditions": row,
+                                "raw_data": row
+                            })
+        
         # Load de-evolution sources (what can evolve into this Digimon)
+        # Check base game first
         if evolution_to_file.exists():
             rows = self.load_csv(evolution_to_file)
+            for row in rows[1:]:  # Skip header
+                if len(row) > 3 and row[3] == str(digimon.id):
+                    digimon.deevolution_sources.append({
+                        "evolution_id": int(row[0]) if row[0] else 0,
+                        "from_id": int(row[1]) if row[1] else 0,
+                        "to_id": int(row[3]) if row[3] else 0,
+                        "raw_data": row
+                    })
+        
+        # Check DLC files
+        if dlc_evolution_to_file.exists():
+            rows = self.load_csv(dlc_evolution_to_file)
             for row in rows[1:]:  # Skip header
                 if len(row) > 3 and row[3] == str(digimon.id):
                     digimon.deevolution_sources.append({
@@ -694,6 +879,11 @@ class MBELoader:
     
     def _load_battle_enemy_data(self, digimon: DigimonData):
         """Load battle enemy parameter data"""
+        # Check both base game and DLC files
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        
+        # Check base game first
         enemy_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
         if enemy_file.exists():
             rows = self.load_csv(enemy_file)
@@ -713,6 +903,28 @@ class MBELoader:
                         "raw_data": row
                     }
                     break
+        
+        # Check DLC files if not found in base game
+        if not digimon.battle_enemy_data:
+            dlc_enemy_file = dlc_data / "battle_enemy_dlc17.mbe" / "00_enemy_parameter.csv"
+            if dlc_enemy_file.exists():
+                rows = self.load_csv(dlc_enemy_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) > 2 and row[2] == str(digimon.id):
+                        digimon.battle_enemy_data = {
+                            "enemy_id": int(row[0]) if row[0] else 0,
+                            "base_id": int(row[2]) if row[2] else 0,
+                            "level": int(row[10]) if len(row) > 10 and row[10] else 0,
+                            "hp": int(row[17]) if len(row) > 17 and row[17] else 0,
+                            "sp": int(row[18]) if len(row) > 18 and row[18] else 0,
+                            "attack": int(row[19]) if len(row) > 19 and row[19] else 0,
+                            "defense": int(row[20]) if len(row) > 20 and row[20] else 0,
+                            "intelligence": int(row[21]) if len(row) > 21 and row[21] else 0,
+                            "spirit": int(row[22]) if len(row) > 22 and row[22] else 0,
+                            "speed": int(row[23]) if len(row) > 23 and row[23] else 0,
+                            "raw_data": row
+                        }
+                        break
     
     def _load_encounter_groups(self, digimon: DigimonData):
         """Load encounter groups that this Digimon appears in"""
@@ -723,9 +935,12 @@ class MBELoader:
         if not enemy_id or enemy_id == '0':
             return
         
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        if encounter_file.exists():
-            rows = self.load_csv(encounter_file)
+        # Check both base game and DLC files
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        
+        def process_encounter_rows(rows):
+            """Process encounter group rows"""
             for row in rows[1:]:  # Skip header
                 if len(row) > 2:
                     # Column 2 is the primary enemy ID
@@ -758,6 +973,18 @@ class MBELoader:
                                 "raw_data": row
                             })
                             break
+        
+        # Check base game first
+        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        if encounter_file.exists():
+            rows = self.load_csv(encounter_file)
+            process_encounter_rows(rows)
+        
+        # Check DLC files
+        dlc_encounter_file = dlc_data / "battle_enemy_dlc17.mbe" / "01_encount_group.csv"
+        if dlc_encounter_file.exists():
+            rows = self.load_csv(dlc_encounter_file)
+            process_encounter_rows(rows)
     
     def _load_growth_data(self, digimon: DigimonData):
         """Load growth curve data"""
@@ -784,6 +1011,11 @@ class MBELoader:
     
     def _load_battle_formation_data(self, digimon: DigimonData):
         """Load battle formation data"""
+        # Check both base game and DLC files
+        dlc_exporter = DLCExporter(self)
+        dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+        
+        # Check base game first
         formation_file = self.data_path / "battle_formation.mbe" / "00_battle_formation.csv"
         if formation_file.exists():
             rows = self.load_csv(formation_file)
@@ -795,6 +1027,20 @@ class MBELoader:
                         "raw_data": row
                     }
                     break
+        
+        # Check DLC files if not found in base game
+        if not digimon.battle_formation_data:
+            dlc_formation_file = dlc_data / "battle_formation_dlc17.mbe" / "00_battle_formation.csv"
+            if dlc_formation_file.exists():
+                rows = self.load_csv(dlc_formation_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) > 0 and str(row[0]) == str(digimon.id):
+                        digimon.battle_formation_data = {
+                            "formation_id": int(row[0]) if row[0] else 0,
+                            "formation_type": row[2] if len(row) > 2 else "",
+                            "raw_data": row
+                        }
+                        break
     
     def _load_personality_data(self, digimon: DigimonData):
         """Load personality system data"""
@@ -1732,7 +1978,7 @@ class DLCExporter:
                 return False
             
             # 7. Save to model_setting_dlc17
-            success = self._save_to_dlc_model_setting(digimon, dlc_data)
+            success = self._save_to_dlc_model_setting(digimon, dlc_data, animation_ref_chr_id)
             if not success:
                 print("❌ Failed to save to model_setting_dlc17")
                 return False
@@ -1758,6 +2004,252 @@ class DLCExporter:
             traceback.print_exc()
             return False
     
+    def remove_digimon_from_dlc(self, digimon_id: int, chr_id: str = None, char_key: str = None, dlc_name: str = "addcont_17") -> bool:
+        """Remove a Digimon from all DLC files
+        
+        Args:
+            digimon_id: The Digimon ID to remove
+            chr_id: Optional chr_id to match (for more accurate removal)
+            char_key: Optional char_key to match (for more accurate removal)
+            dlc_name: DLC name (default: "addcont_17")
+        
+        Returns:
+            True if successful, False otherwise
+        """
+        try:
+            dlc_data = self.get_dlc_path(dlc_name) / "data" / "mbe"
+            dlc_text = self.get_dlc_text_path(dlc_name + "_text01") / "text" / "mbe"
+            
+            print(f"\n=== Removing Digimon ID {digimon_id} from DLC ===")
+            if chr_id:
+                print(f"Chr ID: {chr_id}")
+            if char_key:
+                print(f"Char Key: {char_key}")
+            
+            removed_count = 0
+            
+            # 1. Remove from char_info_dlc17
+            file_path = dlc_data / "char_info_dlc17.mbe" / "00_char_info.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                for row in rows[1:]:
+                    # Match by char_key (row[0]) or chr_id (row[3])
+                    if len(row) > 0:
+                        row_char_key = row[0].strip('"')
+                        row_chr_id = row[3].strip('"') if len(row) > 3 else ""
+                        if not (char_key and row_char_key == char_key) and not (chr_id and row_chr_id == chr_id):
+                            filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed from char_info_dlc17.mbe")
+            
+            # 2. Remove from digimon_status_dlc17
+            file_path = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                for row in rows[1:]:
+                    if len(row) > 0 and row[0] != str(digimon_id):
+                        filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed from digimon_status_dlc17.mbe")
+            
+            # 3. Remove from evolution_dlc17 (both files)
+            # Remove from 00_evolution_condition.csv
+            file_path = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                for row in rows[1:]:
+                    if len(row) > 0 and row[0] != str(digimon_id):
+                        filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed from evolution_condition")
+            
+            # Remove from 01_evolution_to.csv (remove paths where this Digimon is source or target)
+            file_path = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                for row in rows[1:]:
+                    # row[1] = from_id, row[3] = to_id
+                    if len(row) > 3:
+                        if row[1] != str(digimon_id) and row[3] != str(digimon_id):
+                            filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed evolution paths from evolution_to")
+            
+            # 4. Remove from char_name_dlc17
+            file_path = dlc_text / "char_name_dlc17.mbe" / "00_Sheet1.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                for row in rows[1:]:
+                    if len(row) > 0:
+                        row_char_key = row[0].strip('"')
+                        if not (char_key and row_char_key == char_key):
+                            filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed from char_name_dlc17.mbe")
+            
+            # 5. Remove from digimon_profile_dlc17
+            file_path = dlc_text / "digimon_profile_dlc17.mbe" / "00_Sheet1.csv"
+            if file_path.exists():
+                rows = self.loader.load_csv(file_path)
+                original_count = len(rows)
+                filtered_rows = [rows[0]]  # Keep header
+                profile_key = f'digimon_{digimon_id:04d}_profile'
+                for row in rows[1:]:
+                    if len(row) > 0:
+                        row_key = row[0].strip('"')
+                        if row_key != profile_key:
+                            filtered_rows.append(row)
+                if len(filtered_rows) < original_count:
+                    with open(file_path, 'w', encoding='utf-8') as f:
+                        for row in filtered_rows:
+                            f.write(','.join(row) + '\n')
+                    removed_count += 1
+                    print(f"✅ Removed from digimon_profile_dlc17.mbe")
+            
+            # 6. Remove from anim_setting_dlc17 (by chr_id)
+            if chr_id:
+                file_path = dlc_data / "anim_setting_dlc17.mbe" / "00_anim_setting.csv"
+                if file_path.exists():
+                    rows = self.loader.load_csv(file_path)
+                    original_count = len(rows)
+                    filtered_rows = [rows[0]]  # Keep header
+                    chr_id_clean = chr_id.strip('"')
+                    for row in rows[1:]:
+                        if len(row) > 0:
+                            row_chr_id = row[0].strip('"')
+                            if row_chr_id != chr_id_clean:
+                                filtered_rows.append(row)
+                    if len(filtered_rows) < original_count:
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            for row in filtered_rows:
+                                f.write(','.join(row) + '\n')
+                        removed_count += 1
+                        print(f"✅ Removed from anim_setting_dlc17.mbe")
+            
+            # 7. Remove from model_setting_dlc17 (by chr_id)
+            if chr_id:
+                file_path = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+                if file_path.exists():
+                    rows = self.loader.load_csv(file_path)
+                    original_count = len(rows)
+                    filtered_rows = [rows[0]]  # Keep header
+                    chr_id_clean = chr_id.strip('"')
+                    for row in rows[1:]:
+                        if len(row) > 0:
+                            row_chr_id = row[0].strip('"')
+                            if row_chr_id != chr_id_clean:
+                                filtered_rows.append(row)
+                    if len(filtered_rows) < original_count:
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            for row in filtered_rows:
+                                f.write(','.join(row) + '\n')
+                        removed_count += 1
+                        print(f"✅ Removed from model_setting_dlc17.mbe")
+            
+            # 8. Remove from model_outline_dlc17 (by chr_id)
+            if chr_id:
+                file_path = dlc_data / "model_outline_dlc17.mbe" / "00_model_outline.csv"
+                if file_path.exists():
+                    rows = self.loader.load_csv(file_path)
+                    original_count = len(rows)
+                    filtered_rows = [rows[0]]  # Keep header
+                    chr_id_clean = chr_id.strip('"')
+                    for row in rows[1:]:
+                        if len(row) > 0:
+                            row_chr_id = row[0].strip('"')
+                            if row_chr_id != chr_id_clean:
+                                filtered_rows.append(row)
+                    if len(filtered_rows) < original_count:
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            for row in filtered_rows:
+                                f.write(','.join(row) + '\n')
+                        removed_count += 1
+                        print(f"✅ Removed from model_outline_dlc17.mbe")
+            
+            # 9. Remove from lod_chara_dlc17 (both files)
+            if chr_id:
+                # 00_lod.csv
+                file_path = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+                if file_path.exists():
+                    rows = self.loader.load_csv(file_path)
+                    original_count = len(rows)
+                    filtered_rows = [rows[0]]  # Keep header
+                    chr_id_clean = chr_id.strip('"')
+                    for row in rows[1:]:
+                        if len(row) > 0:
+                            row_chr_id = row[0].strip('"')
+                            if row_chr_id != chr_id_clean:
+                                filtered_rows.append(row)
+                    if len(filtered_rows) < original_count:
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            for row in filtered_rows:
+                                f.write(','.join(row) + '\n')
+                        removed_count += 1
+                        print(f"✅ Removed from lod_chara_dlc17.mbe (00_lod.csv)")
+                
+                # 01_lod_model.csv
+                file_path = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+                if file_path.exists():
+                    rows = self.loader.load_csv(file_path)
+                    original_count = len(rows)
+                    filtered_rows = [rows[0]]  # Keep header
+                    chr_id_clean = chr_id.strip('"')
+                    chr_prefix = f"{chr_id_clean}_"
+                    for row in rows[1:]:
+                        if len(row) > 0:
+                            row_key = row[0].strip('"')
+                            if not row_key.startswith(chr_prefix):
+                                filtered_rows.append(row)
+                    if len(filtered_rows) < original_count:
+                        with open(file_path, 'w', encoding='utf-8') as f:
+                            for row in filtered_rows:
+                                f.write(','.join(row) + '\n')
+                        removed_count += 1
+                        print(f"✅ Removed from lod_chara_dlc17.mbe (01_lod_model.csv)")
+            
+            if removed_count > 0:
+                print(f"✅ Successfully removed Digimon ID {digimon_id} from {removed_count} DLC file(s)!")
+                return True
+            else:
+                print(f"⚠️ No entries found to remove for Digimon ID {digimon_id}")
+                return False
+            
+        except Exception as e:
+            print(f"Error removing Digimon from DLC: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
     def _save_to_dlc_char_info(self, digimon: DigimonData, dlc_data: Path) -> bool:
         """Save to char_info_dlc17.mbe/00_char_info.csv"""
         try:
@@ -1770,24 +2262,67 @@ class DLCExporter:
                 # Create header
                 rows = [['string2 0', 'empty 1', 'empty 2', 'string2 3', 'string2 4', 'empty 5', 'int 6', 'int 7', 'string2 8', 'int 9', 'string2 10', 'int 11', 'string2 12', 'int 13']]
             
+            # Calculate column 4 value based on chr_id
+            # Extract number from chr_id (e.g., "chr1000" -> 1000)
+            chr_id_clean = digimon.chr_id.strip('"')
+            chr_id_number = 0
+            try:
+                # Extract number after "chr"
+                if chr_id_clean.startswith('chr'):
+                    chr_id_number = int(chr_id_clean[3:])
+                else:
+                    # Fallback: try to extract any number
+                    import re
+                    match = re.search(r'\d+', chr_id_clean)
+                    if match:
+                        chr_id_number = int(match.group())
+            except:
+                chr_id_number = digimon.id
+            
+            # Calculate column 4: if chr_id >= 1000, add 9000; otherwise add 1000
+            if chr_id_number >= 1000:
+                column_4_value = chr_id_number + 9000  # chr1000 -> 10000, chr1001 -> 10001, etc.
+            else:
+                column_4_value = chr_id_number + 1000  # chr143 -> 1143, chr175 -> 1175, etc.
+            
+            # Use digimon's loaded char_info_data if available
+            if digimon.char_info_data:
+                char_info = digimon.char_info_data
+                new_row = [
+                    f'"{digimon.char_key}"',
+                    char_info.get('empty1', '""'),
+                    char_info.get('empty2', '""'),
+                    f'"{digimon.chr_id}"',
+                    f'"{column_4_value}"',
+                    char_info.get('empty3', '""'),
+                    str(char_info.get('gender_flag', 0)),
+                    str(char_info.get('flag1', 0)),
+                    char_info.get('motion_ref', '""'),
+                    str(char_info.get('flag2', 0)),
+                    char_info.get('model_ref', '""'),
+                    str(char_info.get('flag3', 0)),
+                    char_info.get('empty4', '""'),
+                    str(char_info.get('flag4', 0))
+                ]
+            else:
+                # Fallback: create basic entry
+                new_row = [
+                    f'"{digimon.char_key}"', '""', '""', f'"{digimon.chr_id}"',
+                    f'"{column_4_value}"', '""', '0', '0', '""', '0', '""', '0', '""', '0'
+                ]
+            
             # Check if entry already exists
             entry_found = False
             for i, row in enumerate(rows[1:], 1):
                 if len(row) > 0 and row[0].strip('"') == digimon.char_key:
                     # Update existing
-                    rows[i] = [
-                        f'"{digimon.char_key}"', '""', '""', f'"{digimon.chr_id}"',
-                        f'"{digimon.id + 1000}"', '""', '0', '0', '""', '0', '""', '0', '""', '0'
-                    ]
+                    rows[i] = new_row
                     entry_found = True
                     break
             
             if not entry_found:
                 # Add new entry
-                rows.append([
-                    f'"{digimon.char_key}"', '""', '""', f'"{digimon.chr_id}"',
-                    f'"{digimon.id + 1000}"', '""', '0', '0', '""', '0', '""', '0', '""', '0'
-                ])
+                rows.append(new_row)
             
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
@@ -1798,6 +2333,8 @@ class DLCExporter:
             return True
         except Exception as e:
             print(f"Error saving to char_info_dlc17: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _save_to_dlc_status(self, digimon: DigimonData, dlc_data: Path) -> bool:
@@ -1883,14 +2420,10 @@ class DLCExporter:
             
             # Stage and type
             row[4] = str(digimon.stage_id)
-            row[5] = str(digimon.type_id) if digimon.type_id else "0"
-            row[6] = str(digimon.generation_id)
+            row[5] = "1"  # This field is always 1
+            row[6] = str(digimon.type_id)
             
-            # Columns 7-17: Various attributes (copy from template if available)
-            # These are things like element types, sub-types, etc.
-            for col_idx in range(7, 18):
-                if col_idx < len(row) and not row[col_idx]:
-                    row[col_idx] = "0"
+            # Columns 7-17: ELEMENTAL RESISTANCES (already set below, don't overwrite!)
             
             # Columns 19-59: Boolean flags (must be 0 or 1, never empty)
             for col_idx in range(19, 60):
@@ -1985,37 +2518,138 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_evolution(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to evolution_dlc17.mbe/00_evolution_condition.csv"""
+        """Save to evolution_dlc17.mbe/00_evolution_condition.csv and 01_evolution_to.csv"""
         try:
-            file_path = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+            # 1. Save evolution condition file
+            cond_file_path = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
             
-            # Load or create file
-            if file_path.exists():
-                rows = self.loader.load_csv(file_path)
+            # Load or create condition file
+            if cond_file_path.exists():
+                cond_rows = self.loader.load_csv(cond_file_path)
             else:
                 # Create header (30 columns based on DLC example)
-                rows = [['int 0', 'empty 1', 'int 2', 'int 3', 'int 4', 'int 5', 'int 6', 'int 7', 'int 8', 'int 9', 'int 10', 'int 11', 'int 12', 'int 13', 'int 14', 'int 15', 'int 16', 'int 17', 'empty 18', 'int 19', 'int 20', 'int 21', 'int 22', 'empty 23', 'int 24', 'empty 25', 'int 26', 'int 27', 'empty 28', 'int 29']]
+                cond_rows = [['int 0', 'empty 1', 'int 2', 'int 3', 'int 4', 'int 5', 'int 6', 'int 7', 'int 8', 'int 9', 'int 10', 'int 11', 'int 12', 'int 13', 'int 14', 'int 15', 'int 16', 'int 17', 'empty 18', 'int 19', 'int 20', 'int 21', 'int 22', 'empty 23', 'int 24', 'empty 25', 'int 26', 'int 27', 'empty 28', 'int 29']]
             
-            # Check if entry exists
-            entry_found = False
-            for i, row in enumerate(rows[1:], 1):
+            # Check if condition entry exists
+            cond_entry_found = False
+            for i, row in enumerate(cond_rows[1:], 1):
                 if len(row) > 0 and row[0] == str(digimon.id):
-                    entry_found = True
+                    cond_entry_found = True
                     break
             
-            if not entry_found:
+            if not cond_entry_found:
                 # Add minimal evolution condition entry
-                rows.append([str(digimon.id), '""', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '""', '0', '0', '0', '0', '""', '0', '""', '0', '0', '""', '0'])
+                cond_rows.append([str(digimon.id), '""', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '""', '0', '0', '0', '0', '""', '0', '""', '0', '0', '""', '0'])
             
-            # Write file
-            with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
+            # Write condition file
+            with open(cond_file_path, 'w', encoding='utf-8') as f:
+                for row in cond_rows:
                     f.write(','.join(row) + '\n')
             
-            print(f"✅ Saved to evolution_dlc17.mbe")
+            # 2. Save evolution_to file (actual evolution paths)
+            evo_to_file_path = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            
+            # Load or create evolution_to file
+            if evo_to_file_path.exists():
+                evo_to_rows = self.loader.load_csv(evo_to_file_path)
+            else:
+                # Create header - need to check format from base game
+                base_evo_to = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+                if base_evo_to.exists():
+                    base_rows = self.loader.load_csv(base_evo_to)
+                    evo_to_rows = [base_rows[0]]  # Copy header from base game
+                else:
+                    # Fallback header (based on loading code: row[0]=evolution_id, row[1]=from_id, row[3]=to_id)
+                    evo_to_rows = [['int 0', 'int 1', 'empty 2', 'int 3', 'int 4', 'int 5', 'int 6', 'int 7', 'int 8', 'int 9', 'int 10', 'int 11', 'int 12', 'int 13', 'int 14', 'int 15', 'int 16', 'int 17', 'empty 18', 'int 19', 'int 20', 'int 21', 'int 22', 'empty 23', 'int 24', 'empty 25', 'int 26', 'int 27', 'empty 28', 'int 29']]
+            
+            # Remove existing entries for this Digimon (both as source and target)
+            filtered_rows = [evo_to_rows[0]]  # Keep header
+            for row in evo_to_rows[1:]:
+                # Skip rows where this Digimon is the source (row[1]) or target (row[3])
+                if len(row) > 3:
+                    if row[1] != str(digimon.id) and row[3] != str(digimon.id):
+                        filtered_rows.append(row)
+            
+            # Add evolution paths (where this Digimon evolves TO other Digimon)
+            # Format: row[0]=evolution_id, row[1]=from_id (this Digimon), row[3]=to_id (target)
+            evolution_id_counter = 1
+            for evo_path in digimon.evolution_paths:
+                if evo_path.get('to_id'):
+                    # Use raw_data if available, otherwise create new row
+                    if evo_path.get('raw_data') and len(evo_path['raw_data']) >= len(evo_to_rows[0]):
+                        new_row = evo_path['raw_data'].copy()
+                        # Update from_id to this Digimon's ID
+                        if len(new_row) > 1:
+                            new_row[1] = str(digimon.id)
+                        # Update to_id
+                        if len(new_row) > 3:
+                            new_row[3] = str(evo_path['to_id'])
+                        # Update evolution_id if needed
+                        if len(new_row) > 0:
+                            new_row[0] = str(evolution_id_counter)
+                    else:
+                        # Create new row with default format
+                        num_cols = len(evo_to_rows[0])
+                        new_row = ['0'] * num_cols
+                        new_row[0] = str(evolution_id_counter)  # evolution_id
+                        new_row[1] = str(digimon.id)  # from_id
+                        new_row[2] = '""'  # empty column
+                        new_row[3] = str(evo_path['to_id'])  # to_id
+                        # Fill rest with defaults
+                        for i in range(4, num_cols):
+                            if i in [18, 23, 25, 28]:  # empty columns
+                                new_row[i] = '""'
+                            else:
+                                new_row[i] = '0'
+                    
+                    filtered_rows.append(new_row)
+                    evolution_id_counter += 1
+            
+            # Add de-evolution sources (where other Digimon evolve TO this Digimon)
+            # Format: row[0]=evolution_id, row[1]=from_id (source), row[3]=to_id (this Digimon)
+            for deevo_source in digimon.deevolution_sources:
+                if deevo_source.get('from_id'):
+                    # Use raw_data if available, otherwise create new row
+                    if deevo_source.get('raw_data') and len(deevo_source['raw_data']) >= len(evo_to_rows[0]):
+                        new_row = deevo_source['raw_data'].copy()
+                        # Update from_id
+                        if len(new_row) > 1:
+                            new_row[1] = str(deevo_source['from_id'])
+                        # Update to_id to this Digimon's ID
+                        if len(new_row) > 3:
+                            new_row[3] = str(digimon.id)
+                        # Update evolution_id if needed
+                        if len(new_row) > 0:
+                            new_row[0] = str(evolution_id_counter)
+                    else:
+                        # Create new row with default format
+                        num_cols = len(evo_to_rows[0])
+                        new_row = ['0'] * num_cols
+                        new_row[0] = str(evolution_id_counter)  # evolution_id
+                        new_row[1] = str(deevo_source['from_id'])  # from_id
+                        new_row[2] = '""'  # empty column
+                        new_row[3] = str(digimon.id)  # to_id
+                        # Fill rest with defaults
+                        for i in range(4, num_cols):
+                            if i in [18, 23, 25, 28]:  # empty columns
+                                new_row[i] = '""'
+                            else:
+                                new_row[i] = '0'
+                    
+                    filtered_rows.append(new_row)
+                    evolution_id_counter += 1
+            
+            # Write evolution_to file
+            with open(evo_to_file_path, 'w', encoding='utf-8') as f:
+                for row in filtered_rows:
+                    f.write(','.join(row) + '\n')
+            
+            print(f"✅ Saved to evolution_dlc17.mbe (condition + evolution paths)")
             return True
         except Exception as e:
             print(f"Error saving to evolution_dlc17: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _save_to_dlc_char_name(self, digimon: DigimonData, dlc_text: Path) -> bool:
@@ -2126,7 +2760,7 @@ class DLCExporter:
             print(f"Error saving to anim_setting_dlc17: {e}")
             return False
     
-    def _save_to_dlc_model_setting(self, digimon: DigimonData, dlc_data: Path) -> bool:
+    def _save_to_dlc_model_setting(self, digimon: DigimonData, dlc_data: Path, animation_ref_chr_id: str = None) -> bool:
         """Save to model_setting_dlc17.mbe/00_model_setting.csv"""
         try:
             file_path = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
@@ -2140,18 +2774,55 @@ class DLCExporter:
                 base_rows = self.loader.load_csv(base_file)
                 rows = [base_rows[0]]  # Just the header
             
-            # Find the template chr_id entry in base game file to copy settings from
-            base_file = self.loader.data_path / "model_setting.mbe" / "00_model_setting.csv"
-            base_rows = self.loader.load_csv(base_file)
-            
+            # Use digimon's loaded model_setting_data if available
             template_row = None
-            for row in base_rows[1:]:
-                if len(row) > 0 and row[0].strip('"') == digimon.chr_id:
-                    template_row = row.copy()
-                    break
+            if digimon.model_setting_data and digimon.model_setting_data.get('chr_id'):
+                # Reconstruct row from loaded data
+                model_data = digimon.model_setting_data
+                template_row = [
+                    f'"{digimon.chr_id}"',
+                    model_data.get('empty1', '""'),
+                    model_data.get('empty2', '""'),
+                    model_data.get('chr_id', f'"{digimon.chr_id}"'),
+                    model_data.get('numeric_id', '""'),
+                    model_data.get('empty3', '""'),
+                    str(model_data.get('gender_flag', 0)),
+                    str(model_data.get('flag1', 0)),
+                    model_data.get('motion_ref', '""'),
+                    str(model_data.get('flag2', 0)),
+                    model_data.get('model_ref', '""'),
+                    str(model_data.get('flag3', 0)),
+                    model_data.get('empty4', '""'),
+                    str(model_data.get('flag4', 0))
+                ]
+                # Pad to expected length if needed
+                while len(template_row) < 82:
+                    template_row.append('""')
+            else:
+                # Find template using animation_ref_chr_id (e.g., chr805) instead of digimon.chr_id (e.g., chr1000)
+                template_chr_id = animation_ref_chr_id.strip('"') if animation_ref_chr_id else digimon.chr_id.strip('"')
+                
+                # First check base game file
+                base_file = self.loader.data_path / "model_setting.mbe" / "00_model_setting.csv"
+                if base_file.exists():
+                    base_rows = self.loader.load_csv(base_file)
+                    for row in base_rows[1:]:
+                        if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                            template_row = row.copy()
+                            break
+                
+                # Also check DLC files if not found in base game
+                if not template_row:
+                    dlc_file = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+                    if dlc_file.exists():
+                        dlc_rows = self.loader.load_csv(dlc_file)
+                        for row in dlc_rows[1:]:
+                            if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                                template_row = row.copy()
+                                break
             
             if not template_row:
-                print(f"⚠️ Warning: No model_setting entry found for {digimon.chr_id}, using defaults")
+                print(f"⚠️ Warning: No model_setting entry found for template {animation_ref_chr_id or digimon.chr_id}, using defaults")
                 # Create minimal row with chr_id
                 template_row = [f'"{digimon.chr_id}"'] + ['""'] * 81
             else:
@@ -2178,6 +2849,8 @@ class DLCExporter:
             return True
         except Exception as e:
             print(f"Error saving to model_setting_dlc17: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _save_to_dlc_model_outline(self, digimon: DigimonData, dlc_data: Path) -> bool:
@@ -2240,15 +2913,38 @@ class DLCExporter:
             else:
                 rows = [['string2 0', 'float 1', 'float 2', 'float 3', 'float 4', 'float 5', 'float 6', 'float 7', 'float 8', 'float 9', 'float 10']]
             
-            # Find template entry in base game
-            base_file = self.loader.data_path / "lod_chara.mbe" / "00_lod.csv"
-            base_rows = self.loader.load_csv(base_file)
-            
+            # Use digimon's loaded lod_data if available
             template_row = None
-            for row in base_rows[1:]:
-                if len(row) > 0 and row[0].strip('"') == digimon.chr_id:
-                    template_row = row.copy()
-                    break
+            if digimon.lod_data:
+                lod_data = digimon.lod_data
+                template_row = [
+                    f'"{digimon.chr_id}"',
+                    str(lod_data.get('lod_distance_1', 20)),
+                    str(lod_data.get('lod_distance_2', 65)),
+                    str(lod_data.get('lod_distance_3', 500)),
+                    '0', '0', '0', '0', '0', '0', '0'
+                ]
+            else:
+                # Fallback: Find template entry in base game or DLC
+                base_file = self.loader.data_path / "lod_chara.mbe" / "00_lod.csv"
+                if base_file.exists():
+                    base_rows = self.loader.load_csv(base_file)
+                    template_chr_id = digimon.chr_id
+                    for row in base_rows[1:]:
+                        if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                            template_row = row.copy()
+                            break
+                
+                # Also check DLC files
+                if not template_row:
+                    dlc_file = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+                    if dlc_file.exists():
+                        dlc_rows = self.loader.load_csv(dlc_file)
+                        template_chr_id = digimon.chr_id
+                        for row in dlc_rows[1:]:
+                            if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                                template_row = row.copy()
+                                break
             
             if not template_row:
                 # Default LOD settings
@@ -2280,15 +2976,44 @@ class DLCExporter:
             else:
                 rows = [['string2 0', 'string2 1', 'string2 2', 'string2 3', 'string2 4', 'string2 5', 'string2 6', 'string2 7', 'string2 8', 'string2 9', 'string2 10']]
             
-            # Find template entry in base game
-            base_file = self.loader.data_path / "lod_chara.mbe" / "01_lod_model.csv"
-            base_rows = self.loader.load_csv(base_file)
-            
+            # Use digimon's loaded lod_model_data if available
             template_row = None
-            for row in base_rows[1:]:
-                if len(row) > 0 and row[0].strip('"') == digimon.chr_id:
-                    template_row = row.copy()
-                    break
+            if digimon.lod_model_data:
+                lod_model = digimon.lod_model_data
+                template_row = [
+                    f'"{digimon.chr_id}"',
+                    lod_model.get('model_1', '""'),
+                    lod_model.get('model_2', '""'),
+                    lod_model.get('model_3', '""'),
+                    lod_model.get('model_4', '""'),
+                    lod_model.get('model_5', '""'),
+                    lod_model.get('model_6', '""'),
+                    lod_model.get('model_7', '""'),
+                    lod_model.get('model_8', '""'),
+                    lod_model.get('model_9', '""'),
+                    lod_model.get('model_10', '""')
+                ]
+            else:
+                # Fallback: Find template in base game or DLC
+                base_file = self.loader.data_path / "lod_chara.mbe" / "01_lod_model.csv"
+                if base_file.exists():
+                    base_rows = self.loader.load_csv(base_file)
+                    template_chr_id = digimon.chr_id
+                    for row in base_rows[1:]:
+                        if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                            template_row = row.copy()
+                            break
+                
+                # Also check DLC files
+                if not template_row:
+                    dlc_file = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+                    if dlc_file.exists():
+                        dlc_rows = self.loader.load_csv(dlc_file)
+                        template_chr_id = digimon.chr_id
+                        for row in dlc_rows[1:]:
+                            if len(row) > 0 and row[0].strip('"') == template_chr_id:
+                                template_row = row.copy()
+                                break
             
             if not template_row:
                 # Default LOD model reference
@@ -2317,4 +3042,6 @@ class DLCExporter:
             return True
         except Exception as e:
             print(f"Error saving to lod_chara_dlc17: {e}")
+            import traceback
+            traceback.print_exc()
             return False

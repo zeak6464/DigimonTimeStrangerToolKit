@@ -1,0 +1,67 @@
+require("include")
+
+function m160_050()
+  Fade_Out(0, 0)
+  EVENT_BEGIN()
+  EventRankSet("S")
+  EventRankSet("Shadow")
+  Talk.Load("m160")
+  SetEventCutNo("1.0")
+  if Debug.IsEventView() then
+  end
+  local Movie = MOVIE.new("movie", "ep08_B")
+  WaitVistaLoad()
+  Event_StopBGM(2, 0)
+  Sound.StopAmbientSE(0)
+  FIELD_SET()
+  Vista.Play()
+  CUT("1.0")
+  WaitFrame(60)
+  Fade_In(0, FADE_TIME)
+  Event_PlaySE(420009, 100, false, 0, 0)
+  Event_PlayBGM(945, 2, 0)
+  Vista.SetMessageTalkAuto("m160_050_010", -1, false, 18)
+  Vista.SetMessageTalkAuto("m160_050_011", -1, false, 191)
+  Vista.SetMessageTalkAuto("m160_050_012", -1, false, 463)
+  Vista.SetMessageTalkAuto("m160_050_020", -1, false, 698)
+  Vista.SetMessageTalkAuto("m160_050_021", -1, false, 972)
+  Vista.SetMessageTalkAuto("m160_050_030", -1, false, 1189)
+  Vista.SetMessageTalkAuto("m160_050_031", -1, false, 1413)
+  Vista.SetMessageTalkAuto("m160_050_040", -1, false, 1538)
+  Vista.SetMessageTalkAuto("m160_050_041", -1, false, 1725)
+  Vista.SetMessageTalkAuto("m160_050_042", -1, false, 1992)
+  Vista.SetMessageTalkAuto("m160_050_050", -1, false, 2165)
+  Vista.SetMessageTalkAuto("m160_050_051", -1, false, 2399)
+  Movie:PLAY(2547)
+  Event_StopBGM(2, 0)
+  Fade_OutNoLoadingWithWait(0, FADE_TIME)
+  WaitFrame(60)
+  Vista.SetKeepBGM()
+  Vista.SetSkip(false, true)
+  Event_Quake_Stop(0)
+  TalkExit()
+  VistaExit()
+  Field_CancelInvisiblePlayer(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleFollowerAllGuest(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleFollowerAllPartyMember(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleNpc("", INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleAllSymbolEnemy(INVISIBLE_KEY_EVENT, 0, false, false)
+  Field_CancelInvisibleRumorNpc(FOR_ALL, INVISIBLE_KEY_EVENT, 0, false, false)
+  Field_CancelInvisibleMob(FOR_ALL, INVISIBLE_KEY_EVENT, 0, true, false)
+  local field_player_index = Field.GetPlayerIndex()
+  if field_player_index then
+    Field.ObjectResetAim(FLD_OBJ_PLAYER, field_player_index, 0)
+  end
+  if Debug.IsEventView() then
+    Event_StopBGM(0, 0)
+    Event_StopAllSE(0, 0)
+  end
+end
+
+function CUT(cut_no)
+  CUT_START(cut_no)
+end
+
+function main()
+  m160_050()
+end

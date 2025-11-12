@@ -1,0 +1,107 @@
+require("include")
+
+function m420_101()
+  Fade_Out(1, 0)
+  EVENT_BEGIN()
+  Talk.Load("m420")
+  SetEventCutNo(1)
+  if Debug.IsEventView() then
+    SetTimeZone("Noon")
+    SetTimeAxis("P2028_daft_420")
+    SetMapStatus("Disable")
+    LoadMap("h0701")
+  end
+  LoadModel("HERO_01", "Player")
+  LoadModel("AEGIOMON_01", "char_AEGIOMON")
+  LoadModel("chr805_01", "char_BLACKSHADOW")
+  LoadEffectScript("eff_01", "ef_e_com_210")
+  LoadSceneViewerResource("c1.0", "h0701f_za")
+  LoadSceneViewerResource("c2.0", "h0701f_za")
+  LoadEnvironmentFile("c1.0", "es_m420_100_c1.0")
+  LoadEnvironmentFile("c2.0", "es_m420_100_c2.0")
+  WaitVistaLoad()
+  Event_StopBGM(3, 0)
+  SetPosition("HERO_01", 0, 0.505, 112.076, "LINEAR", 0, 0)
+  SetRotation("HERO_01", 0, 180, 0, "LINEAR", 0, 0)
+  SetPosition("AEGIOMON_01", 0, 0.505, 105.878, "LINEAR", 0, 0)
+  SetRotation("AEGIOMON_01", 0, 0, 0, "LINEAR", 0, 0)
+  SetPosition("chr805_01", 0.125, 0.506, 105.478, "LINEAR", 0, 0)
+  SetRotation("chr805_01", 0, 172, 0, "LINEAR", 0, 0)
+  PlayMotion("HERO_01", "fn01_01", 0, true, 0)
+  SetFace("HERO_01", "F01", 1, 1, 0, 0)
+  PlayMotion("AEGIOMON_01", "fn01_01", 0, true, 0)
+  SetFace("AEGIOMON_01", "F01", 2, 1, FACE_BLENDTIME, 0)
+  PlayMotion("chr805_01", "bn01", 0, true, 0)
+  ModelVisible("AEGIOMON_01", false, 0, 0)
+  ModelVisible("eff_01", false, 0, 0)
+  FIELD_SET()
+  Field_CancelInvisibleNpc(FOR_ALL, INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleRumorNpc(FOR_ALL, INVISIBLE_KEY_EVENT, 0, false, false)
+  Field_CancelInvisibleMob(FOR_ALL, INVISIBLE_KEY_EVENT, 0, true, false)
+  Vista.Play()
+  SetMobTransparentRange(0.001, 0.001, 0.001)
+  CUT("1.0")
+  BlendEye("HERO_01", 0, 0, "SCURVE", 0, 0)
+  BlendFace("HERO_01", 0, 0, 0, true, "SCURVE", 0, 0)
+  BlendEye("AEGIOMON_01", 0, 0, "SCURVE", 0, 0)
+  BlendFace("AEGIOMON_01", 0, 0, 0, true, "SCURVE", 0, 0)
+  SetEnv_All("c2.0", 0)
+  SetPosition("eff_01", 0, 0.506, 105.878, "LINEAR", 0, 0)
+  SetRotation("eff_01", 0, 138.5, 0, "LINEAR", 0, 0)
+  SetScale("eff_01", 1.5, 1.5, 1.5)
+  ModelVisible("eff_01", true, 0, 0)
+  local slot_01 = Event_PlaySE(404091, 100, true, 0, 0)
+  PlayEffect("eff_01", false, 0)
+  ModelVisible("chr805_01", false, 0, 0)
+  ModelVisible("AEGIOMON_01", true, 0, 0)
+  SetPosition("chr805_01", 0.125, 0.486, 105.478, "LINEAR", 0, 0)
+  SetRotation("chr805_01", 0, 90, 0, "LINEAR", 0, 0)
+  SetCamera(0.58, 0.533, 103.987, 0, 23, "LINEAR", 0, false, 0, false)
+  SetCameraTarget(0.18, 0.663, 105.875, "LINEAR", 0, false, 0, false)
+  SetCamera(0.58, 1.29, 103.987, 0, 23, "SCURVE", 200, false, 30, false)
+  SetCameraTarget(0.18, 1.449, 105.875, "SCURVE", 200, false, 30, false)
+  SetCamera(0.58, 1.328, 103.987, 0, 23, "DECEL", 150, false, 230, false)
+  SetCameraTarget(0.18, 1.487, 105.875, "DECEL", 150, false, 230, false)
+  Fade_In(1, 30)
+  WaitFrame(30)
+  WaitFrame(230)
+  if Debug.IsEventView() then
+    EVENT_END()
+    Debug.AllUIOn()
+  else
+    Vista.SetSkip(false, true)
+    Vista.ClearMobTransparentRange()
+    TalkExit()
+    Field_CancelInvisiblePlayer(INVISIBLE_KEY_EVENT, 0, false, false)
+    Vista.SeamlessExit(Util.SecondFromFrame(45), "SCURVE")
+    Field_CancelInvisibleFollowerAllGuest(INVISIBLE_KEY_EVENT, 0, false, false)
+    Field_CancelInvisibleFollowerAllPartyMember(INVISIBLE_KEY_EVENT, 0, false, false)
+    Field_CancelInvisibleNpc("", INVISIBLE_KEY_EVENT, 0, false, false)
+    Field_CancelInvisibleAllSymbolEnemy(INVISIBLE_KEY_EVENT, 0, false, false)
+    Field_CancelInvisibleRumorNpc(FOR_ALL, INVISIBLE_KEY_EVENT, 0, false, false)
+    Field_CancelInvisibleMob(FOR_ALL, INVISIBLE_KEY_EVENT, 0, true, false)
+    local field_player_index = Field.GetPlayerIndex()
+    if field_player_index then
+      Field.ObjectResetAim(FLD_OBJ_PLAYER, field_player_index, 0)
+    end
+    while true do
+      if Vista.IsExit() then
+        Vista.End()
+        break
+      end
+      WaitFrame(1)
+    end
+    if Debug.IsEventView() then
+      Event_StopBGM(0, 0)
+      Event_StopAllSE(0, 0)
+    end
+  end
+end
+
+function CUT(cut_no)
+  CUT_START(cut_no)
+end
+
+function main()
+  m420_101()
+end

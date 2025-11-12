@@ -693,61 +693,161 @@ def repack_dlc_mbe_files(dlc_name: str = "addcont_17") -> bool:
     """
     try:
         # Get DLC paths
-        workspace_root = Path.cwd()
-        dlc_data_dir = workspace_root / "DLC" / f"{dlc_name}.dx11" / "data" / "mbe"
-        dlc_text_dir = workspace_root / "DLC" / f"{dlc_name}_text01.dx11" / "text" / "mbe"
+        # Source: CSV folders in DLC/addcont_17.dx11/data/mbe/ and DLC/addcont_17_text01.dx11/text/mbe/
+        # Target: .mbe files in export/DLC/addcont_17.dx11/data/ and export/DLC/addcont_17_text01.dx11/text/
+        try:
+            from data_loader import MBELoader
+            temp_loader = MBELoader()
+            workspace_root = temp_loader.data_path.parent
+        except:
+            workspace_root = Path.cwd()
         
-        if not dlc_data_dir.exists():
-            print(f"DLC data directory not found: {dlc_data_dir}")
+        # Source paths - CSV folders in DLC/
+        dlc_data_source_dir = workspace_root / "DLC" / f"{dlc_name}.dx11" / "data" / "mbe"
+        dlc_text_source_dir = workspace_root / "DLC" / f"{dlc_name}_text01.dx11" / "text" / "mbe"
+        
+        # Target paths - .mbe files in export/DLC/
+        dlc_data_target_dir = workspace_root / "export" / "DLC" / f"{dlc_name}.dx11" / "data"
+        dlc_text_target_dir = workspace_root / "export" / "DLC" / f"{dlc_name}_text01.dx11" / "text"
+        
+        if not dlc_data_source_dir.exists():
+            print(f"DLC data source directory not found: {dlc_data_source_dir}")
             return False
         
-        # Find all DLC .mbe folders (folders ending with _dlc17.mbe)
+        # Find all DLC .mbe folders (folders ending with _dlc17.mbe containing CSV files)
         mbe_folders = []
         
-        # Data folders
-        if dlc_data_dir.exists():
-            for folder in dlc_data_dir.iterdir():
+        # Data folders - from DLC/
+        if dlc_data_source_dir.exists():
+            for folder in dlc_data_source_dir.iterdir():
                 if folder.is_dir() and folder.name.endswith("_dlc17.mbe"):
-                    mbe_folders.append(folder)
+                    mbe_folders.append((folder, dlc_data_target_dir))
         
-        # Text folders
-        if dlc_text_dir.exists():
-            for folder in dlc_text_dir.iterdir():
+        # Text folders - from DLC/
+        if dlc_text_source_dir.exists():
+            for folder in dlc_text_source_dir.iterdir():
                 if folder.is_dir() and folder.name.endswith("_dlc17.mbe"):
-                    mbe_folders.append(folder)
+                    mbe_folders.append((folder, dlc_text_target_dir))
         
         if not mbe_folders:
             print("No DLC .mbe folders found to repack")
             return False
         
         print(f"\n=== Repacking {len(mbe_folders)} DLC .mbe folders ===")
+        print(f"Source: DLC/{dlc_name}.dx11/...")
+        print(f"Target: export/DLC/{dlc_name}.dx11/...")
         success_count = 0
         
-        for mbe_folder in mbe_folders:
-            # Create target .mbe file path (same directory as the folder)
-            target_mbe_file = mbe_folder.parent / mbe_folder.name
+        for mbe_folder, target_dir in mbe_folders:
+            # Check if folder contains CSV files
+            csv_files = list(mbe_folder.glob("*.csv"))
+            if not csv_files:
+                print(f"⚠️ Warning: {mbe_folder.name} contains no CSV files, skipping...")
+                continue
             
-            # Use Unix-style paths with forward slashes for DSCSToolsCLI
-            source_path = str(mbe_folder.relative_to(Path.cwd())).replace('\\', '/')
-            target_path = str(target_mbe_file.relative_to(Path.cwd())).replace('\\', '/')
+            print(f"  Found {len(csv_files)} CSV file(s) in folder")
             
-            # Run DSCSToolsCLI --mbepack command with Unix-style paths
-            # On Windows, use DSCSToolsCLI.exe directly (not ./DSCSToolsCLI.exe)
+            # Verify source folder exists
+            if not mbe_folder.exists() or not mbe_folder.is_dir():
+                print(f"⚠️ Warning: Source folder does not exist: {mbe_folder}")
+                continue
+            
+            # Create target .mbe file path in export/DLC/
+            # Ensure target directory exists
+            target_dir.mkdir(parents=True, exist_ok=True)
+            target_mbe_file = target_dir / mbe_folder.name
+            
+            # Convert to absolute paths first
+            abs_source = mbe_folder.absolute()
+            abs_target = target_mbe_file.absolute()
+            
+            # Check if target already exists - if it's a file, we'll overwrite it; if it's a directory, skip
+            if abs_target.exists():
+                if abs_target.is_dir():
+                    print(f"  ⚠️ Warning: Target path is a directory (conflict with folder name): {abs_target.name}")
+                    print(f"     This means there's both a folder and file with the same name - skipping...")
+                    continue
+                elif abs_target.is_file():
+                    # Existing .mbe file - we'll overwrite it
+                    print(f"  Found existing .mbe file, will overwrite: {abs_target.name}")
+            
+            # Remove existing .mbe file if it exists (DSCSToolsCLI will create it)
+            if abs_target.exists():
+                try:
+                    abs_target.unlink()
+                except Exception as e:
+                    print(f"  Warning: Could not remove existing file: {e}")
+            
+            # Use Windows-style paths with backslashes for DSCSToolsCLI on Windows
+            # DSCSToolsCLI on Windows expects native Windows paths, quoted
+            # Do NOT add trailing backslash - DSCSToolsCLI doesn't need it
+            source_path = str(abs_source)
+            target_path = str(abs_target)
+            
+            # Quote paths to handle spaces and special characters
+            source_path_quoted = f'"{source_path}"'
+            target_path_quoted = f'"{target_path}"'
+            
+            # Debug: Print what paths we're using
+            print(f"  Source path: {source_path}")
+            print(f"  Target path: {target_path}")
+            print(f"  Source exists: {abs_source.exists()}")
+            print(f"  Target dir exists: {abs_target.parent.exists()}")
+            
+            # Check if DSCSToolsCLI.exe exists
+            dscstools_path = Path.cwd() / "DSCSToolsCLI.exe"
+            if not dscstools_path.exists():
+                print(f"❌ Error: DSCSToolsCLI.exe not found in {Path.cwd()}")
+                print(f"   Please ensure DSCSToolsCLI.exe is in the workspace root directory.")
+                return False
+            
+            # Run DSCSToolsCLI --mbepack command with quoted Windows paths
             cmd = [
-                "DSCSToolsCLI.exe",
+                str(dscstools_path),
                 "--mbepack",
-                source_path,
-                target_path
+                source_path_quoted,
+                target_path_quoted
             ]
             
-            print(f"Repacking {mbe_folder.name}...")
-            result = subprocess.run(cmd, capture_output=True, text=True)
+            print(f"\nRepacking {mbe_folder.name}...")
+            print(f"  Source folder: {abs_source}")
+            print(f"  Target file: {abs_target}")
+            print(f"  Command: {' '.join(cmd)}")
+            
+            result = subprocess.run(cmd, capture_output=True, text=True, cwd=Path.cwd())
             
             if result.returncode == 0:
-                print(f"✅ Successfully repacked {mbe_folder.name}")
-                success_count += 1
+                # Wait a moment for file system to sync
+                import time
+                time.sleep(0.2)
+                
+                # Check if target file was created
+                if abs_target.exists() and abs_target.is_file():
+                    file_size = abs_target.stat().st_size
+                    if file_size > 0:
+                        print(f"✅ Successfully repacked {mbe_folder.name} ({file_size:,} bytes)")
+                        success_count += 1
+                    else:
+                        print(f"⚠️ Warning: File created but is empty (0 bytes)")
+                        print(f"  DSCSToolsCLI may have failed silently.")
+                        print(f"  Try running manually: {' '.join(cmd)}")
+                        if result.stdout:
+                            print(f"  Output: {result.stdout}")
+                        if result.stderr:
+                            print(f"  Error: {result.stderr}")
+                else:
+                    print(f"⚠️ Warning: Repack reported success but target file not found!")
+                    print(f"  Expected: {abs_target}")
+                    if result.stdout:
+                        print(f"  Output: {result.stdout}")
+                    if result.stderr:
+                        print(f"  Error: {result.stderr}")
             else:
-                print(f"❌ Error repacking {mbe_folder.name}: {result.stderr}")
+                print(f"❌ Error repacking {mbe_folder.name} (exit code: {result.returncode})")
+                if result.stdout:
+                    print(f"  Output: {result.stdout}")
+                if result.stderr:
+                    print(f"  Error: {result.stderr}")
         
         print(f"\n✅ Successfully repacked {success_count}/{len(mbe_folders)} DLC .mbe files")
         return success_count > 0

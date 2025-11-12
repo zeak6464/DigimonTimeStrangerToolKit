@@ -1,0 +1,66 @@
+require("include")
+
+function m320_070()
+  Fade_Out(1, 0)
+  EVENT_BEGIN()
+  EventRankSet("S")
+  EventRankSet("Shadow")
+  Talk.Load("m320")
+  SetEventCutNo("1.0")
+  if Debug.IsEventView() then
+  end
+  local Movie = MOVIE.new("movie", "ep05_C")
+  WaitVistaLoad()
+  Sound.StopAmbientSE(0)
+  FIELD_SET()
+  Vista.Play()
+  CUT("1.0")
+  WaitFrame(15)
+  local slot_01 = Event_PlaySE(404031, 100, false, 0.3, 0)
+  WaitFrame(60)
+  Event_PlaySE(420018, 100, false, 0, 0)
+  Fade_In(1, FADE_TIME)
+  Event_PlayBGM(945, 0.3, 0)
+  Vista.SetMessageTalkAuto("m320_070_010", -1, false, 15)
+  Vista.SetMessageTalkAuto("m320_070_020", -1, false, 348)
+  Vista.SetMessageTalkAuto("m320_070_021", -1, false, 526)
+  Vista.SetMessageTalkAuto("m320_070_030", -1, false, 852)
+  Vista.SetMessageTalkAuto("m320_070_031", -1, false, 1024)
+  Vista.SetMessageTalkAuto("m320_070_040", -1, false, 1279)
+  Vista.SetMessageTalkAuto("m320_070_050", -1, false, 1564)
+  Vista.SetMessageTalkAuto("m320_070_051", -1, false, 1758)
+  Vista.SetMessageTalkAuto("m320_070_060", -1, false, 2049)
+  Event_StopBGM(3, 75)
+  Movie:PLAY(2273)
+  Fade_OutNoLoadingWithWait(1, 30)
+  WaitFrame(60)
+  Vista.SetKeepBGM()
+  Vista.SetKeepBGMWithMapChange()
+  Vista.SetSkip(false, true)
+  Event_Quake_Stop(0)
+  TalkExit()
+  VistaExit()
+  Field_CancelInvisiblePlayer(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleFollowerAllGuest(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleFollowerAllPartyMember(INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleNpc("", INVISIBLE_KEY_EVENT, 0, true, false)
+  Field_CancelInvisibleAllSymbolEnemy(INVISIBLE_KEY_EVENT, 0, false, false)
+  Field_CancelInvisibleRumorNpc(FOR_ALL, INVISIBLE_KEY_EVENT, 0, false, false)
+  Field_CancelInvisibleMob(FOR_ALL, INVISIBLE_KEY_EVENT, 0, true, false)
+  local field_player_index = Field.GetPlayerIndex()
+  if field_player_index then
+    Field.ObjectResetAim(FLD_OBJ_PLAYER, field_player_index, 0)
+  end
+  if Debug.IsEventView() then
+    Event_StopBGM(0, 0)
+    Event_StopAllSE(0, 0)
+  end
+end
+
+function CUT(cut_no)
+  CUT_START(cut_no)
+end
+
+function main()
+  m320_070()
+end
