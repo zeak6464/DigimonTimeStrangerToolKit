@@ -2677,17 +2677,39 @@ class DLCExporter:
                     # Fallback header (based on loading code: row[0]=evolution_id, row[1]=from_id, row[3]=to_id)
                     evo_to_rows = [['int 0', 'int 1', 'empty 2', 'int 3', 'int 4', 'int 5', 'int 6', 'int 7', 'int 8', 'int 9', 'int 10', 'int 11', 'int 12', 'int 13', 'int 14', 'int 15', 'int 16', 'int 17', 'empty 18', 'int 19', 'int 20', 'int 21', 'int 22', 'empty 23', 'int 24', 'empty 25', 'int 26', 'int 27', 'empty 28', 'int 29']]
             
-            # Remove existing entries for this Digimon (both as source and target)
+            # Track ALL evolution IDs from the file to find the maximum
+            all_evolution_ids = set()
+            for row in evo_to_rows[1:]:
+                if len(row) > 0 and row[0]:
+                    try:
+                        all_evolution_ids.add(int(row[0]))
+                    except (ValueError, TypeError):
+                        pass
+            
+            # Track existing evolution IDs from OTHER Digimon (not this one)
+            # This allows us to reuse evolution IDs that belonged to this Digimon
+            existing_evolution_ids = set()
             filtered_rows = [evo_to_rows[0]]  # Keep header
             for row in evo_to_rows[1:]:
                 # Skip rows where this Digimon is the source (row[1]) or target (row[3])
                 if len(row) > 3:
                     if row[1] != str(digimon.id) and row[3] != str(digimon.id):
                         filtered_rows.append(row)
+                        # Track evolution IDs from other Digimon
+                        if len(row) > 0 and row[0]:
+                            try:
+                                existing_evolution_ids.add(int(row[0]))
+                            except (ValueError, TypeError):
+                                pass
+            
+            # Find the next available evolution ID (use max from ALL IDs to ensure uniqueness)
+            if all_evolution_ids:
+                next_evolution_id = max(all_evolution_ids) + 1
+            else:
+                next_evolution_id = 1
             
             # Add evolution paths (where this Digimon evolves TO other Digimon)
             # Format: row[0]=evolution_id, row[1]=from_id (this Digimon), row[3]=to_id (target)
-            evolution_id_counter = 1
             for evo_path in digimon.evolution_paths:
                 if evo_path.get('to_id'):
                     # Use raw_data if available, otherwise create new row
@@ -2699,14 +2721,25 @@ class DLCExporter:
                         # Update to_id
                         if len(new_row) > 3:
                             new_row[3] = str(evo_path['to_id'])
-                        # Update evolution_id if needed
+                        # Update evolution_id if needed (use existing if valid, otherwise assign new)
                         if len(new_row) > 0:
-                            new_row[0] = str(evolution_id_counter)
+                            existing_evo_id = evo_path.get('evolution_id', 0)
+                            if existing_evo_id > 0 and existing_evo_id not in existing_evolution_ids:
+                                new_row[0] = str(existing_evo_id)
+                            else:
+                                new_row[0] = str(next_evolution_id)
+                                next_evolution_id += 1
                     else:
                         # Create new row with default format
                         num_cols = len(evo_to_rows[0])
                         new_row = ['0'] * num_cols
-                        new_row[0] = str(evolution_id_counter)  # evolution_id
+                        # Use existing evolution_id if valid, otherwise assign new unique ID
+                        existing_evo_id = evo_path.get('evolution_id', 0)
+                        if existing_evo_id > 0 and existing_evo_id not in existing_evolution_ids:
+                            new_row[0] = str(existing_evo_id)
+                        else:
+                            new_row[0] = str(next_evolution_id)
+                            next_evolution_id += 1
                         new_row[1] = str(digimon.id)  # from_id
                         new_row[2] = '""'  # empty column
                         new_row[3] = str(evo_path['to_id'])  # to_id
@@ -2718,7 +2751,6 @@ class DLCExporter:
                                 new_row[i] = '0'
                     
                     filtered_rows.append(new_row)
-                    evolution_id_counter += 1
             
             # Add de-evolution sources (where other Digimon evolve TO this Digimon)
             # Format: row[0]=evolution_id, row[1]=from_id (source), row[3]=to_id (this Digimon)
@@ -2733,14 +2765,25 @@ class DLCExporter:
                         # Update to_id to this Digimon's ID
                         if len(new_row) > 3:
                             new_row[3] = str(digimon.id)
-                        # Update evolution_id if needed
+                        # Update evolution_id if needed (use existing if valid, otherwise assign new)
                         if len(new_row) > 0:
-                            new_row[0] = str(evolution_id_counter)
+                            existing_evo_id = deevo_source.get('evolution_id', 0)
+                            if existing_evo_id > 0 and existing_evo_id not in existing_evolution_ids:
+                                new_row[0] = str(existing_evo_id)
+                            else:
+                                new_row[0] = str(next_evolution_id)
+                                next_evolution_id += 1
                     else:
                         # Create new row with default format
                         num_cols = len(evo_to_rows[0])
                         new_row = ['0'] * num_cols
-                        new_row[0] = str(evolution_id_counter)  # evolution_id
+                        # Use existing evolution_id if valid, otherwise assign new unique ID
+                        existing_evo_id = deevo_source.get('evolution_id', 0)
+                        if existing_evo_id > 0 and existing_evo_id not in existing_evolution_ids:
+                            new_row[0] = str(existing_evo_id)
+                        else:
+                            new_row[0] = str(next_evolution_id)
+                            next_evolution_id += 1
                         new_row[1] = str(deevo_source['from_id'])  # from_id
                         new_row[2] = '""'  # empty column
                         new_row[3] = str(digimon.id)  # to_id
@@ -2752,7 +2795,6 @@ class DLCExporter:
                                 new_row[i] = '0'
                     
                     filtered_rows.append(new_row)
-                    evolution_id_counter += 1
             
             # Write evolution_to file
             with open(evo_to_file_path, 'w', encoding='utf-8') as f:
@@ -2896,9 +2938,23 @@ class DLCExporter:
             
             # Use digimon's loaded model_setting_data if available
             template_row = None
-            if digimon.model_setting_data and digimon.model_setting_data.get('chr_id'):
+            if digimon.model_setting_data and digimon.model_setting_data.get('raw_data'):
+                # Use raw_data directly if available (preserves all columns)
+                template_row = digimon.model_setting_data['raw_data'].copy()
+                # Update chr_id
+                if len(template_row) > 0:
+                    template_row[0] = f'"{digimon.chr_id}"'
+                # Update model_id and motion_id if they were changed in the UI
+                if len(template_row) > 8:
+                    template_row[8] = f'"{digimon.motion_id}"' if digimon.motion_id else '""'
+                if len(template_row) > 10:
+                    template_row[10] = f'"{digimon.model_id}"' if digimon.model_id else '""'
+            elif digimon.model_setting_data and digimon.model_setting_data.get('chr_id'):
                 # Reconstruct row from loaded data
                 model_data = digimon.model_setting_data
+                # Use updated model_id and motion_id from UI if available, otherwise use loaded values
+                motion_ref = f'"{digimon.motion_id}"' if digimon.motion_id else model_data.get('motion_ref', '""')
+                model_ref = f'"{digimon.model_id}"' if digimon.model_id else model_data.get('model_ref', '""')
                 template_row = [
                     f'"{digimon.chr_id}"',
                     model_data.get('empty1', '""'),
@@ -2908,9 +2964,9 @@ class DLCExporter:
                     model_data.get('empty3', '""'),
                     str(model_data.get('gender_flag', 0)),
                     str(model_data.get('flag1', 0)),
-                    model_data.get('motion_ref', '""'),
+                    motion_ref,
                     str(model_data.get('flag2', 0)),
-                    model_data.get('model_ref', '""'),
+                    model_ref,
                     str(model_data.get('flag3', 0)),
                     model_data.get('empty4', '""'),
                     str(model_data.get('flag4', 0))
@@ -2948,6 +3004,13 @@ class DLCExporter:
             else:
                 # Update chr_id in the copied row (keep template's settings)
                 template_row[0] = f'"{digimon.chr_id}"'
+            
+            # Update model_id and motion_id if they were changed in the UI (if not already updated above)
+            # Based on model_setting structure: column 8 is motion_ref, column 10 is model_ref
+            if len(template_row) > 8:
+                template_row[8] = f'"{digimon.motion_id}"' if digimon.motion_id else '""'
+            if len(template_row) > 10:
+                template_row[10] = f'"{digimon.model_id}"' if digimon.model_id else '""'
             
             # Check if entry exists in DLC file
             entry_found = False
