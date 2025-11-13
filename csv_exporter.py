@@ -582,7 +582,7 @@ class CSVExporter:
             return False
     
     def export_all_csv_files(self, output_dir: Path) -> bool:
-        """Export all CSV files from data and text directories, preserving structure"""
+        """Export all CSV files from data and text directories, preserving structure, including DLC"""
         import shutil
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
@@ -607,10 +607,23 @@ class CSVExporter:
                 shutil.copytree(text_source, text_dest)
                 print(f"Copied all text CSV files to {text_dest}")
             
+            # Copy DLC directories
+            workspace_root = self.data_path.parent
+            dlc_source_dir = workspace_root / "DLC"
+            
+            if dlc_source_dir.exists():
+                dlc_dest_dir = output_dir / "DLC"
+                if dlc_dest_dir.exists():
+                    shutil.rmtree(dlc_dest_dir)
+                shutil.copytree(dlc_source_dir, dlc_dest_dir)
+                print(f"Copied all DLC CSV files to {dlc_dest_dir}")
+            
             return True
             
         except Exception as e:
             print(f"Error exporting all CSV files: {e}")
+            import traceback
+            traceback.print_exc()
             return False
 
 
