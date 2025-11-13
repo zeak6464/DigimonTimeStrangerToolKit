@@ -1,12 +1,11 @@
 string2 0,string 1
 "char_AGUMON_BK","Agumon (Black)"
-"char_BLACKWARGREYMON","BlackWarGreymon"
-"char_METALGARURUMON_BK","MetalGarurumon (Black)"
-"char_METALGREYMON_BL","MetalGreymon (Blue)"
-"char_GREYMON_BL","Greymon (Blue)"
-"char_GABUMON_BK","Gabumon (Black)"
-"char_GARURUMON_BK","Garurumon (Black)"
-"char_WEREGARURUMON_BK","WereGarurumon (Black)"
-"char_OMEGAMON_ZWART","Omnimon Zwart"
-"char_OMEGAMON_ZWART_BIG","Omnimon Zwart"
-"char_DIGIMON_1000","1000"
+char_BLACKWARGREYMON,BlackWarGreymon
+char_METALGARURUMON_BK,MetalGarurumon (Black)
+char_METALGREYMON_BL,MetalGreymon (Blue)
+char_GREYMON_BL,Greymon (Blue)
+char_GABUMON_BK,Gabumon (Black)
+char_GARURUMON_BK,Garurumon (Black)
+char_WEREGARURUMON_BK,WereGarurumon (Black)
+char_OMEGAMON_ZWART,Omnimon Zwart
+char_OMEGAMON_ZWART_BIG,Omnimon Zwart

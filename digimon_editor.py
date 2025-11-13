@@ -504,7 +504,7 @@ class ClassificationPage(QWizardPage):
         
         # Stage
         self.stage_combo = QComboBox()
-        for i in range(10):
+        for i in range(15):  # Stages 0-14 (based on generation_name.mbe CSV)
             stage_name = wizard.loader.get_generation_name(i)
             clean_name = wizard.loader.clean_ui_text(stage_name)
             self.stage_combo.addItem(clean_name, i)
@@ -3778,12 +3778,19 @@ class DigimonEditor(QMainWindow):
             self.animation_ref_edit.setText(digimon.chr_id)
         
         # Set stage combo box
-        stage_index = self.stage_combo.findData(digimon.stage_id)
+        # Ensure stage_id is in valid range (0-14, based on generation_name.mbe CSV)
+        stage_id = max(0, min(14, digimon.stage_id)) if digimon.stage_id is not None else 0
+        stage_index = self.stage_combo.findData(stage_id)
         if stage_index >= 0:
             self.stage_combo.setCurrentIndex(stage_index)
         else:
-            # If stage_id is 0 or not found, set to index 0 (which should be "-")
-            self.stage_combo.setCurrentIndex(0)
+            # If stage_id is 0 or not found, set to index 0 (which should be the first stage)
+            # Try to find index 0 explicitly
+            stage_index_0 = self.stage_combo.findData(0)
+            if stage_index_0 >= 0:
+                self.stage_combo.setCurrentIndex(stage_index_0)
+            else:
+                self.stage_combo.setCurrentIndex(0)
         
         # Set type combo box
         type_index = self.type_combo.findData(digimon.type_id)
@@ -3998,6 +4005,9 @@ class DigimonEditor(QMainWindow):
         if not self.current_digimon:
             return
         
+        # Store chr_id before saving for reload
+        chr_id_to_reload = self.current_digimon.chr_id
+        
         # Update current digimon with form data
         self.update_digimon_from_form()
         
@@ -4011,16 +4021,48 @@ class DigimonEditor(QMainWindow):
             
             if dlc_exporter.save_digimon_to_dlc(self.current_digimon, animation_ref):
                 QMessageBox.information(self, "Success", "Digimon data saved to DLC successfully!")
+                # Invalidate caches to ensure fresh data is loaded
+                if hasattr(self.loader, '_invalidate_digimon_status_cache'):
+                    self.loader._invalidate_digimon_status_cache()
+                # Clear profile cache to reload updated profile text
+                self.loader._digimon_profiles_cache = None
+                # Clear char_names cache if it exists to force fresh name lookup
+                if hasattr(self.loader, '_char_names_cache'):
+                    self.loader._char_names_cache = None
                 # Refresh the digimon list to show any changes
                 self.load_digimon_list()
+                # Small delay to ensure file writes are complete
+                QApplication.processEvents()
+                # Reload the Digimon data to reflect any changes from save
+                digimon = self.loader.get_digimon_by_chr_id(chr_id_to_reload)
+                if digimon:
+                    # Ensure name is loaded from DLC files
+                    digimon.name = self.loader._get_digimon_name(digimon.char_key, check_dlc=True)
+                    self.load_digimon_data(digimon)
             else:
                 QMessageBox.warning(self, "Error", "Failed to save Digimon data to DLC")
         else:
             # Save to base game files
             if self.loader.save_digimon_data(self.current_digimon):
                 QMessageBox.information(self, "Success", "Digimon data saved successfully!")
+                # Invalidate caches to ensure fresh data is loaded
+                if hasattr(self.loader, '_invalidate_digimon_status_cache'):
+                    self.loader._invalidate_digimon_status_cache()
+                # Clear profile cache to reload updated profile text
+                self.loader._digimon_profiles_cache = None
+                # Clear char_names cache if it exists to force fresh name lookup
+                if hasattr(self.loader, '_char_names_cache'):
+                    self.loader._char_names_cache = None
                 # Refresh the digimon list to show any changes
                 self.load_digimon_list()
+                # Small delay to ensure file writes are complete
+                QApplication.processEvents()
+                # Reload the Digimon data to reflect any changes from save
+                digimon = self.loader.get_digimon_by_chr_id(chr_id_to_reload)
+                if digimon:
+                    # Ensure name is loaded from files
+                    digimon.name = self.loader._get_digimon_name(digimon.char_key, check_dlc=True)
+                    self.load_digimon_data(digimon)
             else:
                 QMessageBox.warning(self, "Error", "Failed to save Digimon data")
     
@@ -4677,7 +4719,7 @@ class DigimonEditor(QMainWindow):
     
     def populate_stage_dropdown(self):
         """Populate the stage dropdown with localized names"""
-        for i in range(10):  # Stages 0-9
+        for i in range(15):  # Stages 0-14 (based on generation_name.mbe CSV)
             stage_name = self.loader.get_generation_name(i)
             clean_name = self.loader.clean_ui_text(stage_name)
             self.stage_combo.addItem(clean_name, i)

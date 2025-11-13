@@ -5,6 +5,7 @@ Data loader for DTS Creator - loads and parses .mbe directories and CSV files
 import os
 import csv
 import json
+import re
 from typing import Dict, List, Optional, Any
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -213,28 +214,13 @@ class MBELoader:
             return self._get_digimon_status_data()
         
         try:
+            # Use Python's csv module for proper multi-line quoted field handling
+            # csv.reader automatically handles multi-line quoted fields correctly
             with open(file_path, 'r', encoding='utf-8') as f:
-                lines = f.readlines()
+                reader = csv.reader(f)
                 rows = []
-                for line in lines:
-                    # Split by comma but preserve quotes
-                    row = []
-                    current_field = ""
-                    in_quotes = False
-                    i = 0
-                    while i < len(line.strip()):
-                        char = line[i]
-                        if char == '"':
-                            in_quotes = not in_quotes
-                            current_field += char
-                        elif char == ',' and not in_quotes:
-                            row.append(current_field)
-                            current_field = ""
-                        else:
-                            current_field += char
-                        i += 1
-                    if current_field:
-                        row.append(current_field)
+                for row in reader:
+                    # csv.reader returns a list of strings (quotes are stripped)
                     rows.append(row)
                 return rows
         except Exception as e:
@@ -349,8 +335,26 @@ class MBELoader:
         digimon.chr_id = chr_id.strip('"') if chr_id else ""
         
         # Stats
-        digimon.stage_id = int(digimon_row[headers["stageId"]]) if digimon_row[headers["stageId"]] else 0
-        digimon.type_id = int(digimon_row[headers["typeId"]]) if digimon_row[headers["typeId"]] else 0
+        # Parse stage_id with better error handling
+        try:
+            if len(digimon_row) > headers["stageId"]:
+                stage_val = str(digimon_row[headers["stageId"]]).strip()
+                digimon.stage_id = int(stage_val) if stage_val and stage_val.isdigit() else 0
+            else:
+                digimon.stage_id = 0
+            # Clamp stage_id to valid range (0-14, based on generation_name.mbe CSV)
+            digimon.stage_id = max(0, min(14, digimon.stage_id))
+        except (ValueError, IndexError, AttributeError, TypeError):
+            digimon.stage_id = 0
+        
+        try:
+            if len(digimon_row) > headers["typeId"]:
+                type_val = str(digimon_row[headers["typeId"]]).strip()
+                digimon.type_id = int(type_val) if type_val and type_val.isdigit() else 0
+            else:
+                digimon.type_id = 0
+        except (ValueError, IndexError, AttributeError, TypeError):
+            digimon.type_id = 0
         digimon.generation_id = digimon.stage_id  # Generation is the same as stage
         digimon.personality_id = int(digimon_row[headers["basePersonality"]]) if digimon_row[headers["basePersonality"]] else 0
         digimon.base_personality = digimon.personality_id  # basePersonality is the same as personality_id
@@ -1271,9 +1275,9 @@ class MBELoader:
             
             # Field guide and script IDs
             if "fieldGuideId" in headers:
-                row[headers["fieldGuideId"]] = str(digimon.field_guide_id)
+                row[headers["fieldGuideId"]] = str(digimon.field_guide_id) if digimon.field_guide_id >= 0 else "-1"
             if "scriptId" in headers:
-                row[headers["scriptId"]] = str(digimon.script_id)
+                row[headers["scriptId"]] = str(digimon.script_id) if digimon.script_id >= 0 else "-1"
             
             # The reference fields are already set above
             
@@ -1287,6 +1291,10 @@ class MBELoader:
                 for row in rows:
                     # Write row manually to preserve exact format
                     f.write(','.join(row) + '\n')
+            
+            # Also update name and profile files for existing Digimon
+            self._update_char_name_file(digimon)
+            self._update_digimon_profile_file(digimon)
             
             # Invalidate cache after saving
             self._invalidate_digimon_status_cache()
@@ -1339,6 +1347,58 @@ class MBELoader:
         with open(char_name_file, 'w', encoding='utf-8') as f:
             for row in rows:
                 f.write(','.join(row) + '\n')
+    
+    def _update_char_name_file(self, digimon: DigimonData):
+        """Update existing Digimon name in char_name.mbe/00_Sheet1.csv"""
+        char_name_file = self.text_path / "char_name.mbe" / "00_Sheet1.csv"
+        if not char_name_file.exists():
+            return
+        
+        rows = self.load_csv(char_name_file)
+        # Find and update existing entry
+        entry_found = False
+        for i, row in enumerate(rows[1:], 1):  # Skip header
+            if len(row) > 0 and row[0].strip('"') == digimon.char_key:
+                rows[i] = [f'"{digimon.char_key}"', f'"{digimon.name}"']
+                entry_found = True
+                break
+        
+        # If not found, add new entry
+        if not entry_found:
+            rows.append([f'"{digimon.char_key}"', f'"{digimon.name}"'])
+        
+        # Write back to file
+        with open(char_name_file, 'w', encoding='utf-8') as f:
+            for row in rows:
+                f.write(','.join(row) + '\n')
+    
+    def _update_digimon_profile_file(self, digimon: DigimonData):
+        """Update existing Digimon profile in digimon_profile.mbe/00_Sheet1.csv"""
+        profile_file = self.text_path / "digimon_profile.mbe" / "00_Sheet1.csv"
+        if not profile_file.exists():
+            return
+        
+        rows = self.load_csv(profile_file)
+        profile_key = f'digimon_{digimon.id:04d}_profile'
+        profile_text = digimon.profile_text if digimon.profile_text else ""
+        
+        # Find and update existing entry
+        entry_found = False
+        for i, row in enumerate(rows[1:], 1):  # Skip header
+            if len(row) > 0 and row[0].strip('"') == profile_key:
+                rows[i] = [f'"{profile_key}"', f'"{profile_text}"']
+                entry_found = True
+                break
+        
+        # If not found, add new entry
+        if not entry_found and profile_text:
+            rows.append([f'"{profile_key}"', f'"{profile_text}"'])
+        
+        # Write back to file
+        if entry_found or (not entry_found and profile_text):
+            with open(profile_file, 'w', encoding='utf-8') as f:
+                for row in rows:
+                    f.write(','.join(row) + '\n')
     
     def _add_to_char_info_file(self, digimon: DigimonData):
         """Add new Digimon to char_info.mbe/00_char_info.csv"""
@@ -1620,29 +1680,72 @@ class MBELoader:
                     current_profile_text = []
                     
                     for row in rows[1:]:  # Skip header
-                        if len(row) >= 1 and row[0]:
+                        if len(row) >= 1:
                             # Check if this is a new profile entry
-                            key = row[0].strip('"')
+                            key = row[0].strip('"').strip() if row[0] else ""
                             if key.startswith('digimon_') and key.endswith('_profile'):
                                 # Save previous profile if exists
                                 if current_profile_id is not None and current_profile_text:
-                                    self._digimon_profiles_cache[current_profile_id] = ' '.join(current_profile_text)
+                                    # Join with space and clean up multiple spaces/newlines
+                                    profile_full_text = ' '.join(current_profile_text).strip()
+                                    # Replace multiple spaces/newlines with single space
+                                    profile_full_text = re.sub(r'\s+', ' ', profile_full_text)
+                                    if profile_full_text:
+                                        self._digimon_profiles_cache[current_profile_id] = profile_full_text
                                 
                                 # Start new profile
                                 try:
                                     id_str = key.replace('digimon_', '').replace('_profile', '')
                                     current_profile_id = int(id_str)
-                                    current_profile_text = [row[1].strip('"') if len(row) > 1 else '']
+                                    # Get text from column 1 - csv.reader handles multi-line quoted fields
+                                    if len(row) > 1 and row[1]:
+                                        # csv.reader already handles multi-line quoted fields, so row[1] contains the full text
+                                        profile_text = row[1].strip()
+                                        # Replace newlines with spaces and clean up
+                                        profile_text = profile_text.replace('\n', ' ').replace('\r', ' ')
+                                        profile_text = re.sub(r'\s+', ' ', profile_text).strip()
+                                        if profile_text:
+                                            self._digimon_profiles_cache[current_profile_id] = profile_text
+                                            current_profile_text = []  # Already saved, clear for next
+                                        else:
+                                            current_profile_text = []
+                                    else:
+                                        current_profile_text = []
                                 except ValueError:
                                     current_profile_id = None
                                     current_profile_text = []
-                            elif current_profile_id is not None and len(row) >= 1:
-                                # This is a continuation row
-                                current_profile_text.append(row[0].strip('"'))
+                            elif current_profile_id is not None:
+                                # This is a continuation row (for old CSV format without proper quoting)
+                                # Check both columns for text
+                                continuation_text = None
+                                # Check column 0 first (most continuation rows have text here)
+                                if len(row) >= 1 and row[0]:
+                                    col0_text = row[0].strip('"').strip()
+                                    # Remove trailing newline if present
+                                    col0_text = col0_text.rstrip('\n\r')
+                                    # Make sure it's not a new profile key and not empty
+                                    if col0_text and not col0_text.startswith('digimon_'):
+                                        continuation_text = col0_text
+                                # If column 0 doesn't have text, check column 1
+                                if not continuation_text and len(row) > 1 and row[1]:
+                                    col1_text = row[1].strip('"').strip()
+                                    if col1_text:
+                                        col1_text = col1_text.rstrip('\n\r')
+                                        # Make sure it's not a new profile key
+                                        if not col1_text.startswith('digimon_'):
+                                            continuation_text = col1_text
+                                
+                                if continuation_text:
+                                    current_profile_text.append(continuation_text)
                     
                     # Save the last profile
                     if current_profile_id is not None and current_profile_text:
-                        self._digimon_profiles_cache[current_profile_id] = ' '.join(current_profile_text)
+                        # Join with space and clean up multiple spaces/newlines
+                        profile_full_text = ' '.join(current_profile_text).strip()
+                        # Replace multiple spaces with single space
+                        profile_full_text = re.sub(r'\s+', ' ', profile_full_text)
+                        if profile_full_text:
+                            self._digimon_profiles_cache[current_profile_id] = profile_full_text
                         
                 except Exception as e:
                     print(f"Error loading digimon profiles: {e}")
@@ -2483,6 +2586,18 @@ class DLCExporter:
                     row[headers[skill_id_key]] = str(skill_id)
                     row[headers[skill_level_key]] = str(skill_level)
             
+            # Traits (boolean flags starting at traitsBaseIdx)
+            traits_start = headers["traitsBaseIdx"]
+            for i, trait_value in enumerate(digimon.traits):
+                if traits_start + i < len(row):
+                    row[traits_start + i] = "1" if trait_value else "0"
+            
+            # Field guide and script IDs
+            if "fieldGuideId" in headers:
+                row[headers["fieldGuideId"]] = str(digimon.field_guide_id) if digimon.field_guide_id >= 0 else "-1"
+            if "scriptId" in headers:
+                row[headers["scriptId"]] = str(digimon.script_id) if digimon.script_id >= 0 else "-1"
+            
             # Fill remaining empty integer/bool fields with defaults
             # Column 51: int field
             if not row[51] or row[51] == '""':
@@ -2678,6 +2793,11 @@ class DLCExporter:
             with open(file_path, 'w', encoding='utf-8') as f:
                 for row in rows:
                     f.write(','.join(row) + '\n')
+            
+            # Flush to ensure file is written
+            import os
+            if hasattr(os, 'sync'):
+                os.sync()
             
             print(f"✅ Saved to char_name_dlc17.mbe")
             return True

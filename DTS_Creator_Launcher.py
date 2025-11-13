@@ -27,7 +27,8 @@ class DTSCreatorLauncher(QMainWindow):
     def init_ui(self):
         """Initialize the user interface"""
         self.setWindowTitle("DTS Creator - Ultimate Toolkit Launcher")
-        self.setMinimumSize(1100, 800)
+        self.setMinimumSize(1300, 950)
+        self.resize(1600, 1100)  # Set default size larger
         
         # Central widget
         central_widget = QWidget()
@@ -35,8 +36,8 @@ class DTSCreatorLauncher(QMainWindow):
         
         # Main layout
         main_layout = QVBoxLayout()
-        main_layout.setSpacing(15)
-        main_layout.setContentsMargins(20, 20, 20, 20)
+        main_layout.setSpacing(20)
+        main_layout.setContentsMargins(25, 25, 25, 25)
         central_widget.setLayout(main_layout)
         
         # Header
@@ -46,18 +47,18 @@ class DTSCreatorLauncher(QMainWindow):
         header_font.setBold(True)
         header.setFont(header_font)
         header.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        header.setStyleSheet("color: #2196F3; padding: 20px;")
+        header.setStyleSheet("color: #2196F3; padding: 25px;")
         main_layout.addWidget(header)
         
         subtitle = QLabel("DTS - Complete Modding Suite")
         subtitle.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        subtitle.setStyleSheet("color: #666; font-size: 12pt; font-style: italic; padding-bottom: 10px;")
+        subtitle.setStyleSheet("color: #666; font-size: 12pt; font-style: italic; padding-bottom: 15px;")
         main_layout.addWidget(subtitle)
         
         # ===== GRID LAYOUT FOR SECTIONS (2 columns) =====
         from PyQt6.QtWidgets import QGridLayout
         grid_layout = QGridLayout()
-        grid_layout.setSpacing(15)
+        grid_layout.setSpacing(20)
         grid_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.addLayout(grid_layout)
         
@@ -71,7 +72,7 @@ class DTSCreatorLauncher(QMainWindow):
                 border: 2px solid #FF9800;
                 border-radius: 5px;
                 margin-top: 10px;
-                padding: 15px;
+                padding: 20px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -80,6 +81,7 @@ class DTSCreatorLauncher(QMainWindow):
             }
         """)
         editors_layout = QVBoxLayout()
+        editors_layout.setSpacing(12)
         editors_group.setLayout(editors_layout)
         
         # Digimon Editor button
@@ -112,7 +114,7 @@ class DTSCreatorLauncher(QMainWindow):
                 border: 2px solid #9C27B0;
                 border-radius: 5px;
                 margin-top: 10px;
-                padding: 15px;
+                padding: 20px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -121,6 +123,7 @@ class DTSCreatorLauncher(QMainWindow):
             }
         """)
         randomizers_layout = QVBoxLayout()
+        randomizers_layout.setSpacing(12)
         randomizers_group.setLayout(randomizers_layout)
         
         # Game Randomizer button
@@ -145,7 +148,7 @@ class DTSCreatorLauncher(QMainWindow):
                 border: 2px solid #2196F3;
                 border-radius: 5px;
                 margin-top: 10px;
-                padding: 15px;
+                padding: 20px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -154,6 +157,7 @@ class DTSCreatorLauncher(QMainWindow):
             }
         """)
         tools_layout = QVBoxLayout()
+        tools_layout.setSpacing(12)
         tools_group.setLayout(tools_layout)
         
         # DSCS Tools button
@@ -195,7 +199,7 @@ class DTSCreatorLauncher(QMainWindow):
                 border: 2px solid #607D8B;
                 border-radius: 5px;
                 margin-top: 10px;
-                padding: 15px;
+                padding: 20px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -204,6 +208,7 @@ class DTSCreatorLauncher(QMainWindow):
             }
         """)
         docs_layout = QVBoxLayout()
+        docs_layout.setSpacing(12)
         docs_group.setLayout(docs_layout)
         
         # Lua Reference Guide button
@@ -227,7 +232,7 @@ class DTSCreatorLauncher(QMainWindow):
                 border: 2px solid #E91E63;
                 border-radius: 5px;
                 margin-top: 10px;
-                padding: 15px;
+                padding: 20px;
             }
             QGroupBox::title {
                 subcontrol-origin: margin;
@@ -236,6 +241,7 @@ class DTSCreatorLauncher(QMainWindow):
             }
         """)
         game_layout = QVBoxLayout()
+        game_layout.setSpacing(12)
         game_group.setLayout(game_layout)
         
         # Reloaded-II button
@@ -256,8 +262,8 @@ class DTSCreatorLauncher(QMainWindow):
         
         self.log_output = QTextEdit()
         self.log_output.setReadOnly(True)
-        self.log_output.setMaximumHeight(120)
-        self.log_output.setMinimumHeight(100)
+        self.log_output.setMaximumHeight(140)
+        self.log_output.setMinimumHeight(120)
         self.log_output.setStyleSheet("""
             QTextEdit {
                 background-color: #1e1e1e;
@@ -288,8 +294,8 @@ class DTSCreatorLauncher(QMainWindow):
     def create_tool_button(self, text, tooltip, color):
         """Create a styled tool button"""
         btn = QPushButton(text)
-        btn.setMinimumHeight(60)
-        btn.setMaximumHeight(80)
+        btn.setMinimumHeight(65)
+        btn.setMaximumHeight(85)
         btn.setToolTip(tooltip)
         btn.setStyleSheet(f"""
             QPushButton {{
@@ -299,7 +305,7 @@ class DTSCreatorLauncher(QMainWindow):
                 font-weight: bold;
                 border: none;
                 border-radius: 5px;
-                padding: 12px;
+                padding: 15px;
                 text-align: left;
             }}
             QPushButton:hover {{

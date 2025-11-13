@@ -33,7 +33,7 @@ end
 
 function GiveAllDigimonToBank()
   -- Add digimon IDs 1-9999
-  for i = 1, 9999 do
+  for i = 1, 999999 do
     Bank.Digimon.Add(i, 50, 1, 1, 0)
   end
 end
