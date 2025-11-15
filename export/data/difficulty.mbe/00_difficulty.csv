@@ -1,6 +1,0 @@
-int 0,string2 1,string2 2,int 3,int 4,int 5,int 6,int 7,int 8,float 9,float 10,float 11,float 12,float 13,float 14,float 15,int 16,int 17,int 18,bool 19,bool 20,empty 21
-1,"ui_difficulty_name_01","ui_difficulty_explanation_01",0,0,1,1,0,0,82,10,20,1,1,1,1.5,2,1,0,0,0,""
-2,"ui_difficulty_name_02","ui_difficulty_explanation_02",1,0,0,0,1,2,82,10,20,1,1,0.5,1,3,1,0,0,0,""
-3,"ui_difficulty_name_03","ui_difficulty_explanation_03",0,0,0,0,1,2,82,10,17.5,0.83,0.9,0.5,1,5,1,30,0,0,""
-4,"ui_difficulty_name_04","ui_difficulty_explanation_04",0,1,0,0,0,0,82,10,15,0.66,0.8,0.4,0.9,7,1,40,1,0,""
-5,"ui_difficulty_name_05","ui_difficulty_explanation_05",0,1,0,0,0,0,82,10,12.5,0.5,0.7,0.3,0.8,9,0,50,1,1,""

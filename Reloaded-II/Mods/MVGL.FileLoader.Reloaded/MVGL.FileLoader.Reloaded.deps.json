@@ -10,7 +10,7 @@
         "dependencies": {
           "FileEmulationFramework.Lib": "1.1.1",
           "MVGL.FileLoader.Interfaces": "1.3.0",
-          "MVLibraryNET": "1.2.2",
+          "MVLibraryNET": "1.2.3",
           "MVLibraryNET.Definitions": "1.1.1",
           "Reloaded.Memory.SigScan.ReloadedII.Interfaces": "1.2.0",
           "Reloaded.Mod.Interfaces": "2.4.0",
@@ -222,7 +222,7 @@
           }
         }
       },
-      "MVLibraryNET/1.2.2": {
+      "MVLibraryNET/1.2.3": {
         "dependencies": {
           "K4os.Compression.LZ4": "1.3.8",
           "MVLibraryNET.Definitions": "1.1.1",
@@ -230,8 +230,8 @@
         },
         "runtime": {
           "lib/net9.0/MVLibraryNET.dll": {
-            "assemblyVersion": "1.2.2.0",
-            "fileVersion": "1.2.2.0"
+            "assemblyVersion": "1.2.3.0",
+            "fileVersion": "1.2.3.0"
           }
         }
       },
@@ -488,12 +488,12 @@
       "path": "microsoft.extensions.primitives/9.0.4",
       "hashPath": "microsoft.extensions.primitives.9.0.4.nupkg.sha512"
     },
-    "MVLibraryNET/1.2.2": {
+    "MVLibraryNET/1.2.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-l+jJ5O2niVhb6V8QqFVRqPmDKRbX2C1ja5nCv3pINtdTa6ktChKwu7ZTHJfoREIjUWGdLZCVkT1R+wxytR7YaA==",
-      "path": "mvlibrarynet/1.2.2",
-      "hashPath": "mvlibrarynet.1.2.2.nupkg.sha512"
+      "sha512": "sha512-XBRqbG/te98SatoalNhb0o1FW0gPB55Sez8ZCQm42fPIqHJwzXsVYWcEsC1cvQMr5KhLHALFG34q/pvMc0zLRA==",
+      "path": "mvlibrarynet/1.2.3",
+      "hashPath": "mvlibrarynet.1.2.3.nupkg.sha512"
     },
     "MVLibraryNET.Definitions/1.1.1": {
       "type": "package",

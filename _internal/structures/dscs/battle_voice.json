@@ -1,0 +1,15 @@
+{
+  "voice": {
+    "voice_id": "int",
+    "voice_name": "string",
+    "pc_id": "short",
+    "ally_id": "short",
+    "enemy_id": "short",
+    "digimon_id": "short",
+    "unk6": "short",
+    "unk7": "short",
+    "battle_id": "short",
+    "skill_id": "short",
+    "unk10": "int"
+  }
+}

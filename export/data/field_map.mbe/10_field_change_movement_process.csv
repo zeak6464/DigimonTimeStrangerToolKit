@@ -1,6 +1,0 @@
-string3 0,float 1,float 2,int 3,float 4,float 5,float 6,float 7,bool 8,bool 9,bool 10,bool 11,bool 12,string2 13,string2 14,string2 15,float 16,float 17
-"stairs",0,3.9,1,-1,0,-1,0,0,0,0,1,1,"","up_stairs","down_stairs",5,5
-"flight",0,0,0,0,0,-1,0,1,0,0,0,0,"","","",0,0
-"swim",0,3,1,0,0,0,0,1,0,1,0,0,"swim","","",0,0
-"walkslow",0,2,1,-1,0,-1,0,0,1,0,0,0,"","","",0,0
-"normal",0,7,1,-1,0,-1,0,0,0,1,0,0,"player","","",0,0

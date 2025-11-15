@@ -1,0 +1,32 @@
+{
+  "digimon": {
+    "id": "int",
+    "level": "int",
+    "attribute": "int",
+    "type": "int",
+    "guideID_JP": "int",
+    "unk2": "int",
+    "sortType": "int",
+    "unk4": "int",
+    "sortGeneration": "int",
+    "sortName_JP": "int",
+    "unk7": "int",
+    "sortName_US": "int",
+    "unk9": "int",
+    "sortName_ZH": "int",
+    "unk11": "int",
+    "sortName_KO": "int",
+    "unk13": "int",
+    "sortName_DE": "int",
+    "unk15": "int",
+    "isDLC": "int",
+    "flag": "int",
+    "guideID_US": "int",
+    "guideID_EU": "int",
+    "guideID_ASIA": "int",
+    "dlcFlag": "int"
+  },
+  "no_generations": {
+    "id": "int"
+  }
+}

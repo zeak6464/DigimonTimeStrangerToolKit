@@ -1,6 +1,0 @@
-int 0,string2 1,string2 2,empty 3,int 4,bool 5,bool 6,bool 7,bool 8,bool 9,bool 10,bool 11,bool 12,bool 13,bool 14,bool 15,string2 16
-11831,"char_AEGIOMON","*Aegiomon","",1,0,0,0,1,0,0,0,0,0,1,0,""
-11832,"char_AEGIOMON","chr183ba010101","",1,0,0,0,1,0,0,0,0,0,1,0,""
-11841,"char_AEGIOCHUSMON","chr184aa010101","",2,0,0,0,1,0,0,0,0,0,1,0,"fg07_u01 fg07_u02 fg07_m01 fg07_m02 fg07_m03
-fg07_d01 fg07_d02 fg07_d03
-e200"

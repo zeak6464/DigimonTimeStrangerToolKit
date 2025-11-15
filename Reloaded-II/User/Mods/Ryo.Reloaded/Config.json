@@ -1,0 +1,5 @@
+{
+  "LogLevel": "Debug",
+  "DevMode": true,
+  "UnencryptedHcaEnabled": true
+}

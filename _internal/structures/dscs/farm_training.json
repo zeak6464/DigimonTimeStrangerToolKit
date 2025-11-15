@@ -1,0 +1,22 @@
+{
+  "personality": {
+    "id": "int",
+    "HP": "float",
+    "SP": "float",
+    "ATK": "float",
+    "DEF": "float",
+    "INT": "float",
+    "SPD": "float"
+  },
+  "course": {
+    "id": "int",
+    "Duration": "int",
+    "HP": "float",
+    "SP": "float",
+    "ATK": "float",
+    "DEF": "float",
+    "INT": "float",
+    "SPD": "float",
+    "CAM": "int"
+  }
+}

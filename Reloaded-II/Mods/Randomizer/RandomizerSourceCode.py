@@ -315,8 +315,8 @@ class RandomizerThread(QThread):
             enc_rows = self.load_csv(encounter_file)
             for row in enc_rows[1:]:
                 if len(row) > 0 and row[0] == encounter_id:
-                    # Enemy IDs are in columns: 8, 20, 32, 44, 56, 68 (6 slots)
-                    enemy_id_columns = [8, 20, 32, 44, 56, 68]
+                    # Enemy IDs are in columns: 2, 14, 26, 38, 50, 62 (6 slots)
+                    enemy_id_columns = [2, 14, 26, 38, 50, 62]
                     count_columns = [9, 21, 33, 45, 57, 69]  # Enemy counts per slot
                     powers = []
                     
@@ -359,8 +359,8 @@ class RandomizerThread(QThread):
                     boss_encounters.add(encounter_id)
             self.progress.emit(f"🛡️ Protected {len(boss_encounters)} boss/event encounters from randomization")
         
-        # If balancing is enabled, group encounters by power (total stats)
-        encounter_by_power = {}
+        # If balancing is enabled, pre-calculate encounter powers
+        encounter_power_map = {}
         if self.balance_encounters:
             self.progress.emit("⚖️ Analyzing encounter power for balancing...")
             for enc_id in all_encounters:
@@ -368,16 +368,12 @@ class RandomizerThread(QThread):
                 if enc_id not in boss_encounters:
                     power = self.get_encounter_power(enc_id)
                     if power > 0:
-                        # Group by power brackets (every 500 power)
-                        power_bracket = (power // 500) * 500
-                        if power_bracket not in encounter_by_power:
-                            encounter_by_power[power_bracket] = []
-                        encounter_by_power[power_bracket].append(enc_id)
+                        encounter_power_map[enc_id] = power
             
-            if encounter_by_power:
-                min_power = min(encounter_by_power.keys())
-                max_power = max(encounter_by_power.keys())
-                self.progress.emit(f"✅ Grouped encounters by power (range: {min_power}-{max_power})")
+            if encounter_power_map:
+                min_power = min(encounter_power_map.values())
+                max_power = max(encounter_power_map.values())
+                self.progress.emit(f"✅ Calculated power for {len(encounter_power_map)} encounters (range: {min_power}-{max_power})")
             else:
                 self.progress.emit("⚠️ Could not determine power, using full random")
                 self.balance_encounters = False
@@ -418,19 +414,18 @@ class RandomizerThread(QThread):
                         continue
                     
                     # Use ORIGINAL encounter power for balancing
-                    if self.balance_encounters and encounter_by_power:
-                        original_power = self.get_encounter_power(original_encounter)
+                    if self.balance_encounters and encounter_power_map:
+                        original_power = encounter_power_map.get(original_encounter)
                         
-                        if original_power > 0:
+                        if original_power and original_power > 0:
                             # Find encounters within ±30% of ORIGINAL power
                             min_power = int(original_power * 0.7)
                             max_power = int(original_power * 1.3)
                             
-                            candidates = []
-                            
-                            for power_bracket in encounter_by_power:
-                                if min_power <= power_bracket <= max_power:
-                                    candidates.extend(encounter_by_power[power_bracket])
+                            candidates = [
+                                enc_id for enc_id, power in encounter_power_map.items()
+                                if min_power <= power <= max_power
+                            ]
                             
                             if candidates:
                                 rows[i][1] = random.choice(candidates)
@@ -785,8 +780,8 @@ class RandomizerThread(QThread):
         if len(rows) < 2:
             return 0
         
-        # Enemy ID columns: 8, 20, 32, 44, 56, 68 (6 slots)
-        enemy_id_columns = [8, 20, 32, 44, 56, 68]
+        # Enemy ID columns: 2, 14, 26, 38, 50, 62 (6 slots)
+        enemy_id_columns = [2, 14, 26, 38, 50, 62]
         randomized_count = 0
         
         for i in range(1, len(rows)):
@@ -1311,6 +1306,25 @@ class RandomizerThread(QThread):
         
         return randomized_count
     
+    def _update_skill_pointer_column(self, row: List[str], pointer_idx: int, old_skill: int, new_skill: str):
+        """Update auxiliary skill columns when they store actual skill IDs"""
+        if len(row) <= pointer_idx:
+            return
+        
+        pointer_value = row[pointer_idx]
+        if not pointer_value or pointer_value in ('0', '-1', '""'):
+            return
+        
+        value = pointer_value.strip('"')
+        try:
+            pointer_num = int(value)
+        except ValueError:
+            row[pointer_idx] = new_skill
+            return
+        
+        if pointer_num == old_skill or pointer_num > 1000:
+            row[pointer_idx] = new_skill
+    
     def randomize_skill_learnsets(self) -> int:
         """Randomize which skills each Digimon learns"""
         status_file = self.get_file_path("digimon_status.mbe", "000_digimon_status_data.csv", "00_digimon_status_data.csv")
@@ -1331,24 +1345,23 @@ class RandomizerThread(QThread):
         if len(rows) < 2:
             return 0
         
-        # Based on Time Stranger Data File Headers.txt:
-        # Signature skill IDs: 72, 75, 78, 81, 84, 87, 90, 93, 96, 99, 102, 105
-        # Generic skill IDs: 108, 111, 114, 117
-        signature_skill_cols = [72, 75, 78, 81, 84, 87, 90, 93, 96, 99, 102, 105]
-        generic_skill_cols = [108, 111, 114, 117]
-        all_skill_cols = signature_skill_cols + generic_skill_cols
+        # Based on Time Stranger Data File Headers.txt (pairs of ID + slot/level columns)
+        signature_pairs = [(72, 74), (75, 77), (78, 80), (81, 83), (84, 86), (87, 89),
+                           (90, 92), (93, 95), (96, 98), (99, 101), (102, 104), (105, 107)]
+        generic_pairs = [(108, 110), (111, 113), (114, 116), (117, 119)]
+        id_columns = [col for col, _ in signature_pairs + generic_pairs]
         
-        # Collect all skill IDs from these columns
+        # Collect all skill IDs from the ID columns
         all_skills = set()
         for row in rows[1:]:
-            for col in all_skill_cols:
+            for col in id_columns:
                 if len(row) > col and row[col]:
                     try:
                         skill_id = int(row[col])
                         if skill_id > 0:
                             all_skills.add(skill_id)
                     except:
-                        pass
+                        continue
         
         all_skills = list(all_skills)
         if not all_skills:
@@ -1360,13 +1373,40 @@ class RandomizerThread(QThread):
         # Randomize skill IDs in both signature and generic skill columns
         randomized_count = 0
         for i in range(1, len(rows)):
-            if len(rows[i]) > max(all_skill_cols):
-                for col in all_skill_cols:
-                    try:
-                        if int(rows[i][col]) > 0:
-                            rows[i][col] = str(random.choice(all_skills))
-                    except:
-                        pass
+            row = rows[i]
+            row_changed = False
+            
+            # Signature skills
+            for id_col, pointer_col in signature_pairs:
+                if len(row) <= id_col:
+                    continue
+                try:
+                    current_skill = int(row[id_col])
+                except:
+                    continue
+                
+                if current_skill > 0:
+                    new_skill = str(random.choice(all_skills))
+                    row[id_col] = new_skill
+                    self._update_skill_pointer_column(row, pointer_col, current_skill, new_skill)
+                    row_changed = True
+            
+            # Generic skills
+            for id_col, pointer_col in generic_pairs:
+                if len(row) <= id_col:
+                    continue
+                try:
+                    current_skill = int(row[id_col])
+                except:
+                    continue
+                
+                if current_skill > 0:
+                    new_skill = str(random.choice(all_skills))
+                    row[id_col] = new_skill
+                    self._update_skill_pointer_column(row, pointer_col, current_skill, new_skill)
+                    row_changed = True
+            
+            if row_changed:
                 randomized_count += 1
         
         self.save_csv(status_file, rows)

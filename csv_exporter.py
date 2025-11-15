@@ -4,9 +4,10 @@ CSV Exporter for DTS Creator - handles exporting modified Digimon data back to C
 
 import csv
 import os
+import shutil
 import subprocess
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import List, Dict, Any, Tuple
 from data_loader import DigimonData, MBELoader
 
 
@@ -582,8 +583,17 @@ class CSVExporter:
             return False
     
     def export_all_csv_files(self, output_dir: Path) -> bool:
-        """Export all CSV files from data and text directories, preserving structure, including DLC"""
-        import shutil
+        """
+        Export all CSV files from data and text directories, preserving structure, including DLC.
+        
+        This preserves the original format matching backup/data:
+        - Headers use 'int' (not 'int32')
+        - Booleans use '0'/'1' (not 'false'/'true')
+        - Empty strings use '""' (quoted empty strings)
+        
+        Files are copied as-is without transformation.
+        For dsts-loader format, use export_for_dsts_loader() instead.
+        """
         try:
             output_dir.mkdir(parents=True, exist_ok=True)
             
@@ -625,6 +635,190 @@ class CSVExporter:
             import traceback
             traceback.print_exc()
             return False
+
+    def export_for_dsts_loader(self, dsts_loader_dir: Path, dlc_name: str = "addcont_17") -> bool:
+        """
+        Export DLC CSV files into a dsts-loader friendly structure.
+
+        Structure:
+            dsts-loader/
+                addcont_17/data/<*.mbe>/<csv without numeric prefix>
+                addcont_17_text01/text/<*.mbe>/<csv without numeric prefix>
+        """
+        try:
+            workspace_root = self.data_path.parent
+            data_source = workspace_root / "DLC" / f"{dlc_name}.dx11" / "data" / "mbe"
+            text_source = workspace_root / "DLC" / f"{dlc_name}_text01.dx11" / "text" / "mbe"
+
+            if not data_source.exists():
+                print(f"[dsts-loader export] DLC data source not found: {data_source}")
+                return False
+
+            dest_data_root, dest_text_root = self._resolve_dsts_loader_targets(dsts_loader_dir, dlc_name)
+
+            self._copy_mbe_tree_to_dsts(data_source, dest_data_root)
+
+            if text_source.exists():
+                self._copy_mbe_tree_to_dsts(text_source, dest_text_root)
+            else:
+                print(f"[dsts-loader export] DLC text source not found: {text_source}")
+
+            print(f"[dsts-loader export] Finished writing CSV files to {dsts_loader_dir}")
+            return True
+        except Exception as e:
+            print(f"Error exporting to dsts-loader structure: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+
+    def _copy_mbe_tree_to_dsts(self, source_root: Path, dest_root: Path):
+        """Copy .mbe folders from source to destination, stripping numeric prefixes and transforming CSV format."""
+        if dest_root.exists():
+            shutil.rmtree(dest_root)
+        dest_root.mkdir(parents=True, exist_ok=True)
+
+        for folder in source_root.iterdir():
+            if not folder.is_dir() or folder.suffix != ".mbe":
+                continue
+
+            dest_folder = dest_root / folder.name
+            dest_folder.mkdir(parents=True, exist_ok=True)
+
+            for file in folder.iterdir():
+                if not file.is_file():
+                    continue
+                dest_name = self._strip_numeric_prefix(file.name) if file.suffix.lower() == ".csv" else file.name
+                dest_path = dest_folder / dest_name
+                
+                if file.suffix.lower() == ".csv":
+                    # Transform CSV format for dsts-loader
+                    self._transform_csv_for_dsts_loader(file, dest_path)
+                else:
+                    # Copy non-CSV files as-is
+                    shutil.copy2(file, dest_path)
+
+    @staticmethod
+    def _strip_numeric_prefix(filename: str) -> str:
+        """Remove leading NN_ prefix from filenames to match dsts-loader expectations."""
+        if "_" in filename:
+            prefix, rest = filename.split("_", 1)
+            if prefix.isdigit():
+                return rest
+        return filename
+    
+    def _transform_csv_for_dsts_loader(self, source_file: Path, dest_file: Path):
+        """
+        Transform CSV file format for dsts-loader compatibility:
+        - int -> int32 in headers
+        - 0/1 -> false/true for boolean values
+        - "" -> empty cell (remove quotes)
+        - String columns: preserve/add quotes
+        """
+        try:
+            # Read raw lines to preserve original format
+            with open(source_file, 'r', encoding='utf-8') as f_in:
+                raw_lines = f_in.readlines()
+            
+            if not raw_lines:
+                # Empty file, just copy
+                import shutil
+                shutil.copy2(source_file, dest_file)
+                return
+            
+            # Parse header to get column types
+            header_line = raw_lines[0].strip()
+            header_cells = header_line.split(',')
+            header_types = [cell.strip() for cell in header_cells]
+            
+            # Transform header: int -> int32
+            transformed_header = [cell.replace('int ', 'int32 ') if cell.startswith('int ') else cell for cell in header_types]
+            
+            # Write transformed file
+            with open(dest_file, 'w', encoding='utf-8', newline='') as f_out:
+                # Write header
+                f_out.write(','.join(transformed_header) + '\n')
+                
+                # Transform data rows
+                for line in raw_lines[1:]:
+                    if not line.strip():
+                        # Empty line
+                        f_out.write(line)
+                        continue
+                    
+                    # Parse row using csv.reader to handle quoted values correctly
+                    row = next(csv.reader([line.strip()]))
+                    
+                    transformed_cells = []
+                    for col_idx, cell in enumerate(row):
+                        if col_idx < len(header_types):
+                            col_type = header_types[col_idx]
+                            
+                            # Check if this is a boolean column
+                            if 'bool' in col_type.lower():
+                                # Boolean column: 0 -> false, 1 -> true
+                                if cell == '0':
+                                    transformed_cells.append('false')
+                                elif cell == '1':
+                                    transformed_cells.append('true')
+                                else:
+                                    transformed_cells.append(cell)
+                            elif 'string' in col_type.lower():
+                                # String column: always quote (including empty)
+                                if cell == '' or cell == '""':
+                                    # Empty string -> quoted empty string
+                                    transformed_cells.append('""')
+                                else:
+                                    # Add quotes for string columns
+                                    transformed_cells.append(f'"{cell}"')
+                            elif cell == '""' or cell == '':
+                                # Empty string -> quoted empty string
+                                transformed_cells.append('""')
+                            else:
+                                transformed_cells.append(cell)
+                        else:
+                            transformed_cells.append(cell)
+                    
+                    # Write row manually to preserve quotes
+                    f_out.write(','.join(transformed_cells) + '\n')
+        except Exception as e:
+            print(f"Error transforming CSV {source_file}: {e}")
+            import traceback
+            traceback.print_exc()
+            # Fallback: just copy the file
+            import shutil
+            shutil.copy2(source_file, dest_file)
+
+    def _resolve_dsts_loader_targets(self, selected_path: Path, dlc_name: str) -> Tuple[Path, Path]:
+        """
+        Determine where to place data/text folders based on the selected directory.
+
+        Supports selecting the dsts-loader root, addcont_17 directories, or an empty folder.
+        """
+        selected = selected_path.resolve()
+        dlc_folder = dlc_name.lower()
+        text_folder = f"{dlc_name}_text01".lower()
+        name = selected.name.lower()
+
+        if name == "dsts-loader":
+            data_root = selected / dlc_name / "data"
+            text_root = selected / f"{dlc_name}_text01" / "text"
+        elif name == dlc_folder:
+            data_root = selected / "data"
+            text_root = selected.parent / f"{dlc_name}_text01" / "text"
+        elif name == text_folder:
+            data_root = selected.parent / dlc_name / "data"
+            text_root = selected / "text"
+        elif name == "data" and selected.parent.name.lower() == dlc_folder:
+            data_root = selected
+            text_root = selected.parents[1] / f"{dlc_name}_text01" / "text"
+        elif name == "text" and selected.parent.name.lower() == text_folder:
+            data_root = selected.parents[1] / dlc_name / "data"
+            text_root = selected
+        else:
+            data_root = selected / dlc_name / "data"
+            text_root = selected / f"{dlc_name}_text01" / "text"
+
+        return data_root, text_root
 
 
 if __name__ == "__main__":

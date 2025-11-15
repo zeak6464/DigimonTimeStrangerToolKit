@@ -1,1 +1,0 @@
-gGimText = "field_text"

@@ -4645,12 +4645,62 @@ class DigimonEditor(QMainWindow):
         if directory:
             from pathlib import Path
             output_path = Path(directory)
+            use_dsts_format = self._is_dsts_loader_directory(output_path)
             
-            if self.exporter.export_all_csv_files(output_path):
-                QMessageBox.information(self, "Success", 
-                    f"Successfully exported all CSV files to {directory}")
+            if not use_dsts_format:
+                format_dialog = QMessageBox(self)
+                format_dialog.setWindowTitle("Select Export Format")
+                format_dialog.setText(
+                    "The selected folder doesn't look like a dsts-loader mod.\n"
+                    "How would you like to export the CSV files?"
+                )
+                dsts_button = format_dialog.addButton("dsts-loader layout", QMessageBox.ButtonRole.AcceptRole)
+                standard_button = format_dialog.addButton("Standard layout", QMessageBox.ButtonRole.DestructiveRole)
+                cancel_button = format_dialog.addButton(QMessageBox.StandardButton.Cancel)
+                format_dialog.setDefaultButton(standard_button)
+                format_dialog.exec()
+                
+                clicked = format_dialog.clickedButton()
+                if clicked == cancel_button:
+                    return
+                if clicked == dsts_button:
+                    use_dsts_format = True
+            
+            if use_dsts_format:
+                if self.exporter.export_for_dsts_loader(output_path):
+                    QMessageBox.information(
+                        self,
+                        "Success",
+                        f"Exported DLC CSV files for dsts-loader to {directory}"
+                    )
+                else:
+                    QMessageBox.warning(
+                        self,
+                        "Error",
+                        "Failed to export CSV files for dsts-loader"
+                    )
+            elif self.exporter.export_all_csv_files(output_path):
+                QMessageBox.information(
+                    self,
+                    "Success",
+                    f"Successfully exported all CSV files to {directory}"
+                )
             else:
                 QMessageBox.warning(self, "Error", "Failed to export CSV files")
+
+    def _is_dsts_loader_directory(self, path: Path) -> bool:
+        """Check if the selected export path appears to be a dsts-loader directory."""
+        try:
+            lowered_parts = [part.lower() for part in path.parts]
+            if "dsts-loader" in lowered_parts:
+                return True
+            if path.name.lower() in {"addcont_17", "addcont_17_text01", "data", "text"}:
+                parent_parts = [part.lower() for part in path.parent.parts]
+                if "dsts-loader" in parent_parts:
+                    return True
+            return (path / "addcont_17").exists() and (path / "addcont_17_text01").exists()
+        except Exception:
+            return False
     
     def repack_mbe_files(self):
         """Repack exported CSV folders to .mbe files"""

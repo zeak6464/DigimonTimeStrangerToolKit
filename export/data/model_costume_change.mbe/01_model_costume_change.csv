@@ -1,9 +1,0 @@
-string3 0,string3 1,int 2,string3 3,string3 4,string3 5,string3 6,empty 7
-"*MalePlayer_0","*MalePlayer",0,"pc001aa010101","pc001ca010101","","pc001ca010101",""
-"*MalePlayer_2","*MalePlayer",2,"pc001ea020101","pc001fa020101","","pc001fa020101",""
-"*FemalePlayer_0","*FemalePlayer",0,"pc002aa010101","pc002ca010101","","pc002ca010101",""
-"*FemalePlayer_2","*FemalePlayer",2,"pc002ea020101","pc002fa020101","","pc002fa020101",""
-"*Heroine_0","*Heroine",0,"npc001aa010101","npc001ca010101","","npc001ca010101",""
-"*FatherOfTheHeroine_0","*FatherOfTheHeroine",0,"npc002aa010101","npc002ca010101","","npc002ca010101",""
-"*Hiroko_0","*Hiroko",0,"npc003aa010101","npc003ca010101","","npc003ca010101",""
-"*Aegiomon_0","*Aegiomon",0,"chr183aa010101","chr183aa010101","chr183ba010101","chr183ca010101",""

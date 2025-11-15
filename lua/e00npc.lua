@@ -1,2 +1,0 @@
-function OnCheckNPC(npc)
-end
