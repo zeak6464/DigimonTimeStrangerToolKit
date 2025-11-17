@@ -6,17 +6,17 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "Reloaded-II/1.29.2": {
+      "Reloaded-II/1.29.3": {
         "dependencies": {
-          "DotNet.ReproducibleBuilds": "1.2.25",
+          "DotNet.ReproducibleBuilds": "1.2.39",
           "HandyControl": "3.2.0-reloaded-1.1.0",
-          "HandyControl.Lang.en": "3.3.0",
+          "HandyControl.Lang.en": "3.5.1",
           "Humanizer.Core": "2.14.1",
           "Markdig.Wpf": "0.5.0.1",
           "Ninject": "3.3.6",
           "PropertyChanged.Fody": "4.1.0",
           "Reloaded.Input": "2.2.0",
-          "Reloaded.Memory": "9.4.2",
+          "Reloaded.Memory": "9.4.3",
           "Reloaded.Mod.Launcher.Lib": "1.0.0",
           "Reloaded.Mod.Loader.IO": "2.8.0",
           "Reloaded.Mod.Loader.Server": "3.0.4",
@@ -73,11 +73,11 @@
           }
         }
       },
-      "AnyOf/0.5.0": {
+      "AnyOf/0.5.0.1": {
         "runtime": {
           "lib/net7.0/AnyOf.dll": {
-            "assemblyVersion": "0.5.0.0",
-            "fileVersion": "0.5.0.0"
+            "assemblyVersion": "0.5.0.1",
+            "fileVersion": "0.5.0.1"
           }
         }
       },
@@ -138,7 +138,7 @@
           }
         }
       },
-      "DotNet.ReproducibleBuilds/1.2.25": {},
+      "DotNet.ReproducibleBuilds/1.2.39": {},
       "Fody/6.6.4": {},
       "gong-wpf-dragdrop/3.2.1": {
         "runtime": {
@@ -156,18 +156,18 @@
           }
         }
       },
-      "HandyControl.Lang.en/3.3.0": {
+      "HandyControl.Lang.en/3.5.1": {
         "resources": {
-          "lib/net5.0/en/HandyControl.resources.dll": {
+          "lib/net8.0/en/HandyControl.resources.dll": {
             "locale": "en"
           }
         }
       },
-      "HtmlAgilityPack/1.11.71": {
+      "HtmlAgilityPack/1.12.4": {
         "runtime": {
-          "lib/netstandard2.0/HtmlAgilityPack.dll": {
-            "assemblyVersion": "1.11.71.0",
-            "fileVersion": "1.11.71.0"
+          "lib/net7.0/HtmlAgilityPack.dll": {
+            "assemblyVersion": "1.12.4.0",
+            "fileVersion": "1.12.4.0"
           }
         }
       },
@@ -243,23 +243,23 @@
           }
         }
       },
-      "MessagePack/2.4.35": {
+      "MessagePack/2.5.198": {
         "dependencies": {
-          "MessagePack.Annotations": "2.4.35",
-          "Microsoft.NET.StringTools": "1.0.0"
+          "MessagePack.Annotations": "2.5.198",
+          "Microsoft.NET.StringTools": "17.6.3"
         },
         "runtime": {
           "lib/net6.0/MessagePack.dll": {
-            "assemblyVersion": "2.4.0.0",
-            "fileVersion": "2.4.35.46570"
+            "assemblyVersion": "2.5.0.0",
+            "fileVersion": "2.5.198.29065"
           }
         }
       },
-      "MessagePack.Annotations/2.4.35": {
+      "MessagePack.Annotations/2.5.198": {
         "runtime": {
           "lib/netstandard2.0/MessagePack.Annotations.dll": {
-            "assemblyVersion": "2.4.0.0",
-            "fileVersion": "2.4.35.46570"
+            "assemblyVersion": "2.5.0.0",
+            "fileVersion": "2.5.198.29065"
           }
         }
       },
@@ -365,16 +365,12 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/9.0.3": {},
-      "Microsoft.NET.StringTools/1.0.0": {
-        "dependencies": {
-          "System.Memory": "4.5.4",
-          "System.Runtime.CompilerServices.Unsafe": "5.0.0"
-        },
+      "Microsoft.NET.ILLink.Tasks/9.0.11": {},
+      "Microsoft.NET.StringTools/17.6.3": {
         "runtime": {
-          "lib/netstandard2.0/Microsoft.NET.StringTools.dll": {
+          "lib/net7.0/Microsoft.NET.StringTools.dll": {
             "assemblyVersion": "1.0.0.0",
-            "fileVersion": "1.0.0.26302"
+            "fileVersion": "17.6.3.22601"
           }
         }
       },
@@ -609,22 +605,22 @@
           }
         }
       },
-      "Polly/8.4.2": {
+      "Polly/8.6.4": {
         "dependencies": {
-          "Polly.Core": "8.4.2"
+          "Polly.Core": "8.6.4"
         },
         "runtime": {
           "lib/net6.0/Polly.dll": {
             "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.4.2.3950"
+            "fileVersion": "8.6.4.5033"
           }
         }
       },
-      "Polly.Core/8.4.2": {
+      "Polly.Core/8.6.4": {
         "runtime": {
           "lib/net8.0/Polly.Core.dll": {
             "assemblyVersion": "8.0.0.0",
-            "fileVersion": "8.4.2.3950"
+            "fileVersion": "8.6.4.5033"
           }
         }
       },
@@ -669,23 +665,23 @@
           }
         }
       },
-      "Reloaded.Memory/9.4.2": {
+      "Reloaded.Memory/9.4.3": {
         "runtime": {
           "lib/net8.0/Reloaded.Memory.dll": {
-            "assemblyVersion": "9.4.2.0",
-            "fileVersion": "9.4.2.0"
+            "assemblyVersion": "9.4.3.0",
+            "fileVersion": "9.4.3.0"
           }
         }
       },
-      "Reloaded.Messaging/2.0.1": {
+      "Reloaded.Messaging/2.0.2": {
         "dependencies": {
           "Microsoft.IO.RecyclableMemoryStream": "2.2.0",
           "Reloaded.Messaging.Interfaces": "2.0.0"
         },
         "runtime": {
           "lib/net5.0/Reloaded.Messaging.dll": {
-            "assemblyVersion": "2.0.1.0",
-            "fileVersion": "2.0.1.0"
+            "assemblyVersion": "2.0.2.0",
+            "fileVersion": "2.0.2.0"
           }
         }
       },
@@ -700,15 +696,15 @@
           }
         }
       },
-      "Reloaded.Messaging.Host.LiteNetLib/2.0.0": {
+      "Reloaded.Messaging.Host.LiteNetLib/2.0.2": {
         "dependencies": {
           "LiteNetLib": "1.3.1",
           "Reloaded.Messaging.Interfaces": "2.0.0"
         },
         "runtime": {
           "lib/net5.0/Reloaded.Messaging.Host.LiteNetLib.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.0.0"
+            "assemblyVersion": "2.0.2.0",
+            "fileVersion": "2.0.2.0"
           }
         }
       },
@@ -720,15 +716,15 @@
           }
         }
       },
-      "Reloaded.Messaging.Serializer.MessagePack/2.0.0": {
+      "Reloaded.Messaging.Serializer.MessagePack/2.0.1": {
         "dependencies": {
-          "MessagePack": "2.4.35",
+          "MessagePack": "2.5.198",
           "Reloaded.Messaging.Interfaces": "2.0.0"
         },
         "runtime": {
           "lib/net5.0/Reloaded.Messaging.Serializer.MessagePack.dll": {
-            "assemblyVersion": "2.0.0.0",
-            "fileVersion": "2.0.0.0"
+            "assemblyVersion": "2.0.1.0",
+            "fileVersion": "2.0.1.0"
           }
         }
       },
@@ -775,14 +771,14 @@
           }
         }
       },
-      "ReverseMarkdown/4.6.0": {
+      "ReverseMarkdown/4.7.1": {
         "dependencies": {
-          "HtmlAgilityPack": "1.11.71"
+          "HtmlAgilityPack": "1.12.4"
         },
         "runtime": {
-          "lib/net8.0/ReverseMarkdown.dll": {
-            "assemblyVersion": "4.6.0.0",
-            "fileVersion": "4.6.0.0"
+          "lib/net9.0/ReverseMarkdown.dll": {
+            "assemblyVersion": "4.7.1.0",
+            "fileVersion": "4.7.1.0"
           }
         }
       },
@@ -838,7 +834,7 @@
         "dependencies": {
           "Sewer56.VCDiff": "3.4.0",
           "Standart.Hash.xxHash": "3.1.0",
-          "System.Text.Json": "5.0.2"
+          "System.Text.Json": "10.0.0"
         },
         "runtime": {
           "lib/net6.0/Sewer56.DeltaPatchGenerator.Lib.dll": {
@@ -1027,7 +1023,7 @@
       },
       "SQLitePCLRaw.core/2.0.7": {
         "dependencies": {
-          "System.Memory": "4.5.4"
+          "System.Memory": "4.5.3"
         },
         "runtime": {
           "lib/netstandard2.0/SQLitePCLRaw.core.dll": {
@@ -1159,7 +1155,14 @@
           "System.Threading": "4.3.0"
         }
       },
-      "System.CodeDom/6.0.0": {},
+      "System.CodeDom/10.0.0": {
+        "runtime": {
+          "lib/net9.0/System.CodeDom.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
       "System.Collections/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
@@ -1244,7 +1247,14 @@
           "System.Threading": "4.3.0"
         }
       },
-      "System.Formats.Asn1/9.0.0": {},
+      "System.Formats.Asn1/10.0.0": {
+        "runtime": {
+          "lib/net9.0/System.Formats.Asn1.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
       "System.Globalization/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
@@ -1328,6 +1338,14 @@
           "System.Runtime": "4.3.1"
         }
       },
+      "System.IO.Pipelines/10.0.0": {
+        "runtime": {
+          "lib/net9.0/System.IO.Pipelines.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
       "System.Linq/4.3.0": {
         "dependencies": {
           "System.Collections": "4.3.0",
@@ -1358,26 +1376,26 @@
           "System.Threading": "4.3.0"
         }
       },
-      "System.Management/6.0.0": {
+      "System.Management/10.0.0": {
         "dependencies": {
-          "System.CodeDom": "6.0.0"
+          "System.CodeDom": "10.0.0"
         },
         "runtime": {
-          "lib/net6.0/System.Management.dll": {
-            "assemblyVersion": "4.0.0.0",
-            "fileVersion": "6.0.21.52210"
+          "lib/net9.0/System.Management.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
           }
         },
         "runtimeTargets": {
-          "runtimes/win/lib/net6.0/System.Management.dll": {
+          "runtimes/win/lib/net9.0/System.Management.dll": {
             "rid": "win",
             "assetType": "runtime",
-            "assemblyVersion": "4.0.0.0",
-            "fileVersion": "6.0.21.52210"
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
           }
         }
       },
-      "System.Memory/4.5.4": {},
+      "System.Memory/4.5.3": {},
       "System.Net.Http/4.3.4": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
@@ -1512,7 +1530,6 @@
           "Microsoft.NETCore.Targets": "1.1.3"
         }
       },
-      "System.Runtime.CompilerServices.Unsafe/5.0.0": {},
       "System.Runtime.Extensions/4.3.0": {
         "dependencies": {
           "Microsoft.NETCore.Platforms": "3.1.0",
@@ -1647,7 +1664,7 @@
       },
       "System.Security.Cryptography.Pkcs/6.0.4": {
         "dependencies": {
-          "System.Formats.Asn1": "9.0.0"
+          "System.Formats.Asn1": "10.0.0"
         }
       },
       "System.Security.Cryptography.Primitives/4.3.0": {
@@ -1712,7 +1729,40 @@
           "System.Text.Encoding": "4.3.0"
         }
       },
-      "System.Text.Json/5.0.2": {},
+      "System.Text.Encodings.Web/10.0.0": {
+        "runtime": {
+          "lib/net9.0/System.Text.Encodings.Web.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        },
+        "runtimeTargets": {
+          "runtimes/browser/lib/net8.0/System.Text.Encodings.Web.dll": {
+            "rid": "browser",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          },
+          "runtimes/win/lib/net9.0/System.Text.Encodings.Web.dll": {
+            "rid": "win",
+            "assetType": "runtime",
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
+      "System.Text.Json/10.0.0": {
+        "dependencies": {
+          "System.IO.Pipelines": "10.0.0",
+          "System.Text.Encodings.Web": "10.0.0"
+        },
+        "runtime": {
+          "lib/net9.0/System.Text.Json.dll": {
+            "assemblyVersion": "10.0.0.0",
+            "fileVersion": "10.0.25.52411"
+          }
+        }
+      },
       "System.Text.RegularExpressions/4.3.1": {
         "dependencies": {
           "System.Runtime": "4.3.1"
@@ -1824,7 +1874,8 @@
       "Reloaded.Mod.Installer.DependencyInstaller/1.0.0": {
         "dependencies": {
           "NetCoreInstallChecker": "3.0.4",
-          "RedistributableChecker": "0.2.3"
+          "RedistributableChecker": "0.2.3",
+          "System.Text.Json": "10.0.0"
         },
         "runtime": {
           "Reloaded.Mod.Installer.DependencyInstaller.dll": {
@@ -1852,7 +1903,7 @@
           "Reloaded.Mod.Loader.IO": "2.8.0",
           "Reloaded.Mod.Loader.Server": "3.0.4",
           "Reloaded.Mod.Loader.Update": "2.2.2",
-          "System.Management": "6.0.0",
+          "System.Management": "10.0.0",
           "dll_syringe.Net.Sys": "0.16.0"
         },
         "runtime": {
@@ -1875,7 +1926,7 @@
       },
       "Reloaded.Mod.Loader.IO/2.8.0": {
         "dependencies": {
-          "Reloaded.Memory": "9.4.2",
+          "Reloaded.Memory": "9.4.3",
           "Reloaded.Mod.Interfaces": "2.4.0"
         },
         "runtime": {
@@ -1887,14 +1938,14 @@
       },
       "Reloaded.Mod.Loader.Server/3.0.4": {
         "dependencies": {
-          "AnyOf": "0.5.0",
+          "AnyOf": "0.5.0.1",
           "LiteNetLib": "1.3.1",
           "Mapster": "7.3.0",
-          "Microsoft.NET.ILLink.Tasks": "9.0.3",
-          "Reloaded.Messaging": "2.0.1",
+          "Microsoft.NET.ILLink.Tasks": "9.0.11",
+          "Reloaded.Messaging": "2.0.2",
           "Reloaded.Messaging.Extras.Runtime": "2.0.0",
-          "Reloaded.Messaging.Host.LiteNetLib": "2.0.0",
-          "Reloaded.Messaging.Serializer.MessagePack": "2.0.0",
+          "Reloaded.Messaging.Host.LiteNetLib": "2.0.2",
+          "Reloaded.Messaging.Serializer.MessagePack": "2.0.1",
           "Reloaded.Mod.Interfaces": "2.4.0"
         },
         "runtime": {
@@ -1907,20 +1958,20 @@
       "Reloaded.Mod.Loader.Update/2.2.2": {
         "dependencies": {
           "DeepCloner": "0.10.4",
-          "HtmlAgilityPack": "1.11.71",
+          "HtmlAgilityPack": "1.12.4",
           "Mapster": "7.3.0",
           "NetCoreInstallChecker": "3.0.4",
           "NuGet.Packaging": "6.11.0",
           "NuGet.Protocol": "6.7.1",
-          "Polly": "8.4.2",
+          "Polly": "8.6.4",
           "RedistributableChecker": "0.2.3",
           "Reloaded.Mod.Loader.IO": "2.8.0",
           "Reloaded.Mod.Loader.Update.Packaging": "1.1.1",
-          "ReverseMarkdown": "4.6.0",
+          "ReverseMarkdown": "4.7.1",
           "Sewer56.Update": "4.0.2",
           "Sewer56.Update.Misc": "1.1.0",
           "Sewer56.Update.Resolvers.GitHub": "1.5.2",
-          "System.Formats.Asn1": "9.0.0",
+          "System.Formats.Asn1": "10.0.0",
           "System.Net.Http": "4.3.4",
           "System.Text.RegularExpressions": "4.3.1"
         },
@@ -1938,7 +1989,8 @@
           "Sewer56.Update.Extractors.SevenZipSharp": "1.1.4",
           "Sewer56.Update.Packaging": "3.0.1",
           "Sewer56.Update.Resolvers.GameBanana": "1.4.2",
-          "Sewer56.Update.Resolvers.NuGet": "1.4.1"
+          "Sewer56.Update.Resolvers.NuGet": "1.4.1",
+          "System.Formats.Asn1": "10.0.0"
         },
         "runtime": {
           "Reloaded.Mod.Loader.Update.Packaging.dll": {
@@ -1950,7 +2002,7 @@
     }
   },
   "libraries": {
-    "Reloaded-II/1.29.2": {
+    "Reloaded-II/1.29.3": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -1976,12 +2028,12 @@
       "path": "akavache.sqlite3/8.1.1",
       "hashPath": "akavache.sqlite3.8.1.1.nupkg.sha512"
     },
-    "AnyOf/0.5.0": {
+    "AnyOf/0.5.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-d/Z2QxEg8rVNEkDp+Z5TfuMz33AxG8RVPf0i6IA8pyCMMmPN0184fa56wzdti6aKh+PfB/PbfwTkfpgccbEvuw==",
-      "path": "anyof/0.5.0",
-      "hashPath": "anyof.0.5.0.nupkg.sha512"
+      "sha512": "sha512-WDQw5Qos3mhCumSCgKD70TM1dmqBAuJFGv1cFtNTwTaDLZR7kGy33M5C+L0vZV/bNRNwyi5ABvRGPWHL17rkNw==",
+      "path": "anyof/0.5.0.1",
+      "hashPath": "anyof.0.5.0.1.nupkg.sha512"
     },
     "CacheCow.Client/2.11.1": {
       "type": "package",
@@ -2011,12 +2063,12 @@
       "path": "dll_syringe.net.sys/0.16.0",
       "hashPath": "dll_syringe.net.sys.0.16.0.nupkg.sha512"
     },
-    "DotNet.ReproducibleBuilds/1.2.25": {
+    "DotNet.ReproducibleBuilds/1.2.39": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg==",
-      "path": "dotnet.reproduciblebuilds/1.2.25",
-      "hashPath": "dotnet.reproduciblebuilds.1.2.25.nupkg.sha512"
+      "sha512": "sha512-fcFN01tDTIQqDuTwr1jUQK/geofiwjG5DycJQOnC72i1SsLAk1ELe+apBOuZ11UMQG8YKFZG1FgvjZPbqHyatg==",
+      "path": "dotnet.reproduciblebuilds/1.2.39",
+      "hashPath": "dotnet.reproduciblebuilds.1.2.39.nupkg.sha512"
     },
     "Fody/6.6.4": {
       "type": "package",
@@ -2039,19 +2091,19 @@
       "path": "handycontrol/3.2.0-reloaded-1.1.0",
       "hashPath": "handycontrol.3.2.0-reloaded-1.1.0.nupkg.sha512"
     },
-    "HandyControl.Lang.en/3.3.0": {
+    "HandyControl.Lang.en/3.5.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-hSv3lQMB3mlTW5qVVSaSUXC8QNu1jaVctFMzTMYIhBHgtsU2gHnwZpIGn8+iMZRXn1Oo/WFKVJN8SvgZzFsXyQ==",
-      "path": "handycontrol.lang.en/3.3.0",
-      "hashPath": "handycontrol.lang.en.3.3.0.nupkg.sha512"
+      "sha512": "sha512-7Tccm+99gQDqBRzLW4jEQH070usu7KuVIU1hcwd6TIyTwsKsIPBGGUZrrvc694s+7vhpCGmxvlcUt8dU5UQs/A==",
+      "path": "handycontrol.lang.en/3.5.1",
+      "hashPath": "handycontrol.lang.en.3.5.1.nupkg.sha512"
     },
-    "HtmlAgilityPack/1.11.71": {
+    "HtmlAgilityPack/1.12.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-HlEThQBnob4/29DIiyrPSYlGXXSZUtOH7571PRev+yu8FW8n5pdxqHyun+PMm17cp3ovCrxFhXedC+1HUSdRMA==",
-      "path": "htmlagilitypack/1.11.71",
-      "hashPath": "htmlagilitypack.1.11.71.nupkg.sha512"
+      "sha512": "sha512-ljqvBabvFwKoLniuoQKO8b5bJfJweKLs4fUNS/V5dsvpo0A8MlJqxxn9XVmP2DaskbUXty6IYaWAi1SArGIMeQ==",
+      "path": "htmlagilitypack/1.12.4",
+      "hashPath": "htmlagilitypack.1.12.4.nupkg.sha512"
     },
     "Humanizer.Core/2.14.1": {
       "type": "package",
@@ -2109,19 +2161,19 @@
       "path": "mcmaster.netcore.plugins/2.0.0-beta.130",
       "hashPath": "mcmaster.netcore.plugins.2.0.0-beta.130.nupkg.sha512"
     },
-    "MessagePack/2.4.35": {
+    "MessagePack/2.5.198": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-sWyuByDues5fXghrCXXt5BSiqsQSjFWC+srBU97iwWWCV3JhiI3HoML5/Uj4zK9yD8pnAk2oobuuvwYfHhUruA==",
-      "path": "messagepack/2.4.35",
-      "hashPath": "messagepack.2.4.35.nupkg.sha512"
+      "sha512": "sha512-ul2rGISMatBL4AbXTteEml4xtOsKF8yClEkS0rnrMyFs6Cu3KTbdZwOXrcbEUjGFIDiCwHuYIGyS55FeiaYzBw==",
+      "path": "messagepack/2.5.198",
+      "hashPath": "messagepack.2.5.198.nupkg.sha512"
     },
-    "MessagePack.Annotations/2.4.35": {
+    "MessagePack.Annotations/2.5.198": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-6wfQ3Law5TMPeMm/HpYpMLal5HzEj70QFmbXWzHJjRsxF+nEol8RP3mqGUIctN9pItdtKCpbrpP8iEpSCkORCA==",
-      "path": "messagepack.annotations/2.4.35",
-      "hashPath": "messagepack.annotations.2.4.35.nupkg.sha512"
+      "sha512": "sha512-3U9OvqQGTra+Mz1k1zfNAScSdNHobnqtQ51qdMGUZppkNDZJl0X/igq6Qz5zDBLEZoYqZrFtZwFx6wBJHHI8BA==",
+      "path": "messagepack.annotations/2.5.198",
+      "hashPath": "messagepack.annotations.2.5.198.nupkg.sha512"
     },
     "Microsoft.AspNet.WebApi.Client/5.2.5": {
       "type": "package",
@@ -2186,19 +2238,19 @@
       "path": "microsoft.io.recyclablememorystream/2.2.0",
       "hashPath": "microsoft.io.recyclablememorystream.2.2.0.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/9.0.3": {
+    "Microsoft.NET.ILLink.Tasks/9.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-1rqGTfubVg0qj2PsK6esyq3PIxtYJYrN3LsYUV9RrvH3anmt3fT3ozYdAZZH4U8JU/pt5pPIUk8NBSu26wtekA==",
-      "path": "microsoft.net.illink.tasks/9.0.3",
-      "hashPath": "microsoft.net.illink.tasks.9.0.3.nupkg.sha512"
+      "sha512": "sha512-vvB9rtDmWaXgYkViT00KORBVmA3pcYsHlgd9vOPqL9sf5bKy3rvLMF1+sI1uUfVj28S3itirHlHmX5/kcpZKNw==",
+      "path": "microsoft.net.illink.tasks/9.0.11",
+      "hashPath": "microsoft.net.illink.tasks.9.0.11.nupkg.sha512"
     },
-    "Microsoft.NET.StringTools/1.0.0": {
+    "Microsoft.NET.StringTools/17.6.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZYVcoDM0LnSyT5nWoRGfShYdOecCw2sOXWwP6j1Z0u48Xq3+BVvZ+EiPCX9/8Gz439giW+O1H1kWF9Eb/w6rVg==",
-      "path": "microsoft.net.stringtools/1.0.0",
-      "hashPath": "microsoft.net.stringtools.1.0.0.nupkg.sha512"
+      "sha512": "sha512-N0ZIanl1QCgvUumEL1laasU0a7sOE5ZwLZVTn0pAePnfhq8P7SvTjF8Axq+CnavuQkmdQpGNXQ1efZtu5kDFbA==",
+      "path": "microsoft.net.stringtools/17.6.3",
+      "hashPath": "microsoft.net.stringtools.17.6.3.nupkg.sha512"
     },
     "Microsoft.NETCore.Platforms/3.1.0": {
       "type": "package",
@@ -2333,19 +2385,19 @@
       "path": "photosauce.nativecodecs.libjxl/0.6.1-ci222723",
       "hashPath": "photosauce.nativecodecs.libjxl.0.6.1-ci222723.nupkg.sha512"
     },
-    "Polly/8.4.2": {
+    "Polly/8.6.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-/qfe/eoHQ9tJOGVmJ/y+fUvK5nHDrS0EZ/DguwYXGN8gnDwlUWdmPqUqoj0PJvg8awELac+9YL7W0GOd1vTORg==",
-      "path": "polly/8.4.2",
-      "hashPath": "polly.8.4.2.nupkg.sha512"
+      "sha512": "sha512-uuBsDoBw0oYrMe3uTWRjkT2sIkKh+ZZnnDrLb4Z+QANfeA4+7FJacx6E8CY5GAxXRoSgFrvUADEAQ7DPF6fGiw==",
+      "path": "polly/8.6.4",
+      "hashPath": "polly.8.6.4.nupkg.sha512"
     },
-    "Polly.Core/8.4.2": {
+    "Polly.Core/8.6.4": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-BpE2I6HBYYA5tF0Vn4eoQOGYTYIK1BlF5EXVgkWGn3mqUUjbXAr13J6fZVbp7Q3epRR8yshacBMlsHMhpOiV3g==",
-      "path": "polly.core/8.4.2",
-      "hashPath": "polly.core.8.4.2.nupkg.sha512"
+      "sha512": "sha512-4AWqYnQ2TME0E+Mzovt1Uu+VyvpR84ymUldMcPw7Mbj799Phaag14CKrMtlJGx5jsvYP+S3oR1QmysgmXoD5cw==",
+      "path": "polly.core/8.6.4",
+      "hashPath": "polly.core.8.6.4.nupkg.sha512"
     },
     "PropertyChanged.Fody/4.1.0": {
       "type": "package",
@@ -2375,19 +2427,19 @@
       "path": "reloaded.input.configurator/2.1.2",
       "hashPath": "reloaded.input.configurator.2.1.2.nupkg.sha512"
     },
-    "Reloaded.Memory/9.4.2": {
+    "Reloaded.Memory/9.4.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yrjimngdXs7evlk/ZFbzP0uppTf0Og+LFFonITgpzZ94HmVOi8b+29YFfYdWTbf68qUzGP0D4s0VsMhaGerg5g==",
-      "path": "reloaded.memory/9.4.2",
-      "hashPath": "reloaded.memory.9.4.2.nupkg.sha512"
+      "sha512": "sha512-j+pev0mS1guirfo4auPfclXKJKm9N0i3CIEY1WbLo46awhRwVsP2GuD7YFTtxRVUHZzjnWJLFhqP4zh/v7mf6A==",
+      "path": "reloaded.memory/9.4.3",
+      "hashPath": "reloaded.memory.9.4.3.nupkg.sha512"
     },
-    "Reloaded.Messaging/2.0.1": {
+    "Reloaded.Messaging/2.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ZU5j+OBB6uuJlfHv9LnCUQ+lR6RfovB+lGmggdbhRfzKi40vMBhls8Vp7VurO10VHSlVCkKA+Qq1W0DoOTGJ0g==",
-      "path": "reloaded.messaging/2.0.1",
-      "hashPath": "reloaded.messaging.2.0.1.nupkg.sha512"
+      "sha512": "sha512-R+Cy5QP8mKJ+TLEiwOzKJlXTGNUu4z11BX7aJd9Tb30v9y8PcxnVsDleZzjgFDshV5THmXOWqKCNnni43fPMEg==",
+      "path": "reloaded.messaging/2.0.2",
+      "hashPath": "reloaded.messaging.2.0.2.nupkg.sha512"
     },
     "Reloaded.Messaging.Extras.Runtime/2.0.0": {
       "type": "package",
@@ -2396,12 +2448,12 @@
       "path": "reloaded.messaging.extras.runtime/2.0.0",
       "hashPath": "reloaded.messaging.extras.runtime.2.0.0.nupkg.sha512"
     },
-    "Reloaded.Messaging.Host.LiteNetLib/2.0.0": {
+    "Reloaded.Messaging.Host.LiteNetLib/2.0.2": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-GzEzCm2iGOzzv+LXSLoccN44hi1Y5EjbVfiKvw54JroIizIrO4Ml/ou0ZhoULicmX35aPqUOPjlI+zxlE85PKw==",
-      "path": "reloaded.messaging.host.litenetlib/2.0.0",
-      "hashPath": "reloaded.messaging.host.litenetlib.2.0.0.nupkg.sha512"
+      "sha512": "sha512-Ump4BU5JT8wQTzRUO6hpVDP0BDGlBJ5f22Gj/aYy59M+fSl7qVe8XaQtmcEq+1UW1kguDZtIAC70a0q4GOhPAw==",
+      "path": "reloaded.messaging.host.litenetlib/2.0.2",
+      "hashPath": "reloaded.messaging.host.litenetlib.2.0.2.nupkg.sha512"
     },
     "Reloaded.Messaging.Interfaces/2.0.0": {
       "type": "package",
@@ -2410,12 +2462,12 @@
       "path": "reloaded.messaging.interfaces/2.0.0",
       "hashPath": "reloaded.messaging.interfaces.2.0.0.nupkg.sha512"
     },
-    "Reloaded.Messaging.Serializer.MessagePack/2.0.0": {
+    "Reloaded.Messaging.Serializer.MessagePack/2.0.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-b1yw0J+bvUaTAdhXRQhiT6/dAqK+fHsqCQovkwJn6ojuEpjVzHKtyNa1MCd4Hac8Riq5LLu+ieTDwlhHC52CvA==",
-      "path": "reloaded.messaging.serializer.messagepack/2.0.0",
-      "hashPath": "reloaded.messaging.serializer.messagepack.2.0.0.nupkg.sha512"
+      "sha512": "sha512-BW43xhFdKzspp12GixVFXnKnHg8wQCjdAtDBwAPgWzAAii75LqxVOWmvTOg1IvKgGiHS9s7Tu7oTLNeTOBBfCA==",
+      "path": "reloaded.messaging.serializer.messagepack/2.0.1",
+      "hashPath": "reloaded.messaging.serializer.messagepack.2.0.1.nupkg.sha512"
     },
     "Reloaded.WPF/3.3.2": {
       "type": "package",
@@ -2445,12 +2497,12 @@
       "path": "reloaded.wpf.theme.default/3.2.3",
       "hashPath": "reloaded.wpf.theme.default.3.2.3.nupkg.sha512"
     },
-    "ReverseMarkdown/4.6.0": {
+    "ReverseMarkdown/4.7.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-ehNpMz3yQwd7P/vHpwi4KyDlT8UtVmtiL+NTb6mFEPzbLqJXbRIGF4OxEA5tuBA5Cfwhzf537TX1UIB6dUpo7A==",
-      "path": "reversemarkdown/4.6.0",
-      "hashPath": "reversemarkdown.4.6.0.nupkg.sha512"
+      "sha512": "sha512-Tz8yJXg8J1O9xJn6fXzjeEcLTYjfwbauCGwK4f/dpxOOpo3iniXIggmRlJ7F91yHJPB0Gm4lk1/qV0Jxip4a8A==",
+      "path": "reversemarkdown/4.7.1",
+      "hashPath": "reversemarkdown.4.7.1.nupkg.sha512"
     },
     "runtime.debian.8-x64.runtime.native.System.Security.Cryptography.OpenSsl/4.3.2": {
       "type": "package",
@@ -2732,12 +2784,12 @@
       "path": "system.buffers/4.3.0",
       "hashPath": "system.buffers.4.3.0.nupkg.sha512"
     },
-    "System.CodeDom/6.0.0": {
+    "System.CodeDom/10.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-CPc6tWO1LAer3IzfZufDBRL+UZQcj5uS207NHALQzP84Vp/z6wF0Aa0YZImOQY8iStY0A2zI/e3ihKNPfUm8XA==",
-      "path": "system.codedom/6.0.0",
-      "hashPath": "system.codedom.6.0.0.nupkg.sha512"
+      "sha512": "sha512-QWERdKi/tQAx+MbrPxTGcpchqMANnVXNiv2r2tILBBB38E74buD+fABSUhozZ1G9kjbadFB0m+HPFMkhJPeFvA==",
+      "path": "system.codedom/10.0.0",
+      "hashPath": "system.codedom.10.0.0.nupkg.sha512"
     },
     "System.Collections/4.3.0": {
       "type": "package",
@@ -2802,12 +2854,12 @@
       "path": "system.dynamic.runtime/4.3.0",
       "hashPath": "system.dynamic.runtime.4.3.0.nupkg.sha512"
     },
-    "System.Formats.Asn1/9.0.0": {
+    "System.Formats.Asn1/10.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-VRDjgfqV0hCma5HBQa46nZTRuqfYMWZClwxUtvLJVTCeDp9Esdvr91AfEWP98IMO8ooSv1yXb6/oCc6jApoXvQ==",
-      "path": "system.formats.asn1/9.0.0",
-      "hashPath": "system.formats.asn1.9.0.0.nupkg.sha512"
+      "sha512": "sha512-0QCZNYeRswlUVyo9N3hXrt5X9dqqRup53loU4K4JatdoYPhXHLrK9PwRtg5vP0Sr9QbdCOKk2luEdip/kV5Sig==",
+      "path": "system.formats.asn1/10.0.0",
+      "hashPath": "system.formats.asn1.10.0.0.nupkg.sha512"
     },
     "System.Globalization/4.3.0": {
       "type": "package",
@@ -2865,6 +2917,13 @@
       "path": "system.io.filesystem.primitives/4.3.0",
       "hashPath": "system.io.filesystem.primitives.4.3.0.nupkg.sha512"
     },
+    "System.IO.Pipelines/10.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-M1eb3nfXntaRJPrrMVM9EFS8I1bDTnt0uvUS6QP/SicZf/ZZjydMD5NiXxfmwW/uQwaMDP/yX2P+zQN1NBHChg==",
+      "path": "system.io.pipelines/10.0.0",
+      "hashPath": "system.io.pipelines.10.0.0.nupkg.sha512"
+    },
     "System.Linq/4.3.0": {
       "type": "package",
       "serviceable": true,
@@ -2879,19 +2938,19 @@
       "path": "system.linq.expressions/4.3.0",
       "hashPath": "system.linq.expressions.4.3.0.nupkg.sha512"
     },
-    "System.Management/6.0.0": {
+    "System.Management/10.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-sHsESYMmPDhQuOC66h6AEOs/XowzKsbT9srMbX71TCXP58hkpn1BqBjdmKj1+DCA/WlBETX1K5WjQHwmV0Txrg==",
-      "path": "system.management/6.0.0",
-      "hashPath": "system.management.6.0.0.nupkg.sha512"
+      "sha512": "sha512-LE3rDZoPzulou78Tsq+3ALhUs4vatQ03v2QWbYVIenVPneUH/+LTUmHyyl098OxIFLQI6sNkZs8YHbUnT/sm3A==",
+      "path": "system.management/10.0.0",
+      "hashPath": "system.management.10.0.0.nupkg.sha512"
     },
-    "System.Memory/4.5.4": {
+    "System.Memory/4.5.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-1MbJTHS1lZ4bS4FmsJjnuGJOu88ZzTT2rLvrhW7Ygic+pC0NWA+3hgAen0HRdsocuQXCkUTdFn9yHJJhsijDXw==",
-      "path": "system.memory/4.5.4",
-      "hashPath": "system.memory.4.5.4.nupkg.sha512"
+      "sha512": "sha512-3oDzvc/zzetpTKWMShs1AADwZjQ/36HnsufHRPcOjyRAAMLDlu2iD33MBI2opxnezcVUtXyqDXXjoFMOU9c7SA==",
+      "path": "system.memory/4.5.3",
+      "hashPath": "system.memory.4.5.3.nupkg.sha512"
     },
     "System.Net.Http/4.3.4": {
       "type": "package",
@@ -2990,13 +3049,6 @@
       "sha512": "sha512-abhfv1dTK6NXOmu4bgHIONxHyEqFjW8HwXPmpY9gmll+ix9UNo4XDcmzJn6oLooftxNssVHdJC1pGT9jkSynQg==",
       "path": "system.runtime/4.3.1",
       "hashPath": "system.runtime.4.3.1.nupkg.sha512"
-    },
-    "System.Runtime.CompilerServices.Unsafe/5.0.0": {
-      "type": "package",
-      "serviceable": true,
-      "sha512": "sha512-ZD9TMpsmYJLrxbbmdvhwt9YEgG5WntEnZ/d1eH8JBX9LBp+Ju8BSBhUGbZMNVHHomWo2KVImJhTDl2hIgw/6MA==",
-      "path": "system.runtime.compilerservices.unsafe/5.0.0",
-      "hashPath": "system.runtime.compilerservices.unsafe.5.0.0.nupkg.sha512"
     },
     "System.Runtime.Extensions/4.3.0": {
       "type": "package",
@@ -3131,12 +3183,19 @@
       "path": "system.text.encoding.extensions/4.3.0",
       "hashPath": "system.text.encoding.extensions.4.3.0.nupkg.sha512"
     },
-    "System.Text.Json/5.0.2": {
+    "System.Text.Encodings.Web/10.0.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-I47dVIGiV6SfAyppphxqupertT/5oZkYLDCX6vC3HpOI4ZLjyoKAreUoem2ie6G0RbRuFrlqz/PcTQjfb2DOfQ==",
-      "path": "system.text.json/5.0.2",
-      "hashPath": "system.text.json.5.0.2.nupkg.sha512"
+      "sha512": "sha512-257hh1ep1Gqm1Lm0ulxf7vVBVMJuGN6EL4xSWjpi46DffXzm1058IiWsfSC06zSm7SniN+Tb5160UnXsSa8rRg==",
+      "path": "system.text.encodings.web/10.0.0",
+      "hashPath": "system.text.encodings.web.10.0.0.nupkg.sha512"
+    },
+    "System.Text.Json/10.0.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-1Dpjwq9peG/Wt5BNbrzIhTpclfOSqBWZsUO28vVr59yQlkvL5jLBWfpfzRmJ1OY+6DciaY0DUcltyzs4fuZHjw==",
+      "path": "system.text.json/10.0.0",
+      "hashPath": "system.text.json.10.0.0.nupkg.sha512"
     },
     "System.Text.RegularExpressions/4.3.1": {
       "type": "package",

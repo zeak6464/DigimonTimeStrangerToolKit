@@ -7,13 +7,13 @@
   "targets": {
     ".NETCoreApp,Version=v9.0": {},
     ".NETCoreApp,Version=v9.0/win-x64": {
-      "Reloaded.Mod.Loader/1.29.2": {
+      "Reloaded.Mod.Loader/1.29.3": {
         "dependencies": {
           "Colorful.Console": "1.2.2-reloaded",
-          "DotNet.ReproducibleBuilds": "1.2.25",
+          "DotNet.ReproducibleBuilds": "1.2.39",
           "Indieteur.SteamAppsManAndVDFAPI": "1.0.5",
           "McMaster.NETCore.Plugins": "2.0.0",
-          "Microsoft.NET.ILLink.Tasks": "9.0.3",
+          "Microsoft.NET.ILLink.Tasks": "9.0.11",
           "Reloaded.Mod.Interfaces": "2.4.0",
           "Reloaded.Mod.Loader.IO": "2.8.0",
           "Reloaded.SharedLib.Hooks": "1.9.0"
@@ -30,7 +30,7 @@
           }
         }
       },
-      "DotNet.ReproducibleBuilds/1.2.25": {},
+      "DotNet.ReproducibleBuilds/1.2.39": {},
       "Indieteur.SteamAppsManAndVDFAPI/1.0.5": {
         "runtime": {
           "lib/Indieteur.SAMAPI.dll": {
@@ -51,13 +51,13 @@
           }
         }
       },
-      "Microsoft.NET.ILLink.Tasks/9.0.3": {},
+      "Microsoft.NET.ILLink.Tasks/9.0.11": {},
       "Reloaded.Hooks.Definitions/1.11.0": {},
-      "Reloaded.Memory/9.4.2": {
+      "Reloaded.Memory/9.4.3": {
         "runtime": {
           "lib/net8.0/Reloaded.Memory.dll": {
-            "assemblyVersion": "9.4.2.0",
-            "fileVersion": "9.4.2.0"
+            "assemblyVersion": "9.4.3.0",
+            "fileVersion": "9.4.3.0"
           }
         }
       },
@@ -76,7 +76,7 @@
       },
       "Reloaded.Mod.Loader.IO/2.8.0": {
         "dependencies": {
-          "Reloaded.Memory": "9.4.2",
+          "Reloaded.Memory": "9.4.3",
           "Reloaded.Mod.Interfaces": "2.4.0"
         },
         "runtime": {
@@ -89,7 +89,7 @@
     }
   },
   "libraries": {
-    "Reloaded.Mod.Loader/1.29.2": {
+    "Reloaded.Mod.Loader/1.29.3": {
       "type": "project",
       "serviceable": false,
       "sha512": ""
@@ -101,12 +101,12 @@
       "path": "colorful.console/1.2.2-reloaded",
       "hashPath": "colorful.console.1.2.2-reloaded.nupkg.sha512"
     },
-    "DotNet.ReproducibleBuilds/1.2.25": {
+    "DotNet.ReproducibleBuilds/1.2.39": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-xCXiw7BCxHJ8pF6wPepRUddlh2dlQlbr81gXA72hdk4FLHkKXas7EH/n+fk5UCA/YfMqG1Z6XaPiUjDbUNBUzg==",
-      "path": "dotnet.reproduciblebuilds/1.2.25",
-      "hashPath": "dotnet.reproduciblebuilds.1.2.25.nupkg.sha512"
+      "sha512": "sha512-fcFN01tDTIQqDuTwr1jUQK/geofiwjG5DycJQOnC72i1SsLAk1ELe+apBOuZ11UMQG8YKFZG1FgvjZPbqHyatg==",
+      "path": "dotnet.reproduciblebuilds/1.2.39",
+      "hashPath": "dotnet.reproduciblebuilds.1.2.39.nupkg.sha512"
     },
     "Indieteur.SteamAppsManAndVDFAPI/1.0.5": {
       "type": "package",
@@ -122,12 +122,12 @@
       "path": "mcmaster.netcore.plugins/2.0.0",
       "hashPath": "mcmaster.netcore.plugins.2.0.0.nupkg.sha512"
     },
-    "Microsoft.NET.ILLink.Tasks/9.0.3": {
+    "Microsoft.NET.ILLink.Tasks/9.0.11": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-1rqGTfubVg0qj2PsK6esyq3PIxtYJYrN3LsYUV9RrvH3anmt3fT3ozYdAZZH4U8JU/pt5pPIUk8NBSu26wtekA==",
-      "path": "microsoft.net.illink.tasks/9.0.3",
-      "hashPath": "microsoft.net.illink.tasks.9.0.3.nupkg.sha512"
+      "sha512": "sha512-vvB9rtDmWaXgYkViT00KORBVmA3pcYsHlgd9vOPqL9sf5bKy3rvLMF1+sI1uUfVj28S3itirHlHmX5/kcpZKNw==",
+      "path": "microsoft.net.illink.tasks/9.0.11",
+      "hashPath": "microsoft.net.illink.tasks.9.0.11.nupkg.sha512"
     },
     "Reloaded.Hooks.Definitions/1.11.0": {
       "type": "package",
@@ -136,12 +136,12 @@
       "path": "reloaded.hooks.definitions/1.11.0",
       "hashPath": "reloaded.hooks.definitions.1.11.0.nupkg.sha512"
     },
-    "Reloaded.Memory/9.4.2": {
+    "Reloaded.Memory/9.4.3": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-yrjimngdXs7evlk/ZFbzP0uppTf0Og+LFFonITgpzZ94HmVOi8b+29YFfYdWTbf68qUzGP0D4s0VsMhaGerg5g==",
-      "path": "reloaded.memory/9.4.2",
-      "hashPath": "reloaded.memory.9.4.2.nupkg.sha512"
+      "sha512": "sha512-j+pev0mS1guirfo4auPfclXKJKm9N0i3CIEY1WbLo46awhRwVsP2GuD7YFTtxRVUHZzjnWJLFhqP4zh/v7mf6A==",
+      "path": "reloaded.memory/9.4.3",
+      "hashPath": "reloaded.memory.9.4.3.nupkg.sha512"
     },
     "Reloaded.SharedLib.Hooks/1.9.0": {
       "type": "package",

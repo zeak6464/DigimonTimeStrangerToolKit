@@ -34,6 +34,7 @@ class DigimonData:
     base_int: int = 0
     base_spi: int = 0
     base_spd: int = 0
+    growth_pattern_id: int = 1  # Growth pattern (1-18) - determines which digimon_growth file to use
     
     # Elemental resistances
     res_null: int = 0
@@ -100,6 +101,7 @@ class MBELoader:
         self.data_path = Path(data_path)
         self.text_path = Path(text_path)
         self.headers = self._load_headers()
+        self._buff_names_cache = None
         
         # CSV data cache to avoid repeated file reads
         self._digimon_status_cache = None
@@ -153,6 +155,7 @@ class MBELoader:
                 "basePersonality": 61,
                 "baseHP": 64, "baseSP": 65, "baseATK": 66,
                 "baseDEF": 67, "baseINT": 68, "baseSPI": 69, "baseSPD": 70,
+                "growthPatternId": 71,  # Growth pattern (1-18)
                 # Traits
                 "traitsBaseIdx": 19,  # next 41 are trait bool flags
                 # Elemental resistance
@@ -365,6 +368,7 @@ class MBELoader:
         digimon.base_int = int(digimon_row[headers["baseINT"]]) if digimon_row[headers["baseINT"]] else 0
         digimon.base_spi = int(digimon_row[headers["baseSPI"]]) if digimon_row[headers["baseSPI"]] else 0
         digimon.base_spd = int(digimon_row[headers["baseSPD"]]) if digimon_row[headers["baseSPD"]] else 0
+        digimon.growth_pattern_id = int(digimon_row[headers["growthPatternId"]]) if digimon_row[headers["growthPatternId"]] else 1
         
         # Elemental resistances
         digimon.res_null = int(digimon_row[headers["resNull"]]) if digimon_row[headers["resNull"]] else 0
@@ -1215,6 +1219,7 @@ class MBELoader:
             row[headers["baseINT"]] = str(digimon.base_int)
             row[headers["baseSPI"]] = str(digimon.base_spi)
             row[headers["baseSPD"]] = str(digimon.base_spd)
+            row[headers["growthPatternId"]] = str(digimon.growth_pattern_id)
             
             # Elemental resistances
             row[headers["resNull"]] = str(digimon.res_null)
@@ -1286,11 +1291,17 @@ class MBELoader:
             # Override field 119 to match expected format
             row[119] = "1"
             
+            # Convert all remaining empty strings to '""' for this row before writing
+            # This ensures empty areas are represented as "" in the CSV
+            for col_idx in range(len(row)):
+                if row[col_idx] == '':
+                    row[col_idx] = '""'
+            
             # Write back to file preserving original format
             with open(status_file, 'w', newline='', encoding='utf-8') as f:
-                for row in rows:
+                for write_row in rows:
                     # Write row manually to preserve exact format
-                    f.write(','.join(row) + '\n')
+                    f.write(','.join(write_row) + '\n')
             
             # Also update name and profile files for existing Digimon
             self._update_char_name_file(digimon)
@@ -1597,6 +1608,47 @@ class MBELoader:
         if self._element_names_cache is None:
             self._element_names_cache = self._load_text_file("element.mbe")
         return self._element_names_cache.get(str(element_id), f"Element_{element_id}")
+    
+    def get_buff_name(self, buff_id: int) -> str:
+        """Get buff/status effect name by ID (0-133)"""
+        if self._buff_names_cache is None:
+            # Buff names from battle_skill.mbe/002_buff_set.csv
+            self._buff_names_cache = {
+                0: "None", 1: "Exhausted", 2: "Instant Death", 3: "Poison", 4: "None",
+                5: "Confusion", 6: "Paralysis", 7: "Sleep", 8: "Severe Poison", 9: "None",
+                10: "Panic", 11: "Cannot Act", 12: "Deep Sleep", 13: "Pixelation", 14: "Bug",
+                15: "HP Recovery Up", 16: "HP Recovery Down", 17: "SP Recovery Up", 18: "SP Recovery Down",
+                19: "Max HP Up", 20: "Max HP Down", 21: "Max SP Up", 22: "Max SP Down",
+                23: "Regen HP", 24: "Regen SP",
+                25: "ATK Up", 26: "DEF Up", 27: "INT Up", 28: "SPI Up", 29: "SPD Up",
+                30: "Accuracy Up", 31: "Evasion Up", 32: "Critical Up",
+                33: "ATK Down", 34: "DEF Down", 35: "INT Down", 36: "SPI Down", 37: "SPD Down",
+                38: "Accuracy Down", 39: "Evasion Down", 40: "Critical Down",
+                41: "Null Resist Up", 42: "Fire Resist Up", 43: "Ice Resist Up", 44: "Grass Resist Up",
+                45: "Water Resist Up", 46: "Elec Resist Up", 47: "Steel Resist Up", 48: "Wind Resist Up",
+                49: "Ground Resist Up", 50: "Light Resist Up", 51: "Dark Resist Up", 52: "Null Resist Up",
+                53: "None", 54: "None", 55: "None", 56: "None", 57: "None",
+                58: "None", 59: "None", 60: "None", 61: "None", 62: "None",
+                63: "Null Resist Down", 64: "Fire Resist Down", 65: "Ice Resist Down", 66: "Grass Resist Down",
+                67: "Water Resist Down", 68: "Elec Resist Down", 69: "Steel Resist Down", 70: "Wind Resist Down",
+                71: "Ground Resist Down", 72: "Light Resist Down", 73: "Dark Resist Down", 74: "Null Resist Down",
+                75: "None", 76: "None", 77: "None", 78: "None", 79: "None",
+                80: "None", 81: "None", 82: "None", 83: "None", 84: "None",
+                85: "Physical Counter", 86: "Magic Counter", 87: "Physical Reflect", 88: "Magic Reflect",
+                89: "Status Barrier", 90: "Debuff Barrier", 91: "Survive Fatal", 92: "Defend",
+                93: "Physical Dmg Reduction", 94: "Physical Dmg Barrier", 95: "Magic Dmg Reduction", 96: "Magic Dmg Barrier",
+                97: "Physical Dmg Up", 98: "Physical Dmg Down", 99: "Magic Dmg Up", 100: "Magic Dmg Down",
+                101: "Physical Power Up", 102: "Magic Power Up", 103: "Taunt", 104: "None",
+                105: "Cannot Act (Recoil)", 106: "Move First", 107: "Move Last",
+                108: "Multi-Action", 109: "Multi-Action?", 110: "None", 111: "None",
+                112: "Stat Up", 113: "Stat Down", 114: "Cure Basic Status", 115: "Cure Special Status",
+                116: "Cure All Status", 117: "None", 118: "Injured", 119: "Sick",
+                120: "Cannot Act (Charge Break)", 121: "None", 122: "None", 123: "None",
+                124: "Death Countdown", 125: "Death Countdown", 126: "Unmotivated",
+                127: "None", 128: "None", 129: "None", 130: "None", 131: "None",
+                132: "Cannot Act (Fear)", 133: "CP Freeze"
+            }
+        return self._buff_names_cache.get(buff_id, f"Buff_{buff_id}")
     
     def get_type_name(self, type_id: int) -> str:
         """Get localized type name by type ID"""
@@ -1982,6 +2034,133 @@ class DLCExporter:
         self.loader = loader
         self.workspace_root = loader.data_path.parent
     
+    def _identify_bool_columns(self, header_row: List[str], file_type: str = "") -> set:
+        """
+        Identify boolean column indices based on file type and header patterns.
+        Returns set of column indices that should be treated as boolean.
+        """
+        bool_indices = set()
+        
+        # For digimon_status: columns 19-59, 52-59, 124-125 are boolean
+        if 'digimon_status' in file_type:
+            bool_indices.update(range(19, 60))  # Columns 19-59
+            bool_indices.update(range(52, 60))  # Columns 52-59 (overlap, but fine)
+            bool_indices.update([124, 125])     # Columns 124-125
+        
+        # Check header for explicit bool markers
+        for col_idx, header_cell in enumerate(header_row):
+            header_cell = header_cell.strip()
+            if header_cell.startswith('bool '):
+                bool_indices.add(col_idx)
+        
+        return bool_indices
+    
+    def _transform_csv_for_dlc_format(self, rows: List[List[str]], header_row: List[str], file_type: str = "") -> List[List[str]]:
+        """
+        Transform CSV rows to match backup DLC format:
+        - Transform headers: int -> int32, identify bool columns
+        - Keep boolean values as 0/1 (backup format uses 0/1, not false/true)
+        - Use "" for empty cells (to match backup format)
+        - Preserve string quotes
+        """
+        if not rows:
+            return rows
+        
+        # Identify boolean columns
+        bool_column_indices = self._identify_bool_columns(header_row, file_type)
+        
+        # Transform header row
+        transformed_header = []
+        
+        for col_idx, header_cell in enumerate(header_row):
+            header_cell = header_cell.strip()
+            
+            # If this is a boolean column, ensure header says 'bool'
+            if col_idx in bool_column_indices:
+                if header_cell.startswith('int '):
+                    transformed_header.append(header_cell.replace('int ', 'bool ', 1))
+                elif not header_cell.startswith('bool '):
+                    # Replace with bool if not already bool
+                    parts = header_cell.split(' ', 1)
+                    if len(parts) > 1:
+                        transformed_header.append(f'bool {parts[1]}')
+                    else:
+                        transformed_header.append(f'bool {col_idx}')
+                else:
+                    transformed_header.append(header_cell)
+            # Transform int -> int32
+            elif header_cell.startswith('int '):
+                transformed_header.append(header_cell.replace('int ', 'int32 ', 1))
+            else:
+                transformed_header.append(header_cell)
+        
+        # Transform data rows
+        transformed_rows = [transformed_header]
+        
+        for row in rows[1:]:  # Skip header
+            transformed_row = []
+            for col_idx, cell in enumerate(row):
+                cell = cell.strip()
+                
+                # Handle boolean columns
+                if col_idx in bool_column_indices:
+                    # Backup format uses 0/1 for booleans, not false/true
+                    # Convert false/true back to 0/1 if needed
+                    if cell.lower() == 'false':
+                        transformed_row.append('0')
+                    elif cell.lower() == 'true':
+                        transformed_row.append('1')
+                    else:
+                        # Keep as-is (should already be 0/1)
+                        transformed_row.append(cell)
+                # Handle empty cells
+                elif cell == '' or cell == '""':
+                    # Check if this is an empty column type
+                    if col_idx < len(header_row):
+                        header_type = header_row[col_idx].strip().lower()
+                        if 'empty' in header_type:
+                            # Empty type columns: use "" (quoted empty string) to match backup format
+                            # Reference uses truly empty, but backup uses ""
+                            transformed_row.append('""')
+                        elif 'string' in header_type:
+                            # Empty string columns: use "" (quoted empty string)
+                            transformed_row.append('""')
+                        else:
+                            # Other empty columns: use "" (quoted empty string)
+                            transformed_row.append('""')
+                    else:
+                        transformed_row.append('""')
+                # Handle string columns - preserve quotes
+                elif col_idx < len(header_row) and ('string' in header_row[col_idx].lower()):
+                    # String columns should already have quotes, preserve them
+                    if not cell.startswith('"'):
+                        transformed_row.append(f'"{cell}"')
+                    else:
+                        transformed_row.append(cell)
+                else:
+                    # Other columns - preserve as-is
+                    transformed_row.append(cell)
+            
+            transformed_rows.append(transformed_row)
+        
+        return transformed_rows
+    
+    def _get_dlc_filename(self, base_filename: str) -> str:
+        """
+        Convert filename from 00_ prefix to 000_ prefix to match reference format.
+        Examples:
+        - 00_digimon_status_data.csv -> 000_digimon_status_data.csv
+        - 00_Sheet1.csv -> 000_Sheet1.csv
+        - 01_evolution_to.csv -> 001_evolution_to.csv
+        """
+        if base_filename.startswith('00_'):
+            return base_filename.replace('00_', '000_', 1)
+        elif base_filename.startswith('01_'):
+            return base_filename.replace('01_', '001_', 1)
+        elif base_filename.startswith('02_'):
+            return base_filename.replace('02_', '002_', 1)
+        return base_filename
+    
     def get_dlc_path(self, dlc_name: str = "addcont_17") -> Path:
         """Get the DLC directory path"""
         return self.workspace_root / "DLC" / f"{dlc_name}.dx11"
@@ -2354,9 +2533,9 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_char_info(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to char_info_dlc17.mbe/00_char_info.csv"""
+        """Save to char_info_dlc17.mbe/000_char_info.csv"""
         try:
-            file_path = dlc_data / "char_info_dlc17.mbe" / "00_char_info.csv"
+            file_path = dlc_data / "char_info_dlc17.mbe" / "000_char_info.csv"
             
             # Load or create file
             if file_path.exists():
@@ -2427,10 +2606,13 @@ class DLCExporter:
                 # Add new entry
                 rows.append(new_row)
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "char_info")
+            
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to char_info_dlc17.mbe")
             return True
@@ -2441,9 +2623,9 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_status(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to digimon_status_dlc17.mbe/00_digimon_status_data.csv"""
+        """Save to digimon_status_dlc17.mbe/000_digimon_status_data.csv"""
         try:
-            file_path = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            file_path = dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv"
             
             # Load or create file
             if file_path.exists():
@@ -2544,6 +2726,7 @@ class DLCExporter:
             row[headers["baseINT"]] = str(digimon.base_int)
             row[headers["baseSPI"]] = str(digimon.base_spi)
             row[headers["baseSPD"]] = str(digimon.base_spd)
+            row[headers["growthPatternId"]] = str(digimon.growth_pattern_id)
             
             # Elemental resistances
             row[headers["resNull"]] = str(digimon.res_null)
@@ -2619,10 +2802,14 @@ class DLCExporter:
                         else:
                             row[col_idx] = "0"
             
+            # Transform CSV to match reference DLC format before writing
+            # This handles: int->int32, bool columns, 0/1->false/true, empty cells
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "digimon_status")
+            
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to digimon_status_dlc17.mbe")
             return True
@@ -2633,10 +2820,10 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_evolution(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to evolution_dlc17.mbe/00_evolution_condition.csv and 01_evolution_to.csv"""
+        """Save to evolution_dlc17.mbe/000_evolution_condition.csv and 001_evolution_to.csv"""
         try:
             # 1. Save evolution condition file
-            cond_file_path = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+            cond_file_path = dlc_data / "evolution_dlc17.mbe" / "000_evolution_condition.csv"
             
             # Load or create condition file
             if cond_file_path.exists():
@@ -2656,13 +2843,16 @@ class DLCExporter:
                 # Add minimal evolution condition entry
                 cond_rows.append([str(digimon.id), '""', '1', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '""', '0', '0', '0', '0', '""', '0', '""', '0', '0', '""', '0'])
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_cond_rows = self._transform_csv_for_dlc_format(cond_rows, cond_rows[0], "evolution_condition")
+            
             # Write condition file
             with open(cond_file_path, 'w', encoding='utf-8') as f:
-                for row in cond_rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_cond_rows:
+                    f.write(','.join(write_row) + '\n')
             
             # 2. Save evolution_to file (actual evolution paths)
-            evo_to_file_path = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            evo_to_file_path = dlc_data / "evolution_dlc17.mbe" / "001_evolution_to.csv"
             
             # Load or create evolution_to file
             if evo_to_file_path.exists():
@@ -2796,10 +2986,13 @@ class DLCExporter:
                     
                     filtered_rows.append(new_row)
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_evo_rows = self._transform_csv_for_dlc_format(filtered_rows, filtered_rows[0], "evolution_to")
+            
             # Write evolution_to file
             with open(evo_to_file_path, 'w', encoding='utf-8') as f:
-                for row in filtered_rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_evo_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to evolution_dlc17.mbe (condition + evolution paths)")
             return True
@@ -2810,9 +3003,9 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_char_name(self, digimon: DigimonData, dlc_text: Path) -> bool:
-        """Save to char_name_dlc17.mbe/00_Sheet1.csv"""
+        """Save to char_name_dlc17.mbe/000_Sheet1.csv"""
         try:
-            file_path = dlc_text / "char_name_dlc17.mbe" / "00_Sheet1.csv"
+            file_path = dlc_text / "char_name_dlc17.mbe" / "000_Sheet1.csv"
             
             # Load or create file
             if file_path.exists():
@@ -2831,15 +3024,13 @@ class DLCExporter:
             if not entry_found:
                 rows.append([f'"{digimon.char_key}"', f'"{digimon.name}"'])
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "char_name")
+            
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
-            
-            # Flush to ensure file is written
-            import os
-            if hasattr(os, 'sync'):
-                os.sync()
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to char_name_dlc17.mbe")
             return True
@@ -2848,9 +3039,10 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_profile(self, digimon: DigimonData, dlc_text: Path) -> bool:
-        """Save to digimon_profile_dlc17.mbe/00_Sheet1.csv"""
+        """Save to digimon_profile_dlc17.mbe/000_Sheet1.csv"""
+        import csv
         try:
-            file_path = dlc_text / "digimon_profile_dlc17.mbe" / "00_Sheet1.csv"
+            file_path = dlc_text / "digimon_profile_dlc17.mbe" / "000_Sheet1.csv"
             
             # Load or create file
             if file_path.exists():
@@ -2865,28 +3057,44 @@ class DLCExporter:
             entry_found = False
             for i, row in enumerate(rows[1:], 1):
                 if len(row) > 0 and row[0].strip('"') == profile_key:
-                    rows[i] = [f'"{profile_key}"', f'"{profile_text}"']
+                    rows[i] = [profile_key, profile_text]
                     entry_found = True
                     break
             
             if not entry_found:
-                rows.append([f'"{profile_key}"', f'"{profile_text}"'])
+                rows.append([profile_key, profile_text])
             
-            # Write file
-            with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+            # Ensure strings are quoted - add quotes if not present
+            for row in rows[1:]:  # Skip header
+                if len(row) > 0 and not row[0].startswith('"'):
+                    row[0] = f'"{row[0]}"'
+                if len(row) > 1 and not row[1].startswith('"'):
+                    row[1] = f'"{row[1]}"'
+            
+            # Write file manually to preserve quotes and handle multi-line strings properly
+            # csv.writer would strip/re-add quotes, so we write manually
+            with open(file_path, 'w', encoding='utf-8', newline='') as f:
+                # Write header
+                f.write(','.join(rows[0]) + '\n')
+                # Write data rows manually to preserve quotes and handle multi-line strings
+                for row in rows[1:]:
+                    # Join with commas, but preserve newlines within quoted strings
+                    # csv.writer would handle this, but we need manual control for quotes
+                    row_str = ','.join(row)
+                    f.write(row_str + '\n')
             
             print(f"✅ Saved to digimon_profile_dlc17.mbe")
             return True
         except Exception as e:
             print(f"Error saving to digimon_profile_dlc17: {e}")
+            import traceback
+            traceback.print_exc()
             return False
     
     def _save_to_dlc_animation(self, digimon: DigimonData, dlc_data: Path, animation_ref_chr_id: str) -> bool:
-        """Save to anim_setting_dlc17.mbe/01_same_animation_data.csv"""
+        """Save to anim_setting_dlc17.mbe/001_same_animation_data.csv"""
         try:
-            file_path = dlc_data / "anim_setting_dlc17.mbe" / "01_same_animation_data.csv"
+            file_path = dlc_data / "anim_setting_dlc17.mbe" / "001_same_animation_data.csv"
             
             # Load or create file
             if file_path.exists():
@@ -2911,10 +3119,13 @@ class DLCExporter:
                 # Add new entry - NEW chr_id points to TEMPLATE chr_id for animations
                 rows.append([f'"{digimon.chr_id}"', f'"{animation_source}"'])
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "anim_setting")
+            
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to anim_setting_dlc17.mbe (animations from {animation_source})")
             return True
@@ -2923,9 +3134,9 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_model_setting(self, digimon: DigimonData, dlc_data: Path, animation_ref_chr_id: str = None) -> bool:
-        """Save to model_setting_dlc17.mbe/00_model_setting.csv"""
+        """Save to model_setting_dlc17.mbe/000_model_setting.csv"""
         try:
-            file_path = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+            file_path = dlc_data / "model_setting_dlc17.mbe" / "000_model_setting.csv"
             
             # Load or create file
             if file_path.exists():
@@ -3023,10 +3234,13 @@ class DLCExporter:
             if not entry_found:
                 rows.append(template_row)
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "model_setting")
+            
             # Write file
-            with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+            with open(file_path, 'w', encoding='utf-8', newline='') as f:
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to model_setting_dlc17.mbe")
             return True
@@ -3037,9 +3251,9 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_model_outline(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to model_outline_dlc17.mbe/00_model_outline_battle.csv"""
+        """Save to model_outline_dlc17.mbe/000_model_outline_battle.csv"""
         try:
-            file_path = dlc_data / "model_outline_dlc17.mbe" / "00_model_outline_battle.csv"
+            file_path = dlc_data / "model_outline_dlc17.mbe" / "000_model_outline_battle.csv"
             
             # Load or create file
             if file_path.exists():
@@ -3074,10 +3288,13 @@ class DLCExporter:
             if not entry_found:
                 rows.append(template_row)
             
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "model_outline")
+            
             # Write file
             with open(file_path, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to model_outline_dlc17.mbe")
             return True
@@ -3086,10 +3303,10 @@ class DLCExporter:
             return False
     
     def _save_to_dlc_lod(self, digimon: DigimonData, dlc_data: Path) -> bool:
-        """Save to lod_chara_dlc17.mbe (both 00_lod.csv and 01_lod_model.csv)"""
+        """Save to lod_chara_dlc17.mbe (both 000_lod.csv and 001_lod_model.csv)"""
         try:
-            # File 1: 00_lod.csv
-            lod_file = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+            # File 1: 000_lod.csv
+            lod_file = dlc_data / "lod_chara_dlc17.mbe" / "000_lod.csv"
             
             if lod_file.exists():
                 rows = self.loader.load_csv(lod_file)
@@ -3146,13 +3363,16 @@ class DLCExporter:
             if not entry_found:
                 rows.append(template_row)
             
-            # Write 00_lod.csv
-            with open(lod_file, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "lod")
             
-            # File 2: 01_lod_model.csv
-            lod_model_file = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+            # Write 000_lod.csv
+            with open(lod_file, 'w', encoding='utf-8') as f:
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
+            
+            # File 2: 001_lod_model.csv
+            lod_model_file = dlc_data / "lod_chara_dlc17.mbe" / "001_lod_model.csv"
             
             if lod_model_file.exists():
                 rows = self.loader.load_csv(lod_model_file)
@@ -3216,10 +3436,13 @@ class DLCExporter:
             if not entry_found:
                 rows.append(template_row)
             
-            # Write 01_lod_model.csv
+            # Transform CSV to match reference DLC format before writing
+            transformed_rows = self._transform_csv_for_dlc_format(rows, rows[0], "lod_model")
+            
+            # Write 001_lod_model.csv
             with open(lod_model_file, 'w', encoding='utf-8') as f:
-                for row in rows:
-                    f.write(','.join(row) + '\n')
+                for write_row in transformed_rows:
+                    f.write(','.join(write_row) + '\n')
             
             print(f"✅ Saved to lod_chara_dlc17.mbe (both files)")
             return True

@@ -1,15 +1,15 @@
 {
   "runtimeOptions": {
     "tfm": "net9.0",
-    "rollForward": "Disable",
+    "rollForward": "Minor",
     "frameworks": [
       {
         "name": "Microsoft.NETCore.App",
-        "version": "9.0.4"
+        "version": "9.0.8"
       },
       {
         "name": "Microsoft.WindowsDesktop.App",
-        "version": "9.0.4"
+        "version": "9.0.8"
       }
     ],
     "configProperties": {

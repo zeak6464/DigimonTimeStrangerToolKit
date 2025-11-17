@@ -11,7 +11,7 @@
     "Ryo.Reloaded",
     "DSTS.RyoFramework",
     "NewGameZ",
-    "Randomizer"
+    "aaaa_957552"
   ],
   "WorkingDirectory": "C:\\Program Files (x86)\\Steam\\steamapps\\common\\Digimon Story Time Stranger",
   "PluginData": {},
@@ -22,7 +22,6 @@
     "Ryo.Reloaded",
     "DSTS.RyoFramework",
     "NewGameZ",
-    "DSTS.digimon.DWN0Recolors",
     "AllRideable",
     "RandomStarter",
     "NewDigimon",
@@ -31,7 +30,8 @@
     "Digimon Adventure01 Digidestined VoicePack",
     "DUB_ANIME_ADVENTURE_GOOD/EVIL_DIGIMON",
     "DUB_ANIME_ADVENTURE02_DIGIDESTINED",
-    "DUB_ANIME_ADVENTURE02_GOOD/EVIL_DiGIMON"
+    "DUB_ANIME_ADVENTURE02_GOOD/EVIL_DiGIMON",
+    "aaaa_957552"
   ],
   "PreserveDisabledModOrder": true,
   "DontInject": false,

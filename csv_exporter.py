@@ -687,6 +687,15 @@ class CSVExporter:
             for file in folder.iterdir():
                 if not file.is_file():
                     continue
+                
+                # Prefer 000_ files over 00_ files (new format over old format)
+                if file.name.startswith('00_') and not file.name.startswith('000_'):
+                    # Check if 000_ version exists
+                    new_name = '000_' + file.name[3:]
+                    new_file = folder / new_name
+                    if new_file.exists():
+                        file = new_file  # Use the 000_ version instead
+                
                 dest_name = self._strip_numeric_prefix(file.name) if file.suffix.lower() == ".csv" else file.name
                 dest_path = dest_folder / dest_name
                 
@@ -711,75 +720,93 @@ class CSVExporter:
         Transform CSV file format for dsts-loader compatibility:
         - int -> int32 in headers
         - 0/1 -> false/true for boolean values
-        - "" -> empty cell (remove quotes)
-        - String columns: preserve/add quotes
+        - Empty cells: ""
+        - String columns: quoted
+        - Numeric columns: unquoted
         """
         try:
-            # Read raw lines to preserve original format
+            # Read CSV file using csv.reader
             with open(source_file, 'r', encoding='utf-8') as f_in:
-                raw_lines = f_in.readlines()
+                reader = csv.reader(f_in)
+                rows = list(reader)
             
-            if not raw_lines:
+            if not rows:
                 # Empty file, just copy
                 import shutil
                 shutil.copy2(source_file, dest_file)
                 return
             
             # Parse header to get column types
-            header_line = raw_lines[0].strip()
-            header_cells = header_line.split(',')
-            header_types = [cell.strip() for cell in header_cells]
+            header_row = rows[0]
+            header_types = [cell.strip() for cell in header_row]
             
             # Transform header: int -> int32
-            transformed_header = [cell.replace('int ', 'int32 ') if cell.startswith('int ') else cell for cell in header_types]
+            transformed_header = [
+                cell.replace('int ', 'int32 ') if cell.startswith('int ') else cell 
+                for cell in header_types
+            ]
             
             # Write transformed file
             with open(dest_file, 'w', encoding='utf-8', newline='') as f_out:
-                # Write header
+                # Write header (no quotes)
                 f_out.write(','.join(transformed_header) + '\n')
                 
-                # Transform data rows
-                for line in raw_lines[1:]:
-                    if not line.strip():
-                        # Empty line
-                        f_out.write(line)
+                # Process and write data rows
+                for row in rows[1:]:
+                    if not row:
+                        f_out.write('\n')
                         continue
                     
-                    # Parse row using csv.reader to handle quoted values correctly
-                    row = next(csv.reader([line.strip()]))
-                    
-                    transformed_cells = []
+                    # Build output row
+                    output_parts = []
                     for col_idx, cell in enumerate(row):
-                        if col_idx < len(header_types):
-                            col_type = header_types[col_idx]
-                            
-                            # Check if this is a boolean column
-                            if 'bool' in col_type.lower():
-                                # Boolean column: 0 -> false, 1 -> true
-                                if cell == '0':
-                                    transformed_cells.append('false')
-                                elif cell == '1':
-                                    transformed_cells.append('true')
-                                else:
-                                    transformed_cells.append(cell)
-                            elif 'string' in col_type.lower():
-                                # String column: always quote (including empty)
-                                if cell == '' or cell == '""':
-                                    # Empty string -> quoted empty string
-                                    transformed_cells.append('""')
-                                else:
-                                    # Add quotes for string columns
-                                    transformed_cells.append(f'"{cell}"')
-                            elif cell == '""' or cell == '':
-                                # Empty string -> quoted empty string
-                                transformed_cells.append('""')
+                        if col_idx >= len(header_types):
+                            # Extra columns beyond header - write as-is
+                            output_parts.append(cell if cell else '""')
+                            continue
+                        
+                        col_type = header_types[col_idx].lower()
+                        
+                        # Handle different column types
+                        if 'bool' in col_type:
+                            # Boolean: 0 -> false, 1 -> true (no quotes)
+                            if cell == '0':
+                                output_parts.append('false')
+                            elif cell == '1':
+                                output_parts.append('true')
                             else:
-                                transformed_cells.append(cell)
+                                output_parts.append(cell)
+                        
+                        elif 'string' in col_type:
+                            # String: always quoted
+                            if not cell or cell == '""':
+                                output_parts.append('""')
+                            else:
+                                # Escape quotes in the string by doubling them
+                                escaped = cell.replace('"', '""')
+                                output_parts.append(f'"{escaped}"')
+                        
+                        elif 'empty' in col_type:
+                            # Empty column: always ""
+                            output_parts.append('""')
+                        
+                        elif 'int' in col_type or 'float' in col_type:
+                            # Numeric: never quoted
+                            if not cell or cell == '""':
+                                output_parts.append('""')
+                            else:
+                                output_parts.append(cell)
+                        
                         else:
-                            transformed_cells.append(cell)
+                            # Unknown type: use as-is
+                            if not cell:
+                                output_parts.append('""')
+                            else:
+                                output_parts.append(cell)
                     
-                    # Write row manually to preserve quotes
-                    f_out.write(','.join(transformed_cells) + '\n')
+                    # Write the row
+                    f_out.write(','.join(output_parts) + '\n')
+                    
         except Exception as e:
             print(f"Error transforming CSV {source_file}: {e}")
             import traceback

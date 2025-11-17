@@ -441,8 +441,24 @@ class BasicInfoPage(QWizardPage):
         # ID
         self.id_spin = QSpinBox()
         self.id_spin.setRange(1, 99999)
-        # Find next available ID
+        # Find next available ID - check both base game and DLC
         existing_ids = wizard.loader.get_all_digimon_ids()
+        # Also check DLC IDs
+        try:
+            from data_loader import DLCExporter
+            dlc_exporter = DLCExporter(wizard.loader)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            if dlc_status_file.exists():
+                dlc_rows = wizard.loader.load_csv(dlc_status_file)
+                for row in dlc_rows[1:]:  # Skip header
+                    if len(row) > 0 and row[0]:
+                        try:
+                            existing_ids.append(int(row[0]))
+                        except ValueError:
+                            continue
+        except Exception:
+            pass  # If DLC check fails, just use base game IDs
         next_id = max(existing_ids) + 1 if existing_ids else 1000
         self.id_spin.setValue(next_id)
         layout.addRow("🆔 Digimon ID:", self.id_spin)
@@ -625,7 +641,7 @@ class ResistancesPage(QWizardPage):
         super().__init__()
         self.wizard = wizard
         self.setTitle("🛡️ Step 5: Elemental Resistances")
-        self.setSubTitle("Set elemental resistances (0=Normal, 1=Weak 2x, 3=Resist 0.5x)")
+        self.setSubTitle("Set elemental resistances (0=Normal, 1=Weak 1.5x, 2=Very Weak 2x, 3=Resist 0.5x, 4=Immune)")
         
         layout = QGridLayout()
         
@@ -634,11 +650,10 @@ class ResistancesPage(QWizardPage):
         
         resistance_labels = {
             0: "Normal (1.0x)",
-            1: "Weak (2.0x)",
-            2: "Slightly Weak (1.5x)",
+            1: "Weak (1.5x)",
+            2: "Very Weak (2.0x)",
             3: "Resist (0.5x)",
-            4: "Strong Resist (0.25x)",
-            5: "Immune (0.0x)"
+            4: "Immune (0.0x)"
         }
         
         for i, resist in enumerate(resistances):
@@ -2021,8 +2036,42 @@ class DigimonEditor(QMainWindow):
         
         layout.addWidget(stats_group)
         
+        # Growth Pattern Group
+        growth_group = QGroupBox("📈 Growth Pattern")
+        growth_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #f093fb;
+                border-radius: 8px;
+                margin-top: 12px;
+                padding-top: 15px;
+                background-color: white;
+                font-size: 11pt;
+            }
+            QGroupBox::title {
+                color: #c967cc;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 8px;
+                background-color: white;
+            }
+        """)
+        growth_layout = QHBoxLayout(growth_group)
+        
+        growth_label = QLabel("Growth Pattern (determines stat gains per level):")
+        growth_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        growth_layout.addWidget(growth_label)
+        
+        self.growth_pattern_combo = QComboBox()
+        for i in range(1, 19):  # Growth patterns 1-18
+            self.growth_pattern_combo.addItem(f"Pattern {i}", i)
+        growth_layout.addWidget(self.growth_pattern_combo)
+        growth_layout.addStretch()
+        
+        layout.addWidget(growth_group)
+        
         # Elemental Resistances Group
-        resist_group = QGroupBox("Elemental Resistances (0=Normal, 1=Weak 2x, 3=Resist 0.5x)")
+        resist_group = QGroupBox("Elemental Resistances (0=Normal, 1=Weak 1.5x, 2=Very Weak 2x, 3=Resist 0.5x, 4=Immune)")
         resist_layout = QGridLayout(resist_group)
         
         # Create resistance spinboxes with element names
@@ -2031,11 +2080,10 @@ class DigimonEditor(QMainWindow):
         
         resistance_labels = {
             0: "Normal (1.0x)",
-            1: "Weak (2.0x)",
-            2: "Slightly Weak (1.5x)",
+            1: "Weak (1.5x)",
+            2: "Very Weak (2.0x)",
             3: "Resist (0.5x)",
-            4: "Strong Resist (0.25x)",
-            5: "Immune (0.0x)"
+            4: "Immune (0.0x)"
         }
         
         for i, resist in enumerate(resistances):
@@ -2635,6 +2683,7 @@ class DigimonEditor(QMainWindow):
         buff_layout.setSpacing(8)
         
         self.buff_set_widgets = []
+        self.buff_name_labels = []
         buff_icons = ["1️⃣", "2️⃣", "3️⃣", "4️⃣", "5️⃣"]
         for i in range(5):
             buff_widget = QWidget()
@@ -2649,8 +2698,30 @@ class DigimonEditor(QMainWindow):
             buff_set_edit = QSpinBox()
             buff_set_edit.setRange(0, 9999)
             buff_set_edit.setObjectName(f"buff_set_{i}")
-            buff_set_edit.setMinimumWidth(150)
+            buff_set_edit.setMinimumWidth(100)
             buff_widget_layout.addWidget(buff_set_edit)
+            
+            # Add label to show buff name
+            buff_name_label = QLabel("")
+            buff_name_label.setObjectName(f"buff_name_{i}")
+            buff_name_label.setStyleSheet("""
+                QLabel {
+                    color: #667eea;
+                    font-weight: bold;
+                    font-size: 10pt;
+                    padding: 5px 10px;
+                    background-color: #e7f5ff;
+                    border-radius: 4px;
+                    border-left: 3px solid #667eea;
+                }
+            """)
+            buff_name_label.setMinimumWidth(200)
+            buff_widget_layout.addWidget(buff_name_label)
+            self.buff_name_labels.append(buff_name_label)
+            
+            # Connect to update buff name when value changes
+            buff_set_edit.valueChanged.connect(lambda v, idx=i: self.update_buff_name_display(idx, v))
+            
             buff_widget_layout.addStretch()
             
             self.buff_set_widgets.append(buff_set_edit)
@@ -3817,6 +3888,13 @@ class DigimonEditor(QMainWindow):
         self.stat_widgets["spi"].setValue(digimon.base_spi)
         self.stat_widgets["spd"].setValue(digimon.base_spd)
         
+        # Growth Pattern
+        growth_index = self.growth_pattern_combo.findData(digimon.growth_pattern_id)
+        if growth_index >= 0:
+            self.growth_pattern_combo.setCurrentIndex(growth_index)
+        else:
+            self.growth_pattern_combo.setCurrentIndex(0)  # Default to pattern 1
+        
         # Resistances
         self.resist_widgets["null"].setValue(digimon.res_null)
         self.resist_widgets["fire"].setValue(digimon.res_fire)
@@ -3966,8 +4044,23 @@ class DigimonEditor(QMainWindow):
         # Use template but with new ID and name
         digimon = template_digimon
         
-        # Find the next available ID
+        # Find the next available ID - check both base game and DLC
         existing_ids = self.loader.get_all_digimon_ids()
+        # Also check DLC IDs
+        try:
+            dlc_exporter = DLCExporter(self.loader)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            if dlc_status_file.exists():
+                dlc_rows = self.loader.load_csv(dlc_status_file)
+                for row in dlc_rows[1:]:  # Skip header
+                    if len(row) > 0 and row[0]:
+                        try:
+                            existing_ids.append(int(row[0]))
+                        except ValueError:
+                            continue
+        except Exception:
+            pass  # If DLC check fails, just use base game IDs
         next_id = max(existing_ids) + 1 if existing_ids else 1000
         
         digimon.id = next_id
@@ -4205,6 +4298,7 @@ class DigimonEditor(QMainWindow):
         self.current_digimon.base_int = self.stat_widgets["int"].value()
         self.current_digimon.base_spi = self.stat_widgets["spi"].value()
         self.current_digimon.base_spd = self.stat_widgets["spd"].value()
+        self.current_digimon.growth_pattern_id = self.growth_pattern_combo.currentData() if self.growth_pattern_combo.currentData() is not None else 1
         
         # Resistances
         self.current_digimon.res_null = self.resist_widgets["null"].value()
@@ -4839,6 +4933,36 @@ class DigimonEditor(QMainWindow):
         if skill_id:
             self.advanced_skill_id_edit.setValue(skill_id)
             # This will trigger update_advanced_skill_display automatically
+    
+    def update_buff_name_display(self, buff_index: int, buff_set_id: int):
+        """Update the buff name label when buff set ID changes"""
+        if buff_index < len(self.buff_name_labels):
+            if buff_set_id > 0:
+                # Try to load buff set and display first buff effect
+                try:
+                    buff_set_file = self.loader.data_path / "battle_skill.mbe" / "02_buff_set.csv"
+                    if buff_set_file.exists():
+                        rows = self.loader.load_csv(buff_set_file)
+                        # Find the buff set row
+                        for row in rows[1:]:  # Skip header
+                            if len(row) > 0 and row[0]:
+                                try:
+                                    set_id = int(row[0])
+                                    if set_id == buff_set_id:
+                                        # Get first buff effect (column 6)
+                                        if len(row) > 6 and row[6]:
+                                            buff_effect_id = int(row[6])
+                                            buff_name = self.loader.get_buff_name(buff_effect_id)
+                                            self.buff_name_labels[buff_index].setText(f"Set {buff_set_id}: {buff_name}...")
+                                            return
+                                except (ValueError, IndexError):
+                                    continue
+                    # If not found, just show the set ID
+                    self.buff_name_labels[buff_index].setText(f"Set {buff_set_id}")
+                except Exception as e:
+                    self.buff_name_labels[buff_index].setText(f"Set {buff_set_id}")
+            else:
+                self.buff_name_labels[buff_index].setText("")
     
     def update_advanced_skill_display(self):
         """Update advanced skill display when skill ID changes"""
