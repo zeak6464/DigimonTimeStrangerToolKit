@@ -1,21 +1,25 @@
 """
 Game Randomizer GUI - Comprehensive randomizer with 9 randomization options
 Features:
-- Field Encounters (randomizes which encounters appear in each field location + customizable stat scaling 1%-500%)
-- Boss Digimon (randomizes which Digimon appear as bosses while keeping scripts intact)
+- Field Encounters (MIXED randomization: overworld model + random variety in battle)
+- Boss Digimon (randomizes which Digimon appear as bosses while keeping scripts intact - FULL RANDOM)
 - Evolution & De-evolution Paths (every Digimon gets 6 targets)
 - Digimon Base Stats
 - Battle Skills & Skill Learnsets
 - Remove Evolution Requirements
 - Treasure Chests & Shop Inventory
 
-Note: Field encounters randomization:
+Note: Field encounters randomization (MIXED MODE):
 - Randomizes which encounter group appears at each field location (field_battle_*/01_field_symbol_enemy.csv)
-- Balanced mode keeps similar power level encounters (±30%)
+- Keeps enemy slot 1 intact (overworld model matches battle enemy 1)
+- Randomizes enemy slots 2-6 for variety (fight 1 matching + others random)
+- Example: See Agumon overworld → Fight 1 Agumon + 2 random Digimon
 - Scales enemy stats by user-defined percentage (1% = very weak, 500% = very strong)
-- PROTECTS boss/event encounters from being used as replacements
-- Boss Digimon option changes WHICH Digimon the boss is (enemy_parameter column 2)
-- Overworld Digimon models will match the encounter you're about to fight
+- PROTECTS boss/event encounters (encounters with actual battle scripts, not "battle_00000000" placeholder)
+- PROTECTS story-flagged encounters (encounters with FLAG_MAIN_, FLAG_SUB_, etc. in conditions file)
+- Story-flagged encounters keep their encounter groups but individual Digimon within them are still randomized
+- Tutorial and normal field encounters with placeholder scripts ARE randomized
+- Boss Digimon option changes WHICH Digimon the boss is (enemy_parameter column 2) - FULL RANDOM
 """
 
 import sys
@@ -40,9 +44,11 @@ class RandomizerThread(QThread):
     modified_files = pyqtSignal(list)  # List of modified .mbe folders
     
     def __init__(self, data_path: Path, backup: bool, 
-                 randomize_encounters: bool = True, balance_encounters: bool = True,
+                 patch_data_path: Path = None,
+                 randomize_encounters: bool = True,
                  encounter_stat_scale: int = 100,
-                 randomize_boss_digimon: bool = False, balance_boss_digimon: bool = True,
+                 include_boss_encounters: bool = False,
+                 randomize_boss_digimon: bool = False,
                  randomize_evolutions: bool = False, balance_evolutions: bool = True,
                  randomize_deevolutions: bool = False, balance_deevolutions: bool = True,
                  randomize_stats: bool = False, balance_stats: bool = True,
@@ -52,13 +58,15 @@ class RandomizerThread(QThread):
                  randomize_treasure: bool = False, balance_treasure: bool = True,
                  randomize_shops: bool = False, balance_shops: bool = True):
         super().__init__()
-        self.data_path = data_path
+        self.data_path = data_path  # app_0/data for field_battle files
+        self.patch_data_path = patch_data_path if patch_data_path else data_path  # patch/data for core files
         self.backup = backup
         self.randomize_encounters = randomize_encounters
-        self.balance_encounters = balance_encounters
+        self.balance_encounters = False  # Always full random for encounters
         self.encounter_stat_scale = encounter_stat_scale
+        self.include_boss_encounters = include_boss_encounters
         self.randomize_boss_digimon = randomize_boss_digimon
-        self.balance_boss_digimon = balance_boss_digimon
+        self.balance_boss_digimon = False  # Always full random for bosses
         self.randomize_evolutions = randomize_evolutions
         self.balance_evolutions = balance_evolutions
         self.randomize_deevolutions = randomize_deevolutions
@@ -86,7 +94,13 @@ class RandomizerThread(QThread):
     
     def get_file_path(self, folder: str, *possible_names: str) -> Path:
         """Get file path supporting multiple naming conventions (e.g., 00_ vs 000_)"""
-        folder_path = self.data_path / folder
+        # Core files (digimon_status, evolution, etc.) are in patch_data_path
+        # Field battle files are in data_path (app_0/data)
+        if folder.startswith("field_battle_"):
+            folder_path = self.data_path / folder
+        else:
+            folder_path = self.patch_data_path / folder
+        
         for name in possible_names:
             file_path = folder_path / name
             if file_path.exists():
@@ -140,24 +154,23 @@ class RandomizerThread(QThread):
         """Collect all valid encounter IDs from battle_enemy.mbe/01_encount_group.csv"""
         all_values = set()
         
-        # Load valid encounter IDs from the encounter group file
-        encounter_file = self.data_path.parent / "data" / "battle_enemy.mbe" / "01_encount_group.csv"
-        
-        # If data_path is already 'data', don't go up a level
-        if self.data_path.name == "data":
-            encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        elif (self.data_path / "battle_enemy.mbe" / "01_encount_group.csv").exists():
-            encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        # Always load from data-backup folder (which has the complete battle_enemy.mbe)
+        # The dsts-loader/patch/data folder only contains modified files
+        # data_path is now dsts-loader/app_0/data, so go up 3 levels to Randomizer root
+        backup_path = self.data_path.parent.parent.parent / "data-backup"
+        encounter_file = backup_path / "battle_enemy.mbe" / "01_encount_group.csv"
         
         if encounter_file.exists():
             rows = self.load_csv(encounter_file)
             for row in rows[1:]:  # Skip header
                 if len(row) > 0 and row[0]:  # Column 0 is encounter ID
-                    encounter_id = row[0]
+                    encounter_id = row[0].strip().strip('"')
                     # Exclude tutorial encounters (IDs starting with 1010)
                     if not encounter_id.startswith("1010"):
                         all_values.add(encounter_id)
         else:
+            self.progress.emit(f"❌ ERROR: Could not find battle_enemy.mbe at {encounter_file}")
+            self.progress.emit(f"   Make sure data-backup folder exists with complete game data!")
             # Fallback: collect from field_battle files if encounter file not found
             field_battle_folders = self.get_all_field_battle_folders()
             for folder in field_battle_folders:
@@ -166,7 +179,7 @@ class RandomizerThread(QThread):
                     rows = self.load_csv(csv_file)
                     for row in rows[1:]:  # Skip header
                         if len(row) > 1 and row[1]:
-                            encounter_id = row[1]
+                            encounter_id = row[1].strip().strip('"')
                             # Exclude tutorial encounters
                             if not encounter_id.startswith("1010"):
                                 all_values.add(encounter_id)
@@ -181,12 +194,21 @@ class RandomizerThread(QThread):
         # Randomize field encounters
         if self.randomize_encounters:
             # Randomize which encounters appear in field locations
+            # This keeps overworld models matching battle enemies!
             self.progress.emit("\n" + "="*50)
             self.progress.emit("🎲 RANDOMIZING FIELD ENCOUNTER PLACEMENTS")
             self.progress.emit("="*50)
             enc_randomized, enc_files = self.randomize_field_encounters()
             total_randomized += enc_randomized
             total_files += enc_files
+            
+            # Randomize additional enemies in each encounter (keep slot 1 for overworld)
+            self.progress.emit("\n" + "="*50)
+            self.progress.emit("🎲 RANDOMIZING ADDITIONAL ENCOUNTER ENEMIES")
+            self.progress.emit("="*50)
+            additional_randomized = self.randomize_encounter_additional_enemies()
+            total_randomized += additional_randomized
+            total_files += 1
             
             # Scale enemy parameters by user-defined percentage
             self.progress.emit("\n" + "="*50)
@@ -283,8 +305,8 @@ class RandomizerThread(QThread):
     def get_encounter_power(self, encounter_id: str) -> int:
         """Get the total power of an encounter by summing enemy stats"""
         try:
-            encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-            enemy_param_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+            encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+            enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
             
             if not encounter_file.exists() or not enemy_param_file.exists():
                 return -1
@@ -337,6 +359,25 @@ class RandomizerThread(QThread):
         except Exception as e:
             return -1
     
+    def get_flagged_encounters_from_field_folder(self, folder: Path) -> set:
+        """Get encounter IDs that have story flags (should preserve encounter groups)"""
+        flagged_encounters = set()
+        conditions_file = folder / "00_field_symbol_enemy_conditions.csv"
+        
+        if conditions_file.exists():
+            rows = self.load_csv(conditions_file)
+            for row in rows[1:]:  # Skip header
+                if len(row) > 24:  # Column 24 contains flag names
+                    flag_value = row[24].strip().strip('"')
+                    # If this encounter has a story flag (FLAG_MAIN_, FLAG_SUB_, etc.)
+                    if flag_value and flag_value.startswith('FLAG_'):
+                        # Get the encounter ID (column 0)
+                        encounter_id = row[0].strip('"')
+                        if encounter_id:
+                            flagged_encounters.add(encounter_id)
+        
+        return flagged_encounters
+    
     def randomize_field_encounters(self) -> tuple:
         """Randomize field battle encounters"""
         self.progress.emit("🔍 Collecting encounter IDs...")
@@ -348,16 +389,25 @@ class RandomizerThread(QThread):
         
         self.progress.emit(f"✅ Found {len(all_encounters)} unique encounter IDs")
         
-        # Identify boss/event encounters (those with battle scripts in column 75)
+        # Identify boss/event encounters (those with ACTUAL battle scripts in column 75)
         boss_encounters = set()
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        if encounter_file.exists():
-            rows = self.load_csv(encounter_file)
-            for i in range(1, len(rows)):
-                if len(rows[i]) > 75 and rows[i][75] and rows[i][75].strip() not in ['""', '']:
-                    encounter_id = rows[i][0].strip('"')
-                    boss_encounters.add(encounter_id)
-            self.progress.emit(f"🛡️ Protected {len(boss_encounters)} boss/event encounters from randomization")
+        if not self.include_boss_encounters:
+            # Read from data-backup (complete data)
+            # data_path is now dsts-loader/app_0/data, so go up 3 levels to Randomizer root
+            backup_path = self.data_path.parent.parent.parent / "data-backup"
+            encounter_file = backup_path / "battle_enemy.mbe" / "01_encount_group.csv"
+            if encounter_file.exists():
+                rows = self.load_csv(encounter_file)
+                for i in range(1, len(rows)):
+                    if len(rows[i]) > 75 and rows[i][75]:
+                        script_value = rows[i][75].strip().strip('"')
+                        # Only treat as boss if it has a REAL script (not empty, "", or battle_00000000 placeholder)
+                        if script_value and script_value not in ['', '""', 'battle_00000000']:
+                            encounter_id = rows[i][0].strip('"')
+                            boss_encounters.add(encounter_id)
+                self.progress.emit(f"🛡️ Protected {len(boss_encounters)} boss/event encounters from randomization")
+        else:
+            self.progress.emit(f"⚠️ WARNING: Boss encounters will be randomized (may break scripts!)")
         
         # If balancing is enabled, pre-calculate encounter powers
         encounter_power_map = {}
@@ -382,26 +432,34 @@ class RandomizerThread(QThread):
         
         field_battle_folders = self.get_all_field_battle_folders()
         total_randomized = 0
+        folders_with_encounters = 0
+        skipped_folders = 0
+        total_flagged = 0
         
         for folder in field_battle_folders:
             csv_file = folder / "01_field_symbol_enemy.csv"
             
             if not csv_file.exists():
+                skipped_folders += 1
                 continue
+            
+            # Load and check if there are encounters
+            rows = self.load_csv(csv_file)
+            
+            if len(rows) < 2:
+                skipped_folders += 1
+                continue
+            
+            # Get encounters with story flags from this field folder
+            flagged_encounters = self.get_flagged_encounters_from_field_folder(folder)
+            if flagged_encounters:
+                total_flagged += len(flagged_encounters)
             
             # Backup if requested
             if self.backup:
                 backup_file = csv_file.with_suffix('.csv.backup')
                 if not backup_file.exists():
-                    rows = self.load_csv(csv_file)
                     self.save_csv(backup_file, rows)
-                    self.progress.emit(f"💾 Backed up: {folder.name}")
-            
-            # Load and randomize
-            rows = self.load_csv(csv_file)
-            
-            if len(rows) < 2:
-                continue
             
             randomized_count = 0
             
@@ -412,6 +470,13 @@ class RandomizerThread(QThread):
                     # Skip boss/event encounters - they must remain unchanged
                     if original_encounter in boss_encounters:
                         continue
+                    
+                    # Skip encounters with story flags - they must keep their encounter groups
+                    # (but individual Digimon within them can still be randomized later)
+                    if len(rows[i]) > 0:
+                        overworld_encounter_id = rows[i][0].strip('"')
+                        if overworld_encounter_id in flagged_encounters:
+                            continue
                     
                     # Use ORIGINAL encounter power for balancing
                     if self.balance_encounters and encounter_power_map:
@@ -441,17 +506,171 @@ class RandomizerThread(QThread):
                     
                     randomized_count += 1
             
-            self.save_csv(csv_file, rows)
-            self.progress.emit(f"✅ {folder.name}: {randomized_count} encounters")
-            total_randomized += randomized_count
-        
-        # Track all modified field_battle folders
-        if field_battle_folders and total_randomized > 0:
-            for folder in field_battle_folders:
+            # Only show folders that actually had encounters randomized
+            if randomized_count > 0:
+                self.save_csv(csv_file, rows)
+                self.progress.emit(f"✅ {folder.name}: {randomized_count} encounters")
+                folders_with_encounters += 1
+                total_randomized += randomized_count
+                
+                # Track modified folder
                 if folder not in self.modified_folders:
                     self.modified_folders.append(folder)
+            else:
+                skipped_folders += 1
         
-        return total_randomized, len(field_battle_folders)
+        # Summary
+        if total_flagged > 0:
+            self.progress.emit(f"🚩 Protected {total_flagged} story-flagged encounters (preserve encounter groups)")
+        if skipped_folders > 0:
+            self.progress.emit(f"ℹ️ Skipped {skipped_folders} empty/boss-only field locations")
+        
+        return total_randomized, folders_with_encounters
+    
+    def randomize_encounter_additional_enemies(self) -> int:
+        """Randomize enemies in slots 2-6 of encounters (keep slot 1 for overworld model)
+        
+        This allows for variety in battles while keeping the overworld model consistent.
+        Example: See Agumon overworld → Fight 1 Agumon + 2 random Digimon
+        """
+        # Read from data-backup for reference data, write to patch_data_path
+        # data_path is now dsts-loader/app_0/data, so go up 3 levels to Randomizer root
+        backup_path = self.data_path.parent.parent.parent / "data-backup"
+        encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        digimon_status_file = backup_path / "digimon_status.mbe" / "000_digimon_status_data.csv"
+        if not digimon_status_file.exists():
+            digimon_status_file = backup_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        
+        if not encounter_file.exists() or not enemy_param_file.exists():
+            self.progress.emit("❌ Required files not found!")
+            return 0
+        
+        # Step 1: Identify boss encounters (those with ACTUAL battle scripts in column 75)
+        encounter_rows = self.load_csv(encounter_file)
+        boss_encounter_rows = set()
+        
+        if not self.include_boss_encounters:
+            for i in range(1, len(encounter_rows)):
+                if len(encounter_rows[i]) > 75 and encounter_rows[i][75]:
+                    script_value = encounter_rows[i][75].strip().strip('"')
+                    # Only treat as boss if it has a REAL script (not empty, "", or battle_00000000 placeholder)
+                    if script_value and script_value not in ['', '""', 'battle_00000000']:
+                        boss_encounter_rows.add(i)
+            
+            self.progress.emit(f"🛡️ Protecting {len(boss_encounter_rows)} boss encounters from randomization")
+        else:
+            self.progress.emit(f"⚠️ WARNING: Boss encounters will be randomized (may break scripts!)")
+        
+        # Step 2: Get boss Digimon IDs from digimon_status (column 5 = boss flag)
+        # AND from model names (chr ID column 3)
+        boss_digimon_ids = set()
+        if digimon_status_file.exists():
+            status_rows = self.load_csv(digimon_status_file)
+            for row in status_rows[1:]:
+                if len(row) > 5:
+                    try:
+                        digimon_id = row[0].strip().strip('"')
+                        boss_flag = str(row[5]).strip().strip('"') if row[5] else "0"
+                        
+                        # Column 5: 0=Normal, 1=Boss/Special
+                        if boss_flag == "1":
+                            boss_digimon_ids.add(digimon_id)
+                        
+                        # Additional safety: filter by model ID (column 3) for boss variants
+                        if len(row) > 3:
+                            model_id = str(row[3]).strip().strip('"')
+                            # Filter boss model IDs (chr800+ are bosses, or models with specific patterns)
+                            if model_id:
+                                # Extract numeric ID from chr### format
+                                try:
+                                    chr_num = int(model_id.replace('chr', '').replace('"', ''))
+                                    # chr800-chr950 range are all boss/special variants
+                                    if chr_num >= 800:
+                                        boss_digimon_ids.add(digimon_id)
+                                except:
+                                    pass
+                    except Exception as e:
+                        pass
+        else:
+            self.progress.emit(f"⚠️ WARNING: digimon_status file not found, cannot filter boss Digimon!")
+        
+        if boss_digimon_ids:
+            self.progress.emit(f"🛡️ Filtering out {len(boss_digimon_ids)} boss-type Digimon from randomization pool")
+        else:
+            self.progress.emit(f"⚠️ WARNING: No boss Digimon detected to filter! Check if digimon_status.csv exists.")
+        
+        # Step 3: Collect non-boss enemy IDs
+        enemy_param_rows = self.load_csv(enemy_param_file)
+        all_enemy_ids = []
+        boss_enemies_filtered = 0
+        
+        for row in enemy_param_rows[1:]:
+            if len(row) > 2:
+                enemy_id = str(row[0]).strip().strip('"')
+                digimon_id = str(row[2]).strip().strip('"')  # Column 2 = Digimon ID reference
+                
+                # Only include if enemy ID is valid AND the Digimon is NOT a boss type
+                if enemy_id and enemy_id not in ['', '0', '-1']:
+                    if digimon_id in boss_digimon_ids:
+                        boss_enemies_filtered += 1
+                    else:
+                        all_enemy_ids.append(enemy_id)
+        
+        if not all_enemy_ids:
+            self.progress.emit("❌ No non-boss enemy IDs found!")
+            return 0
+        
+        self.progress.emit(f"📊 Found {len(all_enemy_ids)} non-boss enemy types to choose from")
+        if boss_enemies_filtered > 0:
+            self.progress.emit(f"🚫 Filtered out {boss_enemies_filtered} boss enemy types")
+        
+        # Step 3: Backup encounter file
+        if self.backup:
+            backup_file = encounter_file.with_suffix('.csv.backup')
+            if not backup_file.exists():
+                self.save_csv(backup_file, encounter_rows)
+                self.progress.emit("💾 Backed up: encount_group.csv")
+        
+        # Step 4: Randomize enemy slots 2-6 (columns 14, 26, 38, 50, 62)
+        # Keep slot 1 (column 2) unchanged for overworld model
+        additional_enemy_columns = [14, 26, 38, 50, 62]
+        randomized_count = 0
+        
+        for i in range(1, len(encounter_rows)):
+            # Skip boss encounters
+            if i in boss_encounter_rows:
+                continue
+            
+            row = encounter_rows[i]
+            row_changed = False
+            
+            # Randomize each additional enemy slot
+            for col in additional_enemy_columns:
+                if len(row) > col and row[col]:
+                    original_enemy = row[col].strip('"')
+                    
+                    # Only randomize if there's an enemy in this slot
+                    if original_enemy and original_enemy not in ['', '0', '-1']:
+                        # Pick a random different enemy
+                        row[col] = random.choice(all_enemy_ids)
+                        row_changed = True
+            
+            if row_changed:
+                randomized_count += 1
+        
+        # Step 5: Save
+        self.save_csv(encounter_file, encounter_rows)
+        self.progress.emit(f"✅ Randomized additional enemies in {randomized_count} encounters!")
+        self.progress.emit(f"   Slot 1 kept intact (overworld models match)")
+        self.progress.emit(f"   Slots 2-6 randomized for variety")
+        
+        # Track modified folder
+        folder = self.patch_data_path / "battle_enemy.mbe"
+        if folder not in self.modified_folders:
+            self.modified_folders.append(folder)
+        
+        return randomized_count
     
     def get_encounter_chapter_mapping(self) -> dict:
         """Map encounter IDs to their minimum chapter number"""
@@ -494,27 +713,33 @@ class RandomizerThread(QThread):
     
     def scale_enemy_parameters_by_percentage(self) -> int:
         """Scale enemy stats by user-defined percentage (1%-500%)"""
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        enemy_param_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
         
         if not encounter_file.exists() or not enemy_param_file.exists():
             self.progress.emit("❌ Required files not found!")
             return 0
         
-        # Collect enemy IDs from encounter groups (excluding bosses)
+        # Collect enemy IDs from encounter groups
         encounter_rows = self.load_csv(encounter_file)
         enemy_id_columns = [2, 14, 26, 38, 50, 62]
         
-        # Identify boss encounters to exclude from scaling
+        # Identify boss encounters to exclude from scaling (unless user wants them included)
         boss_encounter_rows = set()
-        for i in range(1, len(encounter_rows)):
-            if len(encounter_rows[i]) > 75 and encounter_rows[i][75] and encounter_rows[i][75].strip() not in ['""', '']:
-                boss_encounter_rows.add(i)
+        if not self.include_boss_encounters:
+            for i in range(1, len(encounter_rows)):
+                if len(encounter_rows[i]) > 75 and encounter_rows[i][75]:
+                    script_value = encounter_rows[i][75].strip().strip('"')
+                    # Only treat as boss if it has a REAL script (not empty, "", or battle_00000000 placeholder)
+                    if script_value and script_value not in ['', '""', 'battle_00000000']:
+                        boss_encounter_rows.add(i)
+            
+            if boss_encounter_rows:
+                self.progress.emit(f"🛡️ Protecting {len(boss_encounter_rows)} boss encounters from stat scaling")
+        else:
+            self.progress.emit(f"⚠️ Boss encounters will be scaled (may affect difficulty!)")
         
-        if boss_encounter_rows:
-            self.progress.emit(f"🛡️ Protecting {len(boss_encounter_rows)} boss encounters from stat scaling")
-        
-        # Collect all non-boss enemy IDs
+        # Collect enemy IDs to scale
         enemy_ids_to_scale = set()
         for i in range(1, len(encounter_rows)):
             if i not in boss_encounter_rows:
@@ -570,7 +795,7 @@ class RandomizerThread(QThread):
         self.progress.emit(f"✅ Scaled {scaled_count} enemies to {self.encounter_stat_scale}% of their original stats!")
         
         # Track modified folder
-        folder = self.data_path / "battle_enemy.mbe"
+        folder = self.patch_data_path / "battle_enemy.mbe"
         if folder not in self.modified_folders:
             self.modified_folders.append(folder)
         
@@ -582,8 +807,8 @@ class RandomizerThread(QThread):
         This keeps encounter structure intact while randomizing the actual Digimon that appears.
         Boss enemy IDs stay the same, but point to different Digimon IDs.
         """
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        enemy_param_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
         digimon_status_file = self.get_file_path("digimon_status.mbe", "000_digimon_status_data.csv", "00_digimon_status_data.csv")
         
         if not encounter_file.exists() or not enemy_param_file.exists():
@@ -611,45 +836,24 @@ class RandomizerThread(QThread):
         
         self.progress.emit(f"🎯 Found {len(boss_enemy_ids)} boss enemy IDs to randomize")
         
-        # Step 2: Collect all Digimon IDs and their power levels from digimon_status
-        digimon_power = {}
+        # Step 2: Collect all Digimon IDs from digimon_status
+        all_digimon_ids = []
         if digimon_status_file.exists():
             status_rows = self.load_csv(digimon_status_file)
-            # Stat columns: 64(HP), 65(SP), 66(ATK), 67(DEF), 68(INT), 69(SPI), 70(SPD)
             for row in status_rows[1:]:
-                if len(row) > 70:
+                if len(row) > 0:
                     try:
                         digimon_id = row[0].strip('"')
                         if digimon_id and digimon_id not in ['', '0']:
-                            hp = int(row[64]) if row[64] and row[64] != '""' else 0
-                            sp = int(row[65]) if row[65] and row[65] != '""' else 0
-                            atk = int(row[66]) if row[66] and row[66] != '""' else 0
-                            defense = int(row[67]) if row[67] and row[67] != '""' else 0
-                            intelligence = int(row[68]) if row[68] and row[68] != '""' else 0
-                            spi = int(row[69]) if row[69] and row[69] != '""' else 0
-                            spd = int(row[70]) if row[70] and row[70] != '""' else 0
-                            
-                            total_power = (hp // 10) + sp + atk + defense + intelligence + spi + spd
-                            if total_power > 0:
-                                digimon_power[digimon_id] = total_power
+                            all_digimon_ids.append(digimon_id)
                     except:
                         pass
         
-        if not digimon_power:
+        if not all_digimon_ids:
             self.progress.emit("❌ No Digimon found for randomization!")
             return 0
         
-        self.progress.emit(f"📊 Found {len(digimon_power)} Digimon to choose from")
-        
-        # Group Digimon by power for balanced selection
-        digimon_by_power = {}
-        for digimon_id, power in digimon_power.items():
-            power_bracket = (power // 200) * 200
-            if power_bracket not in digimon_by_power:
-                digimon_by_power[power_bracket] = []
-            digimon_by_power[power_bracket].append(digimon_id)
-        
-        all_digimon_ids = list(digimon_power.keys())
+        self.progress.emit(f"📊 Found {len(all_digimon_ids)} Digimon to choose from")
         
         # Step 3: Backup and load enemy parameters
         if self.backup:
@@ -663,7 +867,7 @@ class RandomizerThread(QThread):
         if len(rows) < 2:
             return 0
         
-        # Step 4: Randomize Digimon ID (column 2) for boss enemies only
+        # Step 4: Randomize Digimon ID (column 2) for boss enemies only - FULL RANDOM MODE
         randomized_count = 0
         for i in range(1, len(rows)):
             if len(rows[i]) > 2:
@@ -671,52 +875,129 @@ class RandomizerThread(QThread):
                 
                 # Only randomize if this is a boss enemy
                 if enemy_id in boss_enemy_ids:
-                    original_digimon_id = rows[i][2].strip('"')
-                    
-                    # Get original power for balanced selection
-                    if self.balance_boss_digimon and original_digimon_id in digimon_power:
-                        original_power = digimon_power[original_digimon_id]
-                        
-                        # Find Digimon within ±40% power
-                        min_power = int(original_power * 0.6)
-                        max_power = int(original_power * 1.4)
-                        candidates = []
-                        
-                        for power_bracket in digimon_by_power:
-                            if min_power <= power_bracket <= max_power:
-                                candidates.extend(digimon_by_power[power_bracket])
-                        
-                        if candidates:
-                            rows[i][2] = random.choice(candidates)
-                            randomized_count += 1
-                        else:
-                            # Fallback: full random
-                            rows[i][2] = random.choice(all_digimon_ids)
-                            randomized_count += 1
-                    else:
-                        # Full random mode
-                        rows[i][2] = random.choice(all_digimon_ids)
-                        randomized_count += 1
+                    # Full random: pick any Digimon
+                    rows[i][2] = random.choice(all_digimon_ids)
+                    randomized_count += 1
         
         # Step 5: Save
         self.save_csv(enemy_param_file, rows)
         self.progress.emit(f"✅ Randomized {randomized_count} boss enemies!")
-        if self.balance_boss_digimon:
-            self.progress.emit(f"   Mode: Balanced (±40% power)")
-        else:
-            self.progress.emit(f"   Mode: Full Random")
+        self.progress.emit(f"   Mode: Full Random 🎲")
         
         # Track modified folder
-        folder = self.data_path / "battle_enemy.mbe"
+        folder = self.patch_data_path / "battle_enemy.mbe"
         if folder not in self.modified_folders:
             self.modified_folders.append(folder)
         
         return randomized_count
     
+    def randomize_field_encounter_enemies(self) -> int:
+        """Randomize individual Digimon in field encounters (EXCLUDES bosses to preserve scripts)"""
+        encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        digimon_status_file = self.get_file_path("digimon_status.mbe", "000_digimon_status_data.csv", "00_digimon_status_data.csv")
+        
+        if not encounter_file.exists() or not enemy_param_file.exists():
+            self.progress.emit("❌ Required files not found!")
+            return 0
+        
+        # Step 1: Identify boss encounters (those with battle scripts in column 75)
+        boss_encounter_rows = set()
+        encounter_rows = self.load_csv(encounter_file)
+        
+        for i in range(1, len(encounter_rows)):
+            if len(encounter_rows[i]) > 75 and encounter_rows[i][75] and encounter_rows[i][75].strip() not in ['""', '']:
+                boss_encounter_rows.add(i)
+        
+        self.progress.emit(f"🛡️ Protecting {len(boss_encounter_rows)} boss encounters from randomization")
+        
+        # Step 2: Collect all non-boss Digimon IDs
+        all_digimon_ids = []
+        if digimon_status_file.exists():
+            status_rows = self.load_csv(digimon_status_file)
+            # Check if this is a boss-type Digimon (column 5)
+            for row in status_rows[1:]:
+                if len(row) > 5:
+                    try:
+                        digimon_id = row[0].strip('"')
+                        # Column 5 = isBoss flag (skip boss-type Digimon)
+                        is_boss = row[5].strip('"') if row[5] else "0"
+                        
+                        if digimon_id and digimon_id not in ['', '0'] and is_boss == "0":
+                            all_digimon_ids.append(digimon_id)
+                    except:
+                        pass
+        
+        if not all_digimon_ids:
+            self.progress.emit("❌ No non-boss Digimon found!")
+            return 0
+        
+        self.progress.emit(f"📊 Found {len(all_digimon_ids)} non-boss Digimon to choose from")
+        
+        # Step 3: Collect all enemy IDs used in NON-BOSS encounters and map to Digimon IDs
+        enemy_param_rows = self.load_csv(enemy_param_file)
+        enemy_to_digimon = {}  # enemy_id -> digimon_id mapping
+        
+        for row in enemy_param_rows[1:]:
+            if len(row) > 2:
+                enemy_id = row[0].strip('"')
+                digimon_id = row[2].strip('"')
+                if enemy_id and digimon_id:
+                    enemy_to_digimon[enemy_id] = digimon_id
+        
+        # Step 4: Randomize Digimon IDs in enemy_parameter for non-boss encounters only
+        enemy_ids_to_randomize = set()
+        enemy_id_columns = [2, 14, 26, 38, 50, 62]
+        
+        # Collect enemy IDs from NON-BOSS encounters only
+        for i in range(1, len(encounter_rows)):
+            if i not in boss_encounter_rows:  # Skip boss encounters
+                for col in enemy_id_columns:
+                    if len(encounter_rows[i]) > col and encounter_rows[i][col]:
+                        enemy_id = encounter_rows[i][col].strip('"')
+                        if enemy_id and enemy_id not in ['-1', '0', '']:
+                            enemy_ids_to_randomize.add(enemy_id)
+        
+        if not enemy_ids_to_randomize:
+            self.progress.emit("⚠️ No non-boss enemies found")
+            return 0
+        
+        self.progress.emit(f"🎲 Randomizing {len(enemy_ids_to_randomize)} non-boss enemy types")
+        
+        # Backup
+        if self.backup:
+            backup_file = enemy_param_file.with_suffix('.csv.backup')
+            if not backup_file.exists():
+                rows = self.load_csv(enemy_param_file)
+                self.save_csv(backup_file, rows)
+                self.progress.emit("💾 Backed up: enemy_parameter.csv")
+        
+        # Randomize Digimon ID (column 2) for non-boss enemies only - FULL RANDOM MODE
+        randomized_count = 0
+        for i in range(1, len(enemy_param_rows)):
+            if len(enemy_param_rows[i]) > 2:
+                enemy_id = enemy_param_rows[i][0].strip('"')
+                
+                # Only randomize if this enemy is used in non-boss encounters
+                if enemy_id in enemy_ids_to_randomize:
+                    # Full random: pick any non-boss Digimon
+                    enemy_param_rows[i][2] = random.choice(all_digimon_ids)
+                    randomized_count += 1
+        
+        # Save
+        self.save_csv(enemy_param_file, enemy_param_rows)
+        self.progress.emit(f"✅ Randomized {randomized_count} non-boss enemy Digimon!")
+        self.progress.emit(f"   Boss encounters preserved to keep scripts working")
+        self.progress.emit(f"   Mode: Full Random 🎲")
+        
+        return randomized_count
+    
     def randomize_encounter_enemy_ids(self) -> int:
-        """Randomize which enemies appear in each encounter group (includes bosses!)"""
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
-        enemy_param_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        """DEPRECATED: Use randomize_field_encounter_enemies() or randomize_boss_digimon_ids() instead
+        
+        Randomize which enemies appear in each encounter group (includes bosses!)"""
+        encounter_file = self.patch_data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        enemy_param_file = self.patch_data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
         
         if not encounter_file.exists():
             self.progress.emit("❌ Encounter group file not found!")
@@ -838,7 +1119,7 @@ class RandomizerThread(QThread):
             self.progress.emit(f"   Cleared {cleared_events} battle event identifiers")
         
         # Track modified folder
-        folder = self.data_path / "battle_enemy.mbe"
+        folder = self.patch_data_path / "battle_enemy.mbe"
         if folder not in self.modified_folders:
             self.modified_folders.append(folder)
         
@@ -949,7 +1230,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "evolution.mbe"
+            folder = self.patch_data_path / "evolution.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1060,7 +1341,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder (same as evolution)
         if randomized_count > 0:
-            folder = self.data_path / "evolution.mbe"
+            folder = self.patch_data_path / "evolution.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1118,7 +1399,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "digimon_status.mbe"
+            folder = self.patch_data_path / "digimon_status.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1126,7 +1407,7 @@ class RandomizerThread(QThread):
     
     def randomize_skill_properties(self) -> int:
         """Randomize skill properties (power, SP cost, elements)"""
-        skill_file = self.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+        skill_file = self.patch_data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
         
         if not skill_file.exists():
             self.progress.emit("❌ Skill file not found!")
@@ -1180,7 +1461,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "battle_skill.mbe"
+            folder = self.patch_data_path / "battle_skill.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1188,7 +1469,7 @@ class RandomizerThread(QThread):
     
     def randomize_treasure_chests(self) -> int:
         """Randomize treasure chest contents"""
-        treasure_file = self.data_path / "field_treasure.mbe" / "02_field_treasure.csv"
+        treasure_file = self.patch_data_path / "field_treasure.mbe" / "02_field_treasure.csv"
         
         if not treasure_file.exists():
             self.progress.emit("❌ Treasure file not found!")
@@ -1240,7 +1521,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "field_treasure.mbe"
+            folder = self.patch_data_path / "field_treasure.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1248,7 +1529,7 @@ class RandomizerThread(QThread):
     
     def randomize_shop_inventory(self) -> int:
         """Randomize shop inventory"""
-        shop_file = self.data_path / "shop.mbe" / "01_shop_lineup.csv"
+        shop_file = self.patch_data_path / "shop.mbe" / "01_shop_lineup.csv"
         
         if not shop_file.exists():
             self.progress.emit("❌ Shop file not found!")
@@ -1300,7 +1581,7 @@ class RandomizerThread(QThread):
         
         # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "shop.mbe"
+            folder = self.patch_data_path / "shop.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1345,16 +1626,19 @@ class RandomizerThread(QThread):
         if len(rows) < 2:
             return 0
         
-        # Based on Time Stranger Data File Headers.txt (pairs of ID + slot/level columns)
-        signature_pairs = [(72, 74), (75, 77), (78, 80), (81, 83), (84, 86), (87, 89),
-                           (90, 92), (93, 95), (96, 98), (99, 101), (102, 104), (105, 107)]
-        generic_pairs = [(108, 110), (111, 113), (114, 116), (117, 119)]
-        id_columns = [col for col, _ in signature_pairs + generic_pairs]
+        # Based on Time Stranger Data File Headers.txt
+        # Format: (SkillID, empty, SlotNum/Level) × N
+        # Signature skills: columns 72-107 (12 skills, 3 columns each)
+        signature_skill_id_columns = [72, 75, 78, 81, 84, 87, 90, 93, 96, 99, 102, 105]
+        # Generic skills: columns 108-119 (4 skills, 3 columns each)
+        generic_skill_id_columns = [108, 111, 114, 117]
+        
+        all_skill_id_columns = signature_skill_id_columns + generic_skill_id_columns
         
         # Collect all skill IDs from the ID columns
         all_skills = set()
         for row in rows[1:]:
-            for col in id_columns:
+            for col in all_skill_id_columns:
                 if len(row) > col and row[col]:
                     try:
                         skill_id = int(row[col])
@@ -1370,14 +1654,14 @@ class RandomizerThread(QThread):
         
         self.progress.emit(f"📖 Found {len(all_skills)} unique skills")
         
-        # Randomize skill IDs in both signature and generic skill columns
+        # Randomize skill IDs ONLY (keep slot/level columns unchanged)
         randomized_count = 0
         for i in range(1, len(rows)):
             row = rows[i]
             row_changed = False
             
-            # Signature skills
-            for id_col, pointer_col in signature_pairs:
+            # Randomize all skill ID columns (both signature and generic)
+            for id_col in all_skill_id_columns:
                 if len(row) <= id_col:
                     continue
                 try:
@@ -1386,24 +1670,8 @@ class RandomizerThread(QThread):
                     continue
                 
                 if current_skill > 0:
-                    new_skill = str(random.choice(all_skills))
-                    row[id_col] = new_skill
-                    self._update_skill_pointer_column(row, pointer_col, current_skill, new_skill)
-                    row_changed = True
-            
-            # Generic skills
-            for id_col, pointer_col in generic_pairs:
-                if len(row) <= id_col:
-                    continue
-                try:
-                    current_skill = int(row[id_col])
-                except:
-                    continue
-                
-                if current_skill > 0:
-                    new_skill = str(random.choice(all_skills))
-                    row[id_col] = new_skill
-                    self._update_skill_pointer_column(row, pointer_col, current_skill, new_skill)
+                    # Randomize the skill ID (slot/level stays the same)
+                    row[id_col] = str(random.choice(all_skills))
                     row_changed = True
             
             if row_changed:
@@ -1411,11 +1679,11 @@ class RandomizerThread(QThread):
         
         self.save_csv(status_file, rows)
         self.progress.emit(f"✅ Randomized skill learnsets for {randomized_count} Digimon!")
-        self.progress.emit(f"   Each Digimon now learns random skills from the pool")
+        self.progress.emit(f"   Each Digimon now learns random skills (slot/level unchanged)")
         
-        # Track modified folder (same as stats)
+        # Track modified folder
         if randomized_count > 0:
-            folder = self.data_path / "digimon_status.mbe"
+            folder = self.patch_data_path / "digimon_status.mbe"
             if folder not in self.modified_folders:
                 self.modified_folders.append(folder)
         
@@ -1468,7 +1736,7 @@ class RandomizerThread(QThread):
         self.progress.emit(f"   All evolutions now require only level 1")
         
         # Track modified folder
-        folder = self.data_path / "evolution.mbe"
+        folder = self.patch_data_path / "evolution.mbe"
         if folder not in self.modified_folders:
             self.modified_folders.append(folder)
         
@@ -1559,7 +1827,10 @@ class FieldBattleRandomizerGUI(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.data_path = Path("data")  # Default path
+        # Point to the dsts-loader/app_0/data folder inside the Randomizer folder
+        # Field battle files go in app_0/data, other files stay in patch/data
+        self.data_path = Path(__file__).parent / "dsts-loader" / "app_0" / "data"
+        self.patch_data_path = Path(__file__).parent / "dsts-loader" / "patch" / "data"
         self.randomizer_thread = None
         self.restore_thread = None
         self.modified_folders = []  # Track which folders were modified in last randomization
@@ -1597,14 +1868,12 @@ class FieldBattleRandomizerGUI(QMainWindow):
         path_group = QGroupBox("Data Folder")
         path_layout = QHBoxLayout(path_group)
         
-        path_layout.addWidget(QLabel("Select folder:"))
-        self.path_combo = QComboBox()
-        self.path_combo.addItem("data/", "data")
-        self.path_combo.addItem("backup/data/", "backup/data")
-        self.path_combo.currentIndexChanged.connect(self.on_path_changed)
-        path_layout.addWidget(self.path_combo)
+        self.path_label = QLabel(str(self.data_path))
+        self.path_label.setStyleSheet("padding: 5px; background-color: #f0f0f0; border: 1px solid #ccc; border-radius: 3px;")
+        path_layout.addWidget(self.path_label, 1)
         
         browse_btn = QPushButton("Browse...")
+        browse_btn.setToolTip("Select your data folder location")
         browse_btn.clicked.connect(self.browse_folder)
         path_layout.addWidget(browse_btn)
         
@@ -1642,19 +1911,10 @@ class FieldBattleRandomizerGUI(QMainWindow):
         battles_label.setStyleSheet("color: #2196F3; padding-top: 5px;")
         options_layout.addWidget(battles_label)
         
-        self.randomize_encounters_checkbox = QCheckBox("🎲 Field Encounters")
+        self.randomize_encounters_checkbox = QCheckBox("🎲 Field Encounters (Mixed)")
         self.randomize_encounters_checkbox.setChecked(True)
-        self.randomize_encounters_checkbox.setToolTip("Randomize which encounters appear in field locations (overworld models will match) + scale stats")
+        self.randomize_encounters_checkbox.setToolTip("Randomize encounters with variety:\n• Slot 1: Matches overworld model (e.g., Agumon)\n• Slots 2-6: Random Digimon for variety\n• Result: Fight 1 Agumon + other random Digimon\n\n🛡️ Protected:\n• Boss encounters (with battle scripts)\n• Story-flagged encounters (FLAG_MAIN_, FLAG_SUB_, etc.)\n  → Keeps encounter groups but randomizes individual Digimon")
         options_layout.addWidget(self.randomize_encounters_checkbox)
-        
-        # Encounter balance sub-option
-        encounter_balance_layout = QHBoxLayout()
-        encounter_balance_layout.addSpacing(30)
-        self.balance_encounters_checkbox = QCheckBox("⚖️ Balance by Power (±30%)")
-        self.balance_encounters_checkbox.setChecked(True)
-        self.balance_encounters_checkbox.setToolTip("Only use encounters with similar total stats/power")
-        encounter_balance_layout.addWidget(self.balance_encounters_checkbox)
-        options_layout.addLayout(encounter_balance_layout)
         
         # Stat scaling sub-option
         stat_scale_layout = QHBoxLayout()
@@ -1669,19 +1929,19 @@ class FieldBattleRandomizerGUI(QMainWindow):
         stat_scale_layout.addStretch()
         options_layout.addLayout(stat_scale_layout)
         
-        self.randomize_boss_digimon_checkbox = QCheckBox("👑 Boss Digimon")
-        self.randomize_boss_digimon_checkbox.setChecked(False)
-        self.randomize_boss_digimon_checkbox.setToolTip("Randomize which Digimon appear as bosses (keeps battle scripts working)")
-        options_layout.addWidget(self.randomize_boss_digimon_checkbox)
+        # Boss encounter protection sub-option
+        boss_protection_layout = QHBoxLayout()
+        boss_protection_layout.addSpacing(30)
+        self.include_boss_encounters_checkbox = QCheckBox("⚔️ Include Boss Encounters in Randomization")
+        self.include_boss_encounters_checkbox.setChecked(False)
+        self.include_boss_encounters_checkbox.setToolTip("⚠️ WARNING: Randomizing boss encounters may break battle scripts and story events!\n\nNOTE: Only encounters with ACTUAL battle scripts are protected.\nTutorial and normal field encounters (with 'battle_00000000' placeholder) ARE randomized.\n\nLeave unchecked to protect boss encounters (recommended)")
+        boss_protection_layout.addWidget(self.include_boss_encounters_checkbox)
+        options_layout.addLayout(boss_protection_layout)
         
-        # Boss balance sub-option
-        boss_balance_layout = QHBoxLayout()
-        boss_balance_layout.addSpacing(30)
-        self.balance_boss_digimon_checkbox = QCheckBox("⚖️ Balance by Power (±40%)")
-        self.balance_boss_digimon_checkbox.setChecked(True)
-        self.balance_boss_digimon_checkbox.setToolTip("Only use Digimon with similar power levels for bosses")
-        boss_balance_layout.addWidget(self.balance_boss_digimon_checkbox)
-        options_layout.addLayout(boss_balance_layout)
+        self.randomize_boss_digimon_checkbox = QCheckBox("👑 Boss Digimon (Full Random)")
+        self.randomize_boss_digimon_checkbox.setChecked(False)
+        self.randomize_boss_digimon_checkbox.setToolTip("Randomize which Digimon appear as bosses (FULL RANDOM - no power balancing, keeps battle scripts working)")
+        options_layout.addWidget(self.randomize_boss_digimon_checkbox)
         
         self.randomize_evolutions_checkbox = QCheckBox("🧬 Evolution Paths (all Digimon)")
         self.randomize_evolutions_checkbox.setChecked(False)
@@ -1823,12 +2083,6 @@ class FieldBattleRandomizerGUI(QMainWindow):
         
         button_layout.addLayout(row1_layout)
         
-        # Row 2: Repack MBE
-        self.repack_button = QPushButton("📦 Repack to MBE Files")
-        self.repack_button.setStyleSheet("background-color: #FF9800; color: white; font-weight: bold; padding: 10px;")
-        self.repack_button.clicked.connect(self.repack_mbe_files)
-        button_layout.addWidget(self.repack_button)
-        
         main_layout.addLayout(button_layout)
         
         # Progress bar
@@ -1848,29 +2102,18 @@ class FieldBattleRandomizerGUI(QMainWindow):
         
         main_layout.addWidget(log_group, 2)  # Give log area more stretch priority
     
-    def on_path_changed(self):
-        """Handle path selection change"""
-        path_str = self.path_combo.currentData()
-        self.data_path = Path(path_str)
-        self.log_output.clear()
-        self.check_data_folder()
-    
     def browse_folder(self):
         """Browse for custom folder"""
         folder = QFileDialog.getExistingDirectory(
             self,
             "Select Data Folder",
-            str(Path.cwd())
+            str(self.data_path.parent)
         )
         if folder:
             self.data_path = Path(folder)
-            # Add to combo if not already there
-            for i in range(self.path_combo.count()):
-                if self.path_combo.itemData(i) == folder:
-                    self.path_combo.setCurrentIndex(i)
-                    return
-            self.path_combo.addItem(folder, folder)
-            self.path_combo.setCurrentIndex(self.path_combo.count() - 1)
+            self.path_label.setText(str(self.data_path))
+            self.log_output.clear()
+            self.check_data_folder()
     
     def check_data_folder(self):
         """Check if data folder exists and count files"""
@@ -1963,11 +2206,11 @@ class FieldBattleRandomizerGUI(QMainWindow):
         self.randomizer_thread = RandomizerThread(
             self.data_path, 
             self.backup_checkbox.isChecked(),
+            self.patch_data_path,
             self.randomize_encounters_checkbox.isChecked(),
-            self.balance_encounters_checkbox.isChecked(),
             self.encounter_stat_scale_spinbox.value(),
+            self.include_boss_encounters_checkbox.isChecked(),
             self.randomize_boss_digimon_checkbox.isChecked(),
-            self.balance_boss_digimon_checkbox.isChecked(),
             self.randomize_evolutions_checkbox.isChecked(),
             self.balance_evolutions_checkbox.isChecked(),
             self.randomize_deevolutions_checkbox.isChecked(),
@@ -2012,8 +2255,7 @@ class FieldBattleRandomizerGUI(QMainWindow):
             "Success",
             f"✅ Randomization complete!\n\n"
             f"Modified {total_randomized} entries across {total_files} file(s).\n\n"
-            f"{'Backups created with .backup extension' if self.backup_checkbox.isChecked() else 'No backups created'}\n\n"
-            f"Click 'Repack to MBE Files' to export for the game."
+            f"{'Backups created with .backup extension' if self.backup_checkbox.isChecked() else 'No backups created'}"
         )
     
     def restore(self):
@@ -2072,141 +2314,8 @@ class FieldBattleRandomizerGUI(QMainWindow):
             f"Restored {restored} files from backups."
         )
     
-    def repack_mbe_files(self):
-        """Repack field_battle and evolution CSV folders to .mbe files"""
-        # Check if DSCSToolsCLI.exe exists
-        cli_tool = Path("DSCSToolsCLI.exe")
-        if not cli_tool.exists():
-            QMessageBox.warning(
-                self,
-                "Tool Not Found",
-                "DSCSToolsCLI.exe not found in the workspace root!\n\n"
-                "This tool is required to pack .mbe files."
-            )
-            return
-        
-        # Check if we have modified folders before prompting
-        if not self.modified_folders:
-            QMessageBox.warning(
-                self,
-                "Nothing to Repack",
-                "⚠️ No modified files to repack!\n\n"
-                "Please run randomization first before repacking."
-            )
-            return
-        
-        # Build list of folders that will be repacked
-        folders_to_show = [f.name for f in self.modified_folders if f.exists()]
-        
-        # Truncate list if too long for dialog
-        max_display = 10
-        if len(folders_to_show) <= max_display:
-            folder_list = "\n".join([f"• {name}" for name in sorted(folders_to_show)])
-            extra_msg = ""
-        else:
-            folder_list = "\n".join([f"• {name}" for name in sorted(folders_to_show)[:max_display]])
-            remaining = len(folders_to_show) - max_display
-            extra_msg = f"\n... and {remaining} more folder(s)\n"
-        
-        # Confirm action
-        reply = QMessageBox.question(
-            self,
-            "Repack to MBE Files",
-            f"This will pack {len(folders_to_show)} modified .mbe folder(s):\n\n"
-            f"{folder_list}{extra_msg}\n"
-            "into .mbe files in the 'dsts-loader/patch/data' folder.\n\n"
-            "Full list will be shown in the log below.\n\n"
-            "Continue?",
-            QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
-        )
-        
-        if reply == QMessageBox.StandardButton.No:
-            return
-        
-        self.log("\n" + "="*50)
-        self.log("Starting MBE repacking...")
-        
-        # Collect folders to pack (only those modified)
-        folders_to_pack = [folder for folder in self.modified_folders if folder.exists()]
-        
-        if not folders_to_pack:
-            QMessageBox.warning(self, "Error", f"No .mbe folders found to pack in {self.data_path}!")
-            return
-        
-        # Create output directory
-        output_dir = Path("dsts-loader/patch/data")
-        output_dir.mkdir(parents=True, exist_ok=True)
-        
-        self.log(f"Source: {self.data_path.absolute()}")
-        self.log(f"Found {len(folders_to_pack)} folders to pack:")
-        for folder in sorted(folders_to_pack):
-            self.log(f"  • {folder.name}")
-        self.log(f"Output directory: {output_dir.absolute()}")
-        self.log("")
-        
-        # Pack each folder
-        packed = 0
-        failed = 0
-        
-        for folder in sorted(folders_to_pack):
-            mbe_name = folder.name
-            target_mbe = output_dir / mbe_name
-            
-            try:
-                self.log(f"Packing: {mbe_name}...")
-                
-                # Use forward slashes for DSCSToolsCLI (Unix-style paths work on Windows)
-                # Convert to absolute paths first, then make relative to cwd
-                abs_folder = folder.absolute()
-                abs_target = target_mbe.absolute()
-                
-                try:
-                    source_path = str(abs_folder.relative_to(Path.cwd().absolute())).replace('\\', '/')
-                    target_path = str(abs_target.relative_to(Path.cwd().absolute())).replace('\\', '/')
-                except ValueError:
-                    # If relative_to fails, use the path as-is
-                    source_path = str(folder).replace('\\', '/')
-                    target_path = str(target_mbe).replace('\\', '/')
-                
-                self.log(f"  Source: {source_path}")
-                self.log(f"  Target: {target_path}")
-                
-                # Run DSCSToolsCLI with Unix-style paths
-                # On Windows, use DSCSToolsCLI.exe directly (not ./DSCSToolsCLI.exe)
-                result = subprocess.run(
-                    ['DSCSToolsCLI.exe', '--mbepack', source_path, target_path],
-                    capture_output=True,
-                    text=True,
-                    timeout=30
-                )
-                
-                if result.returncode == 0:
-                    self.log(f"  ✓ SUCCESS")
-                    packed += 1
-                else:
-                    self.log(f"  ✗ FAILED")
-                    if result.stdout:
-                        self.log(f"  Output: {result.stdout}")
-                    if result.stderr:
-                        self.log(f"  Error: {result.stderr}")
-                    failed += 1
-            except Exception as e:
-                self.log(f"  ✗ ERROR: {e}")
-                failed += 1
-        
-        self.log("="*50)
-        self.log(f"Complete! Packed {packed} files, {failed} failed")
-        self.log(f"Output: {output_dir.absolute()}")
-        
-        QMessageBox.information(
-            self,
-            "Repack Complete",
-            f"✅ Repacking complete!\n\n"
-            f"Packed: {packed} files\n"
-            f"Failed: {failed} files\n\n"
-            f"Output folder: {output_dir.absolute()}\n\n"
-            f"The .mbe files are ready in the dsts-loader/patch/data folder!"
-        )
+    # REMOVED: repack_mbe_files() method - no longer needed with new modloader!
+    # The new modloader reads CSV files directly from the data folder
 
 
 def main():
@@ -2221,4 +2330,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
 

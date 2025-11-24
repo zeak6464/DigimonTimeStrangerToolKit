@@ -141,7 +141,7 @@ class SkillEditor(QWidget):
 
 
 class DigimonCreationWizard(QWizard):
-    """Multi-step wizard for creating new Digimon and adding them to DLC"""
+    """Multi-step wizard for creating new Digimon and exporting to dsts-loader"""
     
     def __init__(self, parent=None, loader=None):
         super().__init__(parent)
@@ -149,7 +149,7 @@ class DigimonCreationWizard(QWizard):
         self.template_digimon: Optional[DigimonData] = None
         self.new_digimon: Optional[DigimonData] = None
         
-        self.setWindowTitle("✨ Digimon Creation Wizard - Add New Digimon to DLC")
+        self.setWindowTitle("✨ Digimon Creation Wizard - Export to dsts-loader")
         self.setMinimumSize(700, 600)
         
         # Set wizard style
@@ -253,23 +253,51 @@ class DigimonCreationWizard(QWizard):
         # Update chr_id references in all data structures
         self._update_chr_id_references(self.new_digimon, template_chr_id, new_chr_id)
         
-        # Export to DLC
-        dlc_exporter = DLCExporter(self.loader)
-        animation_ref = model_page.animation_ref_edit.text().strip() if model_page.animation_ref_edit.text().strip() else self.new_digimon.chr_id
+        # Get animation reference
+        animation_ref = model_page.animation_ref_edit.text().strip() if model_page.animation_ref_edit.text().strip() else template_chr_id
         
-        if dlc_exporter.save_digimon_to_dlc(self.new_digimon, animation_ref):
+        # Ask user where to export
+        from pathlib import Path
+        default_path = Path.cwd() / "dsts-loader"
+        
+        export_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Select dsts-loader Export Directory",
+            str(default_path),
+            QFileDialog.Option.ShowDirsOnly
+        )
+        
+        if not export_dir:
+            QMessageBox.warning(self, "Cancelled", "Export cancelled by user")
+            return
+        
+        # Export to dsts-loader format
+        if self._export_to_dsts_loader(Path(export_dir), self.new_digimon, animation_ref):
             QMessageBox.information(
                 self,
                 "Success! 🎉",
-                f"✅ {self.new_digimon.name} has been successfully added to DLC!\n\n"
+                f"✅ {self.new_digimon.name} has been successfully exported!\n\n"
                 f"ID: {self.new_digimon.id}\n"
                 f"Chr ID: {self.new_digimon.chr_id}\n"
                 f"Animation Reference: {animation_ref}\n\n"
-                f"The Digimon is now available in DLC files.\n"
-                f"Use 'Repack DLC to MBE' to finalize the changes."
+                f"📁 Files created in dsts-loader format:\n\n"
+                f"patch/data/:\n"
+                f"  • digimon_status_data.ap.csv\n"
+                f"  • char_info.ap.csv\n"
+                f"  • model_setting.ap.csv\n"
+                f"  • lod.ap.csv + lod_model.ap.csv\n"
+                f"  • evolution_to.ap.csv + evolution_condition.ap.csv\n"
+                f"  • same_animation_data.ap.csv\n\n"
+                f"patch_text01/text/:\n"
+                f"  • char_name.ap.csv\n"
+                f"  • digimon_profile.ap.csv\n"
+                f"  • belong.ap.csv\n\n"
+                f"app_0/data/:\n"
+                f"  • model_outline_battle.ap.csv\n\n"
+                f"Ready to use with dsts-loader! ✨"
             )
         else:
-            QMessageBox.warning(self, "Error", "Failed to export Digimon to DLC")
+            QMessageBox.warning(self, "Error", "Failed to export Digimon")
     
     def _update_chr_id_references(self, digimon: DigimonData, old_chr_id: str, new_chr_id: str):
         """Update all chr_id references in digimon data structures"""
@@ -326,6 +354,411 @@ class DigimonCreationWizard(QWizard):
                 motion_value = anim_entry.get(motion_key, '')
                 if isinstance(motion_value, str) and old_chr_id_clean in motion_value:
                     anim_entry[motion_key] = motion_value.replace(old_chr_id_clean, new_chr_id_clean)
+    
+    def _escape_csv_value(self, value: str) -> str:
+        """Properly escape a value for CSV output"""
+        if not value:
+            return value
+        # Escape quotes by doubling them
+        if '"' in value:
+            value = value.replace('"', '""')
+        return value
+    
+    def _export_to_dsts_loader(self, base_path: Path, digimon: DigimonData, animation_ref: str) -> bool:
+        """Export digimon to dsts-loader format (.ap.csv files)"""
+        try:
+            from pathlib import Path
+            import csv
+            
+            # Create directory structure
+            patch_data = base_path / "patch" / "data"
+            patch_text = base_path / "patch_text01" / "text"
+            app_data = base_path / "app_0" / "data"
+            
+            # Create all needed directories
+            (patch_data / "digimon_status.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "char_info.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "model_setting.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "lod_chara.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "evolution.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "anim_setting.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "char_name.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "digimon_profile.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "belong.mbe").mkdir(parents=True, exist_ok=True)
+            (app_data / "model_outline.mbe").mkdir(parents=True, exist_ok=True)
+            
+            # Export digimon_status_data
+            self._write_digimon_status_ap_csv(patch_data / "digimon_status.mbe" / "000_digimon_status_data.ap.csv", digimon)
+            
+            # Export char_info
+            self._write_char_info_ap_csv(patch_data / "char_info.mbe" / "000_char_info.ap.csv", digimon)
+            
+            # Export model_setting
+            if digimon.model_setting_data:
+                self._write_model_setting_ap_csv(patch_data / "model_setting.mbe" / "000_model_setting.ap.csv", digimon)
+            
+            # Export lod data
+            if digimon.lod_data:
+                self._write_lod_ap_csv(patch_data / "lod_chara.mbe" / "000_lod.ap.csv", digimon)
+                self._write_lod_model_ap_csv(patch_data / "lod_chara.mbe" / "001_lod_model.ap.csv", digimon)
+            
+            # Export animation reference
+            self._write_anim_setting_ap_csv(patch_data / "anim_setting.mbe" / "001_same_animation_data.ap.csv", digimon.chr_id, animation_ref)
+            
+            # Export evolution data
+            if digimon.evolution_paths:
+                self._write_evolution_ap_csv(patch_data / "evolution.mbe" / "001_evolution_to.ap.csv", digimon)
+                self._write_evolution_condition_ap_csv(patch_data / "evolution.mbe" / "000_evolution_condition.ap.csv", digimon)
+            
+            # Export chronodevolution (de-evolution) data
+            if digimon.deevolution_sources:
+                self._write_chronodevolution_ap_csv(patch_data / "evolution.mbe" / "002_chronodevolution.ap.csv", digimon)
+            
+            # Export char_name
+            self._write_char_name_ap_csv(patch_text / "char_name.mbe" / "000_Sheet1.ap.csv", digimon)
+            
+            # Export digimon_profile (always export, even if empty - use default text)
+            self._write_profile_ap_csv(patch_text / "digimon_profile.mbe" / "000_Sheet1.ap.csv", digimon)
+            
+            # Export belong (classification text)
+            self._write_belong_ap_csv(patch_text / "belong.mbe" / "000_Sheet1.ap.csv", digimon)
+            
+            # Export model_outline
+            self._write_model_outline_ap_csv(app_data / "model_outline.mbe" / "000_model_outline_battle.ap.csv", digimon)
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error exporting to dsts-loader: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def _write_digimon_status_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write digimon_status_data.ap.csv"""
+        # Header from dsts-loader format
+        header = "int32 0,empty 1,string2 2,string2 3,int32 4,int32 5,int32 6,int32 7,int32 8,int32 9,int32 10,int32 11,int32 12,int32 13,int32 14,int32 15,int32 16,int32 17,empty 18,bool 19,bool 20,bool 21,bool 22,bool 23,bool 24,bool 25,bool 26,bool 27,bool 28,bool 29,bool 30,bool 31,bool 32,bool 33,bool 34,bool 35,bool 36,bool 37,bool 38,bool 39,bool 40,bool 41,bool 42,bool 43,bool 44,bool 45,bool 46,bool 47,bool 48,bool 49,bool 50,int32 51,bool 52,bool 53,bool 54,bool 55,bool 56,bool 57,bool 58,bool 59,bool 60,int32 61,int32 62,int32 63,int32 64,int32 65,int32 66,int32 67,int32 68,int32 69,int32 70,int32 71,int32 72,empty 73,int32 74,int32 75,empty 76,int32 77,int32 78,empty 79,int32 80,int32 81,empty 82,int32 83,int32 84,empty 85,int32 86,int32 87,empty 88,int32 89,int32 90,empty 91,int32 92,int32 93,empty 94,int32 95,int32 96,empty 97,int32 98,int32 99,empty 100,int32 101,int32 102,empty 103,int32 104,int32 105,empty 106,int32 107,int32 108,empty 109,int32 110,int32 111,empty 112,int32 113,int32 114,empty 115,int32 116,int32 117,empty 118,int32 119,int32 120,int32 121,int32 122,float 123,bool 124,bool 125,int32 126,empty 127,int32 128,int32 129,int32 130,int32 131,int32 132,int32 133,int32 134,int32 135"
+        
+        # Build data row
+        parts = []
+        parts.append(str(digimon.id))  # 0
+        parts.append('')  # 1 empty (blank, not quoted)
+        parts.append(f'"{self._escape_csv_value(digimon.char_key)}"')  # 2
+        parts.append(f'"{self._escape_csv_value(digimon.chr_id)}"')  # 3
+        parts.append(str(digimon.stage_id))  # 4
+        parts.append(str(digimon.personality_id))  # 5
+        parts.append(str(digimon.type_id))  # 6
+        
+        # Resistances (7-17)
+        parts.append(str(digimon.res_null))
+        parts.append(str(digimon.res_fire))
+        parts.append(str(digimon.res_water))
+        parts.append(str(digimon.res_ice))
+        parts.append(str(digimon.res_grass))
+        parts.append(str(digimon.res_wind))
+        parts.append(str(digimon.res_elec))
+        parts.append(str(digimon.res_ground))
+        parts.append(str(digimon.res_steel))
+        parts.append(str(digimon.res_light))
+        parts.append(str(digimon.res_dark))
+        parts.append('')  # 18 empty
+        
+        # Traits part 1 (19-50 bool) - 32 traits
+        for i in range(32):
+            if i < len(digimon.traits):
+                parts.append("true" if digimon.traits[i] else "false")
+            else:
+                parts.append("false")
+        
+        parts.append("0")  # 51 int32
+        
+        # Traits part 2 (52-60 bool) - 9 traits
+        for i in range(32, 41):
+            if i < len(digimon.traits):
+                parts.append("true" if digimon.traits[i] else "false")
+            else:
+                parts.append("false")
+        
+        parts.append(str(digimon.base_personality))  # 61 int32
+        parts.append("1")  # 62
+        parts.append("99")  # 63
+        parts.append(str(digimon.base_hp))  # 64
+        parts.append(str(digimon.base_sp))  # 65
+        parts.append(str(digimon.base_atk))  # 66
+        parts.append(str(digimon.base_def))  # 67
+        parts.append(str(digimon.base_int))  # 68
+        parts.append(str(digimon.base_spi))  # 69
+        parts.append(str(digimon.base_spd))  # 70
+        parts.append("0")  # 71
+        
+        # Signature skills (72-107) - pattern: id, empty, slot
+        for i in range(12):
+            if i < len(digimon.signature_skills):
+                skill = digimon.signature_skills[i]
+                parts.append(str(skill.get('id', 0)))
+                parts.append('')  # empty
+                parts.append(str(skill.get('slot', 0)))
+            else:
+                parts.append("0")
+                parts.append('')  # empty
+                parts.append("0")
+        
+        # Generic skills (108-119) - pattern: id, empty, level
+        for i in range(4):
+            if i < len(digimon.generic_skills):
+                skill = digimon.generic_skills[i]
+                parts.append(str(skill.get('id', 0)))
+                parts.append('')  # empty
+                parts.append(str(skill.get('level', 0)))
+            else:
+                parts.append("0")
+                parts.append('')  # empty
+                parts.append("0")
+        
+        # Remaining fields (120-135)
+        parts.extend(["2", "1", "1", "0", "true", "false", "0", '', "0", "0", "0", "0", str(digimon.id), "-1", "0", "-1"])
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_char_info_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write char_info.ap.csv"""
+        header = 'string2 0,empty 1,empty 2,string2 3,string2 4,empty 5,int32 6,int32 7,string2 8,int32 9,string2 10,int32 11,string2 12,int32 13'
+        parts = [
+            f'"{self._escape_csv_value(digimon.char_key)}"',
+            '', '',  # empty columns
+            f'"{self._escape_csv_value(digimon.chr_id)}"',
+            f'"{10000 + digimon.id}"',
+            '',  # empty
+            '0', '0',
+            '""',  # empty string
+            '0',
+            '""',  # empty string
+            '0',
+            '""',  # empty string
+            '0'
+        ]
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_model_setting_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write model_setting.ap.csv"""
+        if not digimon.model_setting_data or 'raw_data' not in digimon.model_setting_data:
+            return
+        
+        header = 'string2 0,empty 1,string2 2,string2 3,string2 4,float 5,empty 6,empty 7,float 8,float 9,float 10,float 11,float 12,float 13,float 14,float 15,float 16,float 17,float 18,float 19,float 20,float 21,float 22,float 23,float 24,float 25,float 26,string2 27,string2 28,string2 29,string2 30,string2 31,string2 32,float 33,float 34,float 35,float 36,int32 37,float 38,float 39,int32 40,float 41,float 42,float 43,float 44,float 45,float 46,float 47,empty 48,empty 49,empty 50,float 51,string2 52,float 53,float 54,float 55,float 56,float 57,float 58,float 59,float 60,float 61,float 62,float 63,int32 64,int32 65,int32 66,int8 67,int8 68,int8 69,int8 70,int32 71,empty 72,int32 73,int32 74,int8 75,int8 76,int8 77,int8 78,string2 79,int32 80,int32 81'
+        
+        # Convert raw_data to proper format
+        raw_data = digimon.model_setting_data['raw_data']
+        header_types = header.split(',')
+        parts = []
+        
+        for i, value in enumerate(raw_data):
+            col_type = header_types[i] if i < len(header_types) else ''
+            
+            if 'string' in col_type:
+                # String columns: quote non-empty values, use "" for empty
+                if value and value != '""':
+                    # Remove existing quotes if present, then escape and re-quote
+                    clean_value = value.strip('"') if isinstance(value, str) else str(value)
+                    escaped_value = self._escape_csv_value(clean_value)
+                    parts.append(f'"{escaped_value}"')
+                else:
+                    parts.append('""')
+            elif 'empty' in col_type:
+                # Empty columns: just blank
+                parts.append('')
+            else:
+                # Numeric columns: no quotes
+                parts.append(str(value) if value else '0')
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_lod_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write lod.ap.csv"""
+        header = 'string2 0,float 1,float 2,float 3,float 4,float 5,float 6,float 7,float 8,float 9,float 10'
+        parts = [
+            f'"{self._escape_csv_value(digimon.chr_id)}"',
+            str(digimon.lod_data.get('lod_distance_1', 20)),
+            str(digimon.lod_data.get('lod_distance_2', 65)),
+            str(digimon.lod_data.get('lod_distance_3', 500)),
+            '0', '0', '0', '0', '0', '0', '0'
+        ]
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_lod_model_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write lod_model.ap.csv"""
+        header = 'string2 0,string2 1,string2 2,string2 3,string2 4,string2 5,string2 6,string2 7,string2 8,string2 9,string2 10'
+        escaped_chr_id = self._escape_csv_value(digimon.chr_id)
+        parts = [
+            f'"{escaped_chr_id}"',
+            '""',  # empty string
+            f'"{escaped_chr_id}_LOD_2"',  # LOD model name
+            '""', '""', '""', '""', '""', '""', '""', '""'  # 8 empty strings
+        ]
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_anim_setting_ap_csv(self, filepath: Path, chr_id: str, animation_ref: str):
+        """Write same_animation_data.ap.csv"""
+        header = 'string2 0,string2 1'
+        parts = [f'"{self._escape_csv_value(chr_id)}"', f'"{self._escape_csv_value(animation_ref)}"']
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_evolution_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write evolution_to.ap.csv"""
+        header = 'int32 0,int32 1,empty 2,int32 3,empty 4,int32 5,int32 6,int32 7,int32 8,int32 9,int32 10'
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            
+            for evo in digimon.evolution_paths:
+                to_id = evo.get('to_id', 0)
+                raw_data = evo.get('raw_data', [])
+                
+                # Generate evolution ID (100000 + base number)
+                evo_id = 100000 + digimon.id * 100 + to_id
+                
+                parts = [
+                    str(evo_id),
+                    str(digimon.id),
+                    '',  # empty column
+                    str(to_id),
+                    '',  # empty column
+                    '2',  # Default evolution type
+                    '-1', '-1', '-1', '-1', '-1'
+                ]
+                f.write(','.join(parts) + '\n')
+    
+    def _write_char_name_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write char_name.ap.csv"""
+        header = 'string2 0,string 1'
+        # Properly escape strings for CSV
+        escaped_key = self._escape_csv_value(digimon.char_key)
+        escaped_name = self._escape_csv_value(digimon.name)
+        parts = [f'"{escaped_key}"', f'"{escaped_name}"']
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_profile_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write digimon_profile.ap.csv"""
+        header = 'string2 0,string 1'
+        profile = digimon.profile_text if digimon.profile_text else f"A mysterious Digimon known as {digimon.name}."
+        # Properly escape strings for CSV (especially important for profile text!)
+        escaped_key = self._escape_csv_value(digimon.char_key)
+        escaped_profile = self._escape_csv_value(profile)
+        parts = [f'"{escaped_key}"', f'"{escaped_profile}"']
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_model_outline_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write model_outline_battle.ap.csv"""
+        header = 'string2 0,float 1,float 2'
+        parts = [
+            f'"{self._escape_csv_value(digimon.chr_id)}"',
+            '-0.003',  # Default outline thickness values
+            '-0.003'
+        ]
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+    
+    def _write_evolution_condition_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write evolution_condition.ap.csv"""
+        header = 'int32 0,empty 1,int32 2,int32 3,int32 4,int32 5,int32 6,int32 7,int32 8,int32 9,int32 10,int32 11,int32 12,int32 13,int32 14,int32 15,int32 16,int32 17,empty 18,int32 19,int32 20,int32 21,int32 22,empty 23,int32 24,empty 25,int32 26,int32 27,empty 28,int32 29'
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            
+            # Create default evolution condition for the Digimon
+            parts = [
+                str(digimon.id),  # Evolution ID matches Digimon ID
+                '',  # empty
+                '4',  # Condition type (4 = standard evolution)
+                '0',  # Param 1
+                '0',  # Param 2 (friendship level, etc.)
+                '0',  # Param 3 (required level)
+                '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',  # Params 4-17
+                '',  # empty
+                '0', '0', '0', '0',  # More params
+                '',  # empty
+                '0',  # Param
+                '',  # empty
+                '0', '0',  # More params
+                '',  # empty
+                '0'  # Final param
+            ]
+            f.write(','.join(parts) + '\n')
+    
+    def _write_chronodevolution_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write chronodevolution.ap.csv (reverse evolution/de-evolution)"""
+        header = 'int32 0,empty 1,int32 2,int32 3,int32 4,int32 5,int32 6,int32 7'
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            
+            # Write chronodevolution entries (de-evolution paths)
+            for de_evo in digimon.deevolution_sources:
+                from_id = de_evo.get('from_id', 0)
+                
+                # Generate chronodevolution ID
+                chrono_id = 200000 + digimon.id * 100 + from_id
+                
+                parts = [
+                    str(chrono_id),
+                    '',  # empty
+                    str(digimon.id),  # Current Digimon
+                    str(from_id),  # De-evolves to this
+                    '-1', '-1', '-1', '-1'  # Additional params
+                ]
+                f.write(','.join(parts) + '\n')
+    
+    def _write_belong_ap_csv(self, filepath: Path, digimon: DigimonData):
+        """Write belong.ap.csv (classification/category text)"""
+        header = 'string2 0,string 1'
+        
+        # Map stage_id to classification text
+        stage_text_map = {
+            0: "Baby",
+            1: "In-Training",
+            2: "Rookie",
+            3: "Champion",
+            4: "Ultimate",
+            5: "Mega",
+            6: "Ultra"
+        }
+        
+        classification = stage_text_map.get(digimon.stage_id, "Unknown")
+        
+        parts = [
+            f'"{digimon.id}"',  # Use ID as key (matches example format)
+            f'"{classification}"'
+        ]
+        
+        with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            f.write(header + '\n')
+            f.write(','.join(parts) + '\n')
+
+
+
 
 
 class TemplateSelectionPage(QWizardPage):
@@ -641,7 +1074,7 @@ class ResistancesPage(QWizardPage):
         super().__init__()
         self.wizard = wizard
         self.setTitle("🛡️ Step 5: Elemental Resistances")
-        self.setSubTitle("Set elemental resistances (0=Normal, 1=Weak 1.5x, 2=Very Weak 2x, 3=Resist 0.5x, 4=Immune)")
+        self.setSubTitle("Set elemental resistances based on Grindosaur.com data")
         
         layout = QGridLayout()
         
@@ -664,8 +1097,16 @@ class ResistancesPage(QWizardPage):
             layout.addWidget(QLabel(f"{clean_name}:"), row, col)
             
             spin = QSpinBox()
-            spin.setRange(0, 5)
+            spin.setRange(0, 4)
             spin.setObjectName(f"resist_{resist.lower()}")
+            spin.setToolTip(
+                f"Set {clean_name} resistance:\n"
+                "0 = Normal (100% damage - 1.0x)\n"
+                "1 = Weak (150% damage - 1.5x)\n"
+                "2 = Very Weak (200% damage - 2.0x)\n"
+                "3 = Resistant (50% damage - 0.5x)\n"
+                "4 = Immune (0% damage - no damage taken)"
+            )
             self.resist_widgets[resist.lower()] = spin
             layout.addWidget(spin, row, col + 1)
             
@@ -1311,7 +1752,7 @@ class ReviewPage(QWizardPage):
         super().__init__()
         self.wizard = wizard
         self.setTitle("✅ Step 9: Review & Export")
-        self.setSubTitle("Review your Digimon settings and export to DLC")
+        self.setSubTitle("Review your Digimon settings and export to dsts-loader")
         
         layout = QVBoxLayout()
         
@@ -1323,9 +1764,9 @@ class ReviewPage(QWizardPage):
         
         # Info
         info_label = QLabel(
-            "📦 Click 'Finish' to export this Digimon to DLC.\n"
-            "The Digimon will be added to DLC files and can be used in-game.\n"
-            "Remember to use 'Repack DLC to MBE' after exporting."
+            "✨ Click 'Finish' to export this Digimon to dsts-loader format.\n"
+            "You will be asked to select an export directory.\n"
+            "The wizard will create .ap.csv files ready for dsts-loader!"
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: #495057; padding: 10px; background-color: #e7f5ff; border-radius: 6px; margin-top: 10px;")
@@ -1395,6 +1836,26 @@ class TraitsEditor(QWidget):
         scroll_widget = QWidget()
         scroll_layout = QGridLayout(scroll_widget)
         
+        # Trait descriptions for tooltips
+        trait_descriptions = {
+            0: "Searcher - Find items more easily",
+            1: "Fighter - Better at combat",
+            2: "Brainy - Higher INT growth",
+            3: "Defender - Higher DEF growth",
+            4: "Nimble - Higher SPD growth",
+            5: "Builder - Better at construction",
+            6: "Durable - Higher HP growth",
+            7: "Lively - Higher SP growth",
+            8: "Fire Specialist - Fire attacks more effective",
+            9: "Water Specialist - Water attacks more effective",
+            10: "Plant Specialist - Grass attacks more effective",
+            11: "Earth Specialist - Ground attacks more effective",
+            12: "Wind Specialist - Wind attacks more effective",
+            13: "Electricity Specialist - Electric attacks more effective",
+            14: "Light Specialist - Light attacks more effective",
+            15: "Dark Specialist - Dark attacks more effective"
+        }
+        
         # Create 41 trait checkboxes in a grid
         for i in range(41):
             trait_name = f"Trait {i + 1}"
@@ -1404,6 +1865,13 @@ class TraitsEditor(QWidget):
                 trait_name = clean_name if clean_name else f"Trait {i + 1}"
             checkbox = QCheckBox(trait_name)
             checkbox.setObjectName(f"trait_{i}")
+            
+            # Add tooltip if available
+            if i in trait_descriptions:
+                checkbox.setToolTip(trait_descriptions[i])
+            else:
+                checkbox.setToolTip(f"{trait_name} - Check to enable this trait")
+            
             self.trait_checkboxes.append(checkbox)
             
             row = i // 3
@@ -1438,8 +1906,103 @@ class DigimonEditor(QMainWindow):
         self.loader = MBELoader()
         self.exporter = CSVExporter()
         self.current_digimon: Optional[DigimonData] = None
+        self.has_unsaved_changes = False
         self.setup_ui()
+        self.connect_change_signals()
         self.load_digimon_list()
+    
+    def mark_as_modified(self):
+        """Mark the current Digimon as having unsaved changes"""
+        if self.current_digimon and not self.has_unsaved_changes:
+            self.has_unsaved_changes = True
+            # Update window title to show unsaved indicator
+            current_title = self.windowTitle()
+            if not current_title.endswith("*"):
+                self.setWindowTitle(current_title + " *")
+            # Update current digimon label
+            if hasattr(self, 'current_digimon_label'):
+                label_text = self.current_digimon_label.text()
+                if not label_text.endswith("*"):
+                    self.current_digimon_label.setText(label_text + " *")
+    
+    def clear_modified_flag(self):
+        """Clear the unsaved changes flag"""
+        self.has_unsaved_changes = False
+        # Remove asterisk from window title
+        current_title = self.windowTitle()
+        if current_title.endswith(" *"):
+            self.setWindowTitle(current_title[:-2])
+        # Remove asterisk from label
+        if hasattr(self, 'current_digimon_label'):
+            label_text = self.current_digimon_label.text()
+            if label_text.endswith(" *"):
+                self.current_digimon_label.setText(label_text[:-2])
+    
+    def validate_digimon_uniqueness(self, original_id: int, original_chr_id: str) -> bool:
+        """Validate that ID and chr_id are unique"""
+        new_id = self.current_digimon.id
+        new_chr_id = self.current_digimon.chr_id
+        
+        # If values haven't changed, no need to validate
+        if new_id == original_id and new_chr_id == original_chr_id:
+            return True
+        
+        # Check ID uniqueness
+        if new_id != original_id:
+            # Get all Digimon IDs from both base game and DLC
+            all_chr_ids = self.loader.get_all_digimon_chr_ids(from_dlc=False)
+            all_chr_ids.extend(self.loader.get_all_digimon_chr_ids(from_dlc=True))
+            
+            for chr_id in all_chr_ids:
+                digimon = self.loader.get_digimon_by_chr_id(chr_id)
+                if digimon and digimon.id == new_id and digimon.chr_id != original_chr_id:
+                    QMessageBox.warning(
+                        self,
+                        "Duplicate ID",
+                        f"❌ ID {new_id} is already used by {digimon.name} ({digimon.chr_id})!\n\n"
+                        "Please choose a different ID."
+                    )
+                    return False
+        
+        # Check chr_id uniqueness
+        if new_chr_id != original_chr_id:
+            existing_digimon = self.loader.get_digimon_by_chr_id(new_chr_id)
+            if existing_digimon and existing_digimon.chr_id != original_chr_id:
+                QMessageBox.warning(
+                    self,
+                    "Duplicate Chr ID",
+                    f"❌ Chr ID '{new_chr_id}' is already used by {existing_digimon.name}!\n\n"
+                    "Please choose a different Chr ID."
+                )
+                return False
+        
+        return True
+    
+    def connect_change_signals(self):
+        """Connect all form widgets to mark_as_modified"""
+        # Basic info
+        self.id_spin.valueChanged.connect(self.mark_as_modified)
+        self.char_key_edit.textChanged.connect(self.mark_as_modified)
+        self.chr_id_edit.textChanged.connect(self.mark_as_modified)
+        self.name_edit.textChanged.connect(self.mark_as_modified)
+        self.stage_combo.currentIndexChanged.connect(self.mark_as_modified)
+        self.type_combo.currentIndexChanged.connect(self.mark_as_modified)
+        self.personality_combo.currentIndexChanged.connect(self.mark_as_modified)
+        self.profile_text_edit.textChanged.connect(self.mark_as_modified)
+        
+        # Stats
+        for widget in self.stat_widgets.values():
+            widget.valueChanged.connect(self.mark_as_modified)
+        self.growth_pattern_combo.currentIndexChanged.connect(self.mark_as_modified)
+        
+        # Resistances
+        for widget in self.resist_widgets.values():
+            widget.valueChanged.connect(self.mark_as_modified)
+        
+        # Model settings
+        self.model_id_edit.textChanged.connect(self.mark_as_modified)
+        self.motion_id_edit.textChanged.connect(self.mark_as_modified)
+        self.animation_ref_edit.textChanged.connect(self.mark_as_modified)
     
     def setup_ui(self):
         self.setWindowTitle("DTS Creator - Digimon Editor")
@@ -1658,6 +2221,7 @@ class DigimonEditor(QMainWindow):
         self.source_combo = QComboBox()
         self.source_combo.addItem("Base Game", False)
         self.source_combo.addItem("DLC (addcont_17)", True)
+        self.source_combo.setToolTip("Select which Digimon to view:\n• Base Game - Original game Digimon\n• DLC - Custom/modded Digimon\n\nSaving behavior changes based on selection")
         self.source_combo.currentIndexChanged.connect(self.load_digimon_list)
         self.source_combo.currentIndexChanged.connect(self.on_source_changed)
         self.source_combo.setStyleSheet("""
@@ -1768,6 +2332,7 @@ class DigimonEditor(QMainWindow):
         
         self.load_button = QPushButton("📖 Load Selected")
         self.load_button.clicked.connect(self.load_selected_digimon)
+        self.load_button.setToolTip("Load the selected Digimon for editing")
         self.load_button.setStyleSheet(button_style.format(
             color1="#667eea", color2="#764ba2",
             hover1="#5568d3", hover2="#653b8e"
@@ -1776,15 +2341,26 @@ class DigimonEditor(QMainWindow):
         
         self.new_button = QPushButton("➕ Create New")
         self.new_button.clicked.connect(self.launch_creation_wizard)
+        self.new_button.setToolTip("Create a new Digimon using the step-by-step wizard\nExports to dsts-loader format")
         self.new_button.setStyleSheet(button_style.format(
             color1="#84fab0", color2="#8fd3f4",
             hover1="#6ee89f", hover2="#7bc9e8"
         ))
         button_layout.addWidget(self.new_button)
         
+        self.import_button = QPushButton("📥 Import from dsts-loader")
+        self.import_button.clicked.connect(self.import_from_dsts_loader)
+        self.import_button.setToolTip("Import Digimon from dsts-loader .ap.csv files\nAllows you to edit previously exported Digimon")
+        self.import_button.setStyleSheet(button_style.format(
+            color1="#ffecd2", color2="#fcb69f",
+            hover1="#f5dcb8", hover2="#eba685"
+        ))
+        button_layout.addWidget(self.import_button)
+        
         self.remove_button = QPushButton("🗑️ Remove from DLC")
         self.remove_button.clicked.connect(self.remove_digimon_from_dlc)
         self.remove_button.setEnabled(False)
+        self.remove_button.setToolTip("Permanently delete this Digimon from DLC files\nOnly works for DLC Digimon")
         self.remove_button.setStyleSheet(button_style.format(
             color1="#f5576c", color2="#f093fb",
             hover1="#e34556", hover2="#de7fe9"
@@ -1794,6 +2370,7 @@ class DigimonEditor(QMainWindow):
         self.save_button = QPushButton("💾 Save Changes")
         self.save_button.clicked.connect(self.save_current_digimon)
         self.save_button.setEnabled(False)
+        self.save_button.setToolTip("Save changes to the current Digimon\n• Base Game → Saves to .mbe files\n• DLC → Saves to DLC files\n• Imported → Choose save location")
         self.save_button.setStyleSheet(button_style.format(
             color1="#f093fb", color2="#f5576c",
             hover1="#de7fe9", hover2="#e34556"
@@ -1809,6 +2386,7 @@ class DigimonEditor(QMainWindow):
         self.export_dlc_button = QPushButton("📦 Export to DLC")
         self.export_dlc_button.clicked.connect(self.export_to_dlc)
         self.export_dlc_button.setEnabled(False)
+        self.export_dlc_button.setToolTip("Export the current Digimon to DLC files\nMakes it available in-game without modifying base game")
         self.export_dlc_button.setStyleSheet(button_style.format(
             color1="#4CAF50", color2="#45a049",
             hover1="#45a049", hover2="#3d8b40"
@@ -1817,6 +2395,7 @@ class DigimonEditor(QMainWindow):
         
         self.export_button = QPushButton("📄 Export CSV")
         self.export_button.clicked.connect(self.export_csv)
+        self.export_button.setToolTip("Export the current Digimon to CSV format\nUseful for backup or manual editing")
         self.export_button.setStyleSheet(button_style.format(
             color1="#fa709a", color2="#fee140",
             hover1="#e85c89", hover2="#ecd32f"
@@ -1825,6 +2404,7 @@ class DigimonEditor(QMainWindow):
         
         self.repack_button = QPushButton("📦 Repack to MBE Files")
         self.repack_button.clicked.connect(self.repack_mbe_files)
+        self.repack_button.setToolTip("Repack DLC CSV files back into .mbe format\nRequired after making DLC changes")
         self.repack_button.setStyleSheet(button_style.format(
             color1="#667eea", color2="#764ba2",
             hover1="#5568d3", hover2="#653b8e"
@@ -2071,7 +2651,7 @@ class DigimonEditor(QMainWindow):
         layout.addWidget(growth_group)
         
         # Elemental Resistances Group
-        resist_group = QGroupBox("Elemental Resistances (0=Normal, 1=Weak 1.5x, 2=Very Weak 2x, 3=Resist 0.5x, 4=Immune)")
+        resist_group = QGroupBox("🛡️ Elemental Resistances - Per Digimon (verified via Grindosaur.com)")
         resist_layout = QGridLayout(resist_group)
         
         # Create resistance spinboxes with element names
@@ -2095,8 +2675,16 @@ class DigimonEditor(QMainWindow):
             resist_layout.addWidget(QLabel(f"{clean_name}:"), row, col)
             
             spin = QSpinBox()
-            spin.setRange(0, 5)
+            spin.setRange(0, 4)
             spin.setObjectName(f"resist_{resist.lower()}")
+            spin.setToolTip(
+                f"Set {clean_name} resistance:\n"
+                "0 = Normal (100% damage - 1.0x)\n"
+                "1 = Weak (150% damage - 1.5x)\n"
+                "2 = Very Weak (200% damage - 2.0x)\n"
+                "3 = Resistant (50% damage - 0.5x)\n"
+                "4 = Immune (0% damage - no damage taken)"
+            )
             self.resist_widgets[resist.lower()] = spin
             resist_layout.addWidget(spin, row, col + 1)
             
@@ -3773,6 +4361,13 @@ class DigimonEditor(QMainWindow):
                 digimon_names.append(chr_id)
                 self.digimon_data[chr_id] = chr_id
         
+        # Add imported Digimon (marked with 📥)
+        if hasattr(self.loader, 'imported_digimon'):
+            for digimon in self.loader.imported_digimon:
+                display_name = f"📥 {digimon.name} ({digimon.chr_id})"
+                digimon_names.append(display_name)
+                self.digimon_data[display_name] = digimon.chr_id
+        
         # Sort by name
         digimon_names.sort()
         
@@ -3817,9 +4412,37 @@ class DigimonEditor(QMainWindow):
     
     def load_selected_digimon(self):
         """Load the selected Digimon"""
+        # Check for unsaved changes
+        if self.has_unsaved_changes:
+            reply = QMessageBox.question(
+                self,
+                "Unsaved Changes",
+                f"You have unsaved changes to {self.current_digimon.name if self.current_digimon else 'the current Digimon'}.\n\n"
+                "Do you want to save before switching?",
+                QMessageBox.StandardButton.Save | QMessageBox.StandardButton.Discard | QMessageBox.StandardButton.Cancel,
+                QMessageBox.StandardButton.Save
+            )
+            
+            if reply == QMessageBox.StandardButton.Cancel:
+                return  # Don't switch
+            elif reply == QMessageBox.StandardButton.Save:
+                self.save_current_digimon()
+                if self.has_unsaved_changes:  # Save failed or was cancelled
+                    return
+        
         display_name = self.digimon_list.currentText()
         if display_name and display_name in self.digimon_data:
             chr_id = self.digimon_data[display_name]
+            
+            # Check if this is an imported Digimon
+            if display_name.startswith("📥"):
+                if hasattr(self.loader, 'imported_digimon'):
+                    for digimon in self.loader.imported_digimon:
+                        if digimon.chr_id == chr_id:
+                            self.load_digimon_data(digimon)
+                            return
+            
+            # Otherwise load from normal sources
             digimon = self.loader.get_digimon_by_chr_id(chr_id)
             if digimon:
                 self.load_digimon_data(digimon)
@@ -3830,6 +4453,9 @@ class DigimonEditor(QMainWindow):
         """Load Digimon data into the editor"""
         self.current_digimon = digimon
         self.current_digimon_label.setText(f"✏️ Editing: {digimon.name} ({digimon.chr_id})")
+        
+        # Clear unsaved changes flag when loading new Digimon
+        self.clear_modified_flag()
         
         # Enable/disable remove button based on source
         is_from_dlc = self.source_combo.currentData()
@@ -3965,6 +4591,255 @@ class DigimonEditor(QMainWindow):
                         self.load_selected_digimon()
                         break
     
+    def import_from_dsts_loader(self):
+        """Import Digimon from dsts-loader format files"""
+        from pathlib import Path
+        import csv
+        
+        # Ask user to select dsts-loader directory
+        default_path = Path.cwd() / "dsts-loader"
+        
+        loader_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Select dsts-loader Directory to Import From",
+            str(default_path),
+            QFileDialog.Option.ShowDirsOnly
+        )
+        
+        if not loader_dir:
+            return
+        
+        loader_path = Path(loader_dir)
+        
+        # Look for digimon_status_data.ap.csv files
+        status_files = list((loader_path / "patch" / "data" / "digimon_status.mbe").glob("*.ap.csv"))
+        
+        if not status_files:
+            QMessageBox.warning(
+                self,
+                "No Files Found",
+                "No .ap.csv files found in patch/data/digimon_status.mbe/\n\n"
+                "Make sure you selected the correct dsts-loader directory."
+            )
+            return
+        
+        imported_count = 0
+        imported_names = []
+        
+        try:
+            for status_file in status_files:
+                # Parse each status file
+                digimon_list = self._parse_digimon_status_csv(status_file, loader_path)
+                
+                for digimon in digimon_list:
+                    # Add to loader's digimon list
+                    if not hasattr(self.loader, 'imported_digimon'):
+                        self.loader.imported_digimon = []
+                    
+                    self.loader.imported_digimon.append(digimon)
+                    imported_count += 1
+                    imported_names.append(digimon.name)
+            
+            # Refresh the list
+            self.load_digimon_list()
+            
+            QMessageBox.information(
+                self,
+                "Import Successful! 🎉",
+                f"✅ Successfully imported {imported_count} Digimon:\n\n" +
+                "\n".join(f"  • {name}" for name in imported_names[:10]) +
+                (f"\n  ... and {len(imported_names) - 10} more" if len(imported_names) > 10 else "") +
+                "\n\nThey are now available in the editor!"
+            )
+            
+        except Exception as e:
+            QMessageBox.critical(
+                self,
+                "Import Error",
+                f"Failed to import Digimon:\n\n{str(e)}\n\n"
+                "Make sure the files are in the correct dsts-loader format."
+            )
+            import traceback
+            traceback.print_exc()
+    
+    def _parse_digimon_status_csv(self, csv_file: Path, base_path: Path):
+        """Parse a digimon_status_data.ap.csv and related files"""
+        import csv
+        from copy import deepcopy
+        
+        digimon_list = []
+        
+        with open(csv_file, 'r', encoding='utf-8') as f:
+            reader = csv.reader(f)
+            header = next(reader)  # Skip header
+            
+            for row in reader:
+                if not row or len(row) < 4:
+                    continue
+                
+                # Create new DigimonData object
+                digimon = DigimonData()
+                
+                # Parse basic info from digimon_status_data
+                digimon.id = int(row[0]) if row[0] else 0
+                digimon.char_key = row[2].strip('"') if len(row) > 2 else ""
+                digimon.chr_id = row[3].strip('"') if len(row) > 3 else ""
+                digimon.stage_id = int(row[4]) if len(row) > 4 and row[4] else 0
+                digimon.personality_id = int(row[5]) if len(row) > 5 and row[5] else 0
+                digimon.type_id = int(row[6]) if len(row) > 6 and row[6] else 0
+                digimon.generation_id = digimon.stage_id
+                
+                # Parse resistances (columns 7-17)
+                if len(row) > 17:
+                    digimon.res_null = int(row[7]) if row[7] else 0
+                    digimon.res_fire = int(row[8]) if row[8] else 0
+                    digimon.res_water = int(row[9]) if row[9] else 0
+                    digimon.res_ice = int(row[10]) if row[10] else 0
+                    digimon.res_grass = int(row[11]) if row[11] else 0
+                    digimon.res_wind = int(row[12]) if row[12] else 0
+                    digimon.res_elec = int(row[13]) if row[13] else 0
+                    digimon.res_ground = int(row[14]) if row[14] else 0
+                    digimon.res_steel = int(row[15]) if row[15] else 0
+                    digimon.res_light = int(row[16]) if row[16] else 0
+                    digimon.res_dark = int(row[17]) if row[17] else 0
+                
+                # Parse traits (columns 19-60)
+                digimon.traits = []
+                for i in range(19, min(61, len(row))):
+                    digimon.traits.append(row[i].lower() == 'true')
+                
+                # Parse base stats (columns 64-70)
+                if len(row) > 70:
+                    digimon.base_personality = int(row[61]) if row[61] else 0
+                    digimon.base_hp = int(row[64]) if row[64] else 0
+                    digimon.base_sp = int(row[65]) if row[65] else 0
+                    digimon.base_atk = int(row[66]) if row[66] else 0
+                    digimon.base_def = int(row[67]) if row[67] else 0
+                    digimon.base_int = int(row[68]) if row[68] else 0
+                    digimon.base_spi = int(row[69]) if row[69] else 0
+                    digimon.base_spd = int(row[70]) if row[70] else 0
+                
+                # Parse signature skills (every 3 columns starting at 72)
+                digimon.signature_skills = []
+                for i in range(12):
+                    idx = 72 + (i * 3)
+                    if len(row) > idx + 2:
+                        skill_id = int(row[idx]) if row[idx] else 0
+                        slot = int(row[idx + 2]) if row[idx + 2] else 0
+                        if skill_id > 0:
+                            digimon.signature_skills.append({'id': skill_id, 'slot': slot})
+                
+                # Parse generic skills (every 3 columns starting at 108)
+                digimon.generic_skills = []
+                for i in range(4):
+                    idx = 108 + (i * 3)
+                    if len(row) > idx + 2:
+                        skill_id = int(row[idx]) if row[idx] else 0
+                        level = int(row[idx + 2]) if row[idx + 2] else 0
+                        if skill_id > 0:
+                            digimon.generic_skills.append({'id': skill_id, 'level': level})
+                
+                # Load name from char_name
+                name_file = base_path / "patch_text01" / "text" / "char_name.mbe"
+                digimon.name = self._load_name_from_csv(name_file, digimon.char_key)
+                
+                # Load profile from digimon_profile
+                profile_file = base_path / "patch_text01" / "text" / "digimon_profile.mbe"
+                digimon.profile_text = self._load_profile_from_csv(profile_file, digimon.char_key)
+                
+                # Load model settings
+                model_file = base_path / "patch" / "data" / "model_setting.mbe"
+                digimon.model_setting_data = self._load_model_setting_from_csv(model_file, digimon.chr_id)
+                
+                # Load LOD data
+                lod_file = base_path / "patch" / "data" / "lod_chara.mbe"
+                digimon.lod_data = self._load_lod_from_csv(lod_file, digimon.chr_id)
+                
+                # Initialize other required data structures
+                digimon.evolution_paths = []
+                digimon.deevolution_sources = []
+                digimon.model_locator_data = {}
+                digimon.model_locator_motion_data = []
+                digimon.field_move_animation_data = []
+                digimon.lod_model_data = {}
+                
+                digimon_list.append(digimon)
+        
+        return digimon_list
+    
+    def _load_name_from_csv(self, base_path: Path, char_key: str) -> str:
+        """Load Digimon name from char_name CSV files"""
+        import csv
+        
+        csv_files = list(base_path.glob("*.ap.csv"))
+        for csv_file in csv_files:
+            try:
+                with open(csv_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 2 and row[0].strip('"') == char_key:
+                            return row[1].strip('"')
+            except:
+                continue
+        return "Unknown"
+    
+    def _load_profile_from_csv(self, base_path: Path, char_key: str) -> str:
+        """Load Digimon profile from digimon_profile CSV files"""
+        import csv
+        
+        csv_files = list(base_path.glob("*.ap.csv"))
+        for csv_file in csv_files:
+            try:
+                with open(csv_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 2 and row[0].strip('"') == char_key:
+                            return row[1].strip('"')
+            except:
+                continue
+        return ""
+    
+    def _load_model_setting_from_csv(self, base_path: Path, chr_id: str) -> dict:
+        """Load model_setting data from CSV files"""
+        import csv
+        
+        csv_files = list(base_path.glob("*.ap.csv"))
+        for csv_file in csv_files:
+            try:
+                with open(csv_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    header = next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 1 and row[0].strip('"') == chr_id:
+                            return {'raw_data': row}
+            except:
+                continue
+        return {}
+    
+    def _load_lod_from_csv(self, base_path: Path, chr_id: str) -> dict:
+        """Load LOD data from CSV files"""
+        import csv
+        
+        lod_file = base_path / "000_lod.ap.csv"
+        if lod_file.exists():
+            try:
+                with open(lod_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 4 and row[0].strip('"') == chr_id:
+                            return {
+                                'lod_distance_1': float(row[1]) if row[1] else 20,
+                                'lod_distance_2': float(row[2]) if row[2] else 65,
+                                'lod_distance_3': float(row[3]) if row[3] else 500
+                            }
+            except:
+                pass
+        
+        return {'lod_distance_1': 20, 'lod_distance_2': 65, 'lod_distance_3': 500}
+    
     def create_new_digimon(self):
         """Create a new Digimon entry using a selected Digimon as template"""
         # Create dialog to select template Digimon
@@ -4098,11 +4973,53 @@ class DigimonEditor(QMainWindow):
         if not self.current_digimon:
             return
         
-        # Store chr_id before saving for reload
+        # Store original values before updating
+        original_id = self.current_digimon.id
+        original_chr_id = self.current_digimon.chr_id
         chr_id_to_reload = self.current_digimon.chr_id
         
         # Update current digimon with form data
         self.update_digimon_from_form()
+        
+        # Validate for duplicates
+        if not self.validate_digimon_uniqueness(original_id, original_chr_id):
+            # Revert changes
+            self.current_digimon.id = original_id
+            self.current_digimon.chr_id = original_chr_id
+            return
+        
+        # Check if this is an imported Digimon
+        is_imported = hasattr(self.loader, 'imported_digimon') and any(
+            d.chr_id == self.current_digimon.chr_id for d in self.loader.imported_digimon
+        )
+        
+        if is_imported:
+            # Create custom dialog for save options
+            dialog = QMessageBox(self)
+            dialog.setWindowTitle("Save Imported Digimon")
+            dialog.setText(f"Where would you like to save {self.current_digimon.name}?")
+            dialog.setInformativeText(
+                "📥 dsts-loader: Update the .ap.csv files\n"
+                "📦 DLC: Add to DLC files"
+            )
+            
+            dsts_button = dialog.addButton("📥 Save to dsts-loader", QMessageBox.ButtonRole.AcceptRole)
+            dlc_button = dialog.addButton("📦 Save to DLC", QMessageBox.ButtonRole.ActionRole)
+            cancel_button = dialog.addButton("Cancel", QMessageBox.ButtonRole.RejectRole)
+            
+            dialog.exec()
+            clicked = dialog.clickedButton()
+            
+            if clicked == cancel_button:
+                return
+            elif clicked == dsts_button:
+                # Save to dsts-loader
+                self.save_to_dsts_loader(self.current_digimon)
+                return
+            elif clicked == dlc_button:
+                # Save to DLC
+                self.save_to_dlc(self.current_digimon, chr_id_to_reload)
+                return
         
         # Check if this Digimon is from DLC or base game
         is_from_dlc = self.source_combo.currentData()
@@ -4113,6 +5030,7 @@ class DigimonEditor(QMainWindow):
             animation_ref = self.animation_ref_edit.text().strip() if self.animation_ref_edit.text().strip() else self.current_digimon.chr_id
             
             if dlc_exporter.save_digimon_to_dlc(self.current_digimon, animation_ref):
+                self.clear_modified_flag()
                 QMessageBox.information(self, "Success", "Digimon data saved to DLC successfully!")
                 # Invalidate caches to ensure fresh data is loaded
                 if hasattr(self.loader, '_invalidate_digimon_status_cache'):
@@ -4137,6 +5055,7 @@ class DigimonEditor(QMainWindow):
         else:
             # Save to base game files
             if self.loader.save_digimon_data(self.current_digimon):
+                self.clear_modified_flag()
                 QMessageBox.information(self, "Success", "Digimon data saved successfully!")
                 # Invalidate caches to ensure fresh data is loaded
                 if hasattr(self.loader, '_invalidate_digimon_status_cache'):
@@ -4271,6 +5190,71 @@ class DigimonEditor(QMainWindow):
         else:
             QMessageBox.warning(self, "Error", "Failed to export to DLC")
     
+    def save_to_dsts_loader(self, digimon: DigimonData):
+        """Save Digimon back to dsts-loader format"""
+        from pathlib import Path
+        
+        # Ask user to select dsts-loader directory
+        default_path = Path.cwd() / "dsts-loader"
+        
+        loader_dir = QFileDialog.getExistingDirectory(
+            self,
+            "Select dsts-loader Directory to Save To",
+            str(default_path),
+            QFileDialog.Option.ShowDirsOnly
+        )
+        
+        if not loader_dir:
+            return
+        
+        # Use the wizard's export methods
+        wizard = DigimonCreationWizard(self, self.loader)
+        animation_ref = self.animation_ref_edit.text().strip() if self.animation_ref_edit.text().strip() else digimon.chr_id
+        
+        if wizard._export_to_dsts_loader(Path(loader_dir), digimon, animation_ref):
+            self.clear_modified_flag()
+            QMessageBox.information(
+                self,
+                "Success! ✅",
+                f"✅ {digimon.name} has been saved to dsts-loader format!\n\n"
+                f"Location: {loader_dir}\n\n"
+                "All .ap.csv files have been updated."
+            )
+        else:
+            QMessageBox.warning(self, "Error", "Failed to save to dsts-loader format")
+    
+    def save_to_dlc(self, digimon: DigimonData, chr_id_to_reload: str):
+        """Save Digimon to DLC files"""
+        dlc_exporter = DLCExporter(self.loader)
+        animation_ref = self.animation_ref_edit.text().strip() if self.animation_ref_edit.text().strip() else digimon.chr_id
+        
+        if dlc_exporter.save_digimon_to_dlc(digimon, animation_ref):
+            self.clear_modified_flag()
+            QMessageBox.information(
+                self,
+                "Success! ✅",
+                f"✅ {digimon.name} has been saved to DLC!\n\n"
+                "The Digimon is now available in DLC files."
+            )
+            # Invalidate caches
+            if hasattr(self.loader, '_invalidate_digimon_status_cache'):
+                self.loader._invalidate_digimon_status_cache()
+            self.loader._digimon_profiles_cache = None
+            if hasattr(self.loader, '_char_names_cache'):
+                self.loader._char_names_cache = None
+            
+            # Refresh list
+            self.load_digimon_list()
+            
+            # Reload Digimon
+            QApplication.processEvents()
+            digimon_reloaded = self.loader.get_digimon_by_chr_id(chr_id_to_reload)
+            if digimon_reloaded:
+                digimon_reloaded.name = self.loader._get_digimon_name(digimon_reloaded.char_key, check_dlc=True)
+                self.load_digimon_data(digimon_reloaded)
+        else:
+            QMessageBox.warning(self, "Error", "Failed to save to DLC")
+    
     def update_digimon_from_form(self):
         """Update current Digimon with data from form"""
         if not self.current_digimon:
@@ -4323,6 +5307,22 @@ class DigimonEditor(QMainWindow):
         # Model data
         self.current_digimon.model_id = self.model_id_edit.text()
         self.current_digimon.motion_id = self.motion_id_edit.text()
+        
+        # LOD data - FIX: Save LOD distances from widgets
+        if not hasattr(self.current_digimon, 'lod_data') or not self.current_digimon.lod_data:
+            self.current_digimon.lod_data = {}
+        
+        for key, widget in self.lod_widgets.items():
+            self.current_digimon.lod_data[key] = widget.value()
+        
+        # Evolution data - FIX: Save evolution paths from evolution tab
+        # Note: Evolution paths are managed through add_evolution/remove_evolution methods
+        # which directly modify self.current_digimon.evolution_paths and deevolution_sources
+        # So they should already be updated, but we ensure the data structure exists
+        if not hasattr(self.current_digimon, 'evolution_paths'):
+            self.current_digimon.evolution_paths = []
+        if not hasattr(self.current_digimon, 'deevolution_sources'):
+            self.current_digimon.deevolution_sources = []
         
         # References
         self.current_digimon.field_guide_id = self.field_guide_id_spin.value()

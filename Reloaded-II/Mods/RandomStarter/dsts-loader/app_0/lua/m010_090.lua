@@ -185,11 +185,38 @@ local CHR_TO_CHAR = {
   chr950 = "char_TITAMON_ADD"
 }
 
--- Generate ALL_DIGIMON list from CHR_TO_CHAR keys to ensure they always match
+-- Generate ALL_DIGIMON list from CHR_TO_CHAR keys, filtering out boss variants
 local ALL_DIGIMON = {}
-for chrID, _ in pairs(CHR_TO_CHAR) do
-  table.insert(ALL_DIGIMON, chrID)
+for chrID, charName in pairs(CHR_TO_CHAR) do
+  -- Filter out boss monsters (enlarged variants, boss-only, and special encounters)
+  local isBoss = false
+  
+  -- Check if it's a boss variant by name
+  if string.find(charName, "_BIG") or      -- Enlarged boss variants (chr812-950)
+     string.find(charName, "_BOSS") or     -- Boss-only versions (chr804, etc.)
+     string.find(charName, "_ADD") or      -- Boss add-ons/parts
+     string.find(charName, "_SUB") or      -- Boss sub-parts
+     string.find(charName, "VULCANUS_") or -- Boss parts (chr800-801, 809-810)
+     string.find(charName, "CHRONOMONROBO_COMPLETE") or -- Boss (chr802, 808)
+     string.find(charName, "SPECIAL_FORCES") or -- Special encounter (chr811)
+     string.find(charName, "POWER_LOADER") then -- Special encounter (chr807)
+    isBoss = true
+  end
+  
+  -- Check if it's a boss by chr ID range (800+ are mostly bosses)
+  local chrNum = tonumber(string.match(chrID, "%d+"))
+  if chrNum and chrNum >= 800 then
+    isBoss = true
+  end
+  
+  -- Only add non-boss Digimon to the pool
+  if not isBoss then
+    table.insert(ALL_DIGIMON, chrID)
+  end
 end
+
+print("=== FILTERED DIGIMON POOL ===")
+print("Total non-boss Digimon available:", #ALL_DIGIMON)
 
 -- Random Digimon Selection Function
 function GetRandomDigimon(count)
@@ -617,8 +644,7 @@ function m010_090()
     WaitFrame(10)
     CUT("9.0")
     SetEnv_All("c9.0", 0)
-    SetCamera(126.021, 1.603, 37.438, 0, 20, "LINEAR", 0, false, 0)
-    SetCameraTarget(125.594, 1.487, 37.203, "LINEAR", 0, false, 0)
+
     WaitFrame(10)
     PlayMotion("Horo_AGENT", "e002", 5, true, 0)
     MessageTalk("m010_090_070")

@@ -15,6 +15,13 @@
   "HasExports": true,
   "IsLibrary": false,
   "ReleaseMetadataFileName": "Ryo.Reloaded.ReleaseMetadata.json",
+  "IgnoreRegexes": [
+    ".*\\.json"
+  ],
+  "IncludeRegexes": [
+    "\\.deps\\.json",
+    "\\.runtimeconfig\\.json"
+  ],
   "PluginData": {
     "GitHubDependencies": {
       "IdToConfigMap": {
