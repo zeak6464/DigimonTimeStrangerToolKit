@@ -35,6 +35,7 @@ class DigimonData:
     base_spi: int = 0
     base_spd: int = 0
     growth_pattern_id: int = 1  # Growth pattern (1-18) - determines which digimon_growth file to use
+    tribe_name: str = ""  # Tribe/species name for belong classification
     
     # Elemental resistances
     res_null: int = 0
@@ -171,9 +172,10 @@ class MBELoader:
             },
             "main/evolution.mbe/00_evolution_condition.csv": {
                 "dbId": 0,
-                "tamerLevel": 2,
+                "mode": 2,  # Condition type/mode
+                "tamerLevel": 3,  # FIXED: Was 2, should be 3 (Agent Rank)
                 "HP": 4, "SP": 5, "ATK": 6, "DEF": 7, "INT": 8, "SPI": 9, "SPD": 10,
-                "unknown1": 11,
+                "unknown1": 11, "unknown2": 12,
                 "skillCountValor": 13, "skillCountPhilantropy": 14,
                 "skillCountAmicable": 15, "skillCountWisdom": 16,
                 "needsItem": 22,
@@ -825,23 +827,54 @@ class MBELoader:
                         "raw_data": row
                     })
         
-        # Load evolution conditions
+        # Load evolution conditions and embed them into evolution_paths
+        def parse_evolution_conditions(row):
+            """Parse evolution condition CSV row into structured dict"""
+            def safe_int(val):
+                try:
+                    return int(val) if val and str(val).strip() else 0
+                except:
+                    return 0
+            
+            return {
+                'mode': safe_int(row[2]) if len(row) > 2 else 4,
+                'tamerLevel': safe_int(row[3]) if len(row) > 3 else 0,
+                'HP': safe_int(row[4]) if len(row) > 4 else 0,
+                'SP': safe_int(row[5]) if len(row) > 5 else 0,
+                'ATK': safe_int(row[6]) if len(row) > 6 else 0,
+                'DEF': safe_int(row[7]) if len(row) > 7 else 0,
+                'INT': safe_int(row[8]) if len(row) > 8 else 0,
+                'SPI': safe_int(row[9]) if len(row) > 9 else 0,
+                'SPD': safe_int(row[10]) if len(row) > 10 else 0,
+                'unknown1': safe_int(row[11]) if len(row) > 11 else 0,
+                'unknown2': safe_int(row[12]) if len(row) > 12 else 0,
+                'skillCountValor': safe_int(row[13]) if len(row) > 13 else 0,
+                'skillCountPhilantropy': safe_int(row[14]) if len(row) > 14 else 0,
+                'skillCountAmicable': safe_int(row[15]) if len(row) > 15 else 0,
+                'skillCountWisdom': safe_int(row[16]) if len(row) > 16 else 0,
+                'needsItem': safe_int(row[22]) if len(row) > 22 else 0,
+                'jogressDbIdA': safe_int(row[24]) if len(row) > 24 else 0,
+                'jogressPersonalityA': safe_int(row[26]) if len(row) > 26 else 0,
+                'jogressDbIdB': safe_int(row[27]) if len(row) > 27 else 0,
+                'jogressPersonalityB': safe_int(row[29]) if len(row) > 29 else 0
+            }
+        
         # Check base game first
         evolution_cond_file = self.data_path / "evolution.mbe" / "00_evolution_condition.csv"
         if evolution_cond_file.exists():
             rows = self.load_csv(evolution_cond_file)
             for row in rows[1:]:  # Skip header
                 if len(row) > 0:
-                    # Find conditions that apply to this Digimon's evolution paths
+                    target_digimon_id = row[0].strip('"') if row[0] else ""
+                    # Embed conditions directly into matching evolution_path entries
                     for evo_path in digimon.evolution_paths:
-                        if str(evo_path["evolution_id"]) == row[0]:
-                            digimon.evolution_conditions.append({
-                                "evolution_id": int(row[0]) if row[0] else 0,
-                                "level_req": int(row[2]) if len(row) > 2 and row[2] else 0,
-                                "hp_req": int(row[4]) if len(row) > 4 and row[4] else 0,
-                                "conditions": row,
-                                "raw_data": row
-                            })
+                        # FIXED: Match by TARGET Digimon ID (to_id), not source Digimon ID
+                        # Column 0 in evolution_condition = requirements to evolve INTO that Digimon
+                        if str(evo_path.get('to_id', 0)) == target_digimon_id:
+                            conditions = parse_evolution_conditions(row)
+                            evo_path['conditions'] = conditions
+                            # Also store in separate list for backwards compatibility
+                            digimon.evolution_conditions.append(conditions)
         
         # Check DLC files
         dlc_evolution_cond_file = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
@@ -849,16 +882,16 @@ class MBELoader:
             rows = self.load_csv(dlc_evolution_cond_file)
             for row in rows[1:]:  # Skip header
                 if len(row) > 0:
-                    # Find conditions that apply to this Digimon's evolution paths
+                    target_digimon_id = row[0].strip('"') if row[0] else ""
+                    # Embed conditions directly into matching evolution_path entries
                     for evo_path in digimon.evolution_paths:
-                        if str(evo_path["evolution_id"]) == row[0]:
-                            digimon.evolution_conditions.append({
-                                "evolution_id": int(row[0]) if row[0] else 0,
-                                "level_req": int(row[2]) if len(row) > 2 and row[2] else 0,
-                                "hp_req": int(row[4]) if len(row) > 4 and row[4] else 0,
-                                "conditions": row,
-                                "raw_data": row
-                            })
+                        # FIXED: Match by TARGET Digimon ID (to_id), not source Digimon ID
+                        # Column 0 in evolution_condition = requirements to evolve INTO that Digimon
+                        if str(evo_path.get('to_id', 0)) == target_digimon_id:
+                            conditions = parse_evolution_conditions(row)
+                            evo_path['conditions'] = conditions
+                            # Also store in separate list for backwards compatibility
+                            digimon.evolution_conditions.append(conditions)
         
         # Load de-evolution sources (what can evolve into this Digimon)
         # Check base game first

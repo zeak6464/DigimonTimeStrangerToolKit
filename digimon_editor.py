@@ -218,6 +218,13 @@ class DigimonCreationWizard(QWizard):
         self.new_digimon.generation_id = self.new_digimon.stage_id
         self.new_digimon.personality_id = class_page.personality_combo.currentData() if class_page.personality_combo.currentData() is not None else 0
         self.new_digimon.base_personality = self.new_digimon.personality_id
+        self.new_digimon.growth_pattern_id = class_page.growth_combo.currentData() if class_page.growth_combo.currentData() is not None else 1
+        self.new_digimon.tribe_name = class_page.tribe_combo.currentText() if class_page.tribe_combo.currentText() else "None"
+        
+        # Store selected tribe name for belong export
+        if not hasattr(self.new_digimon, 'tribe_name'):
+            self.new_digimon.tribe_name = None
+        self.new_digimon.tribe_name = class_page.tribe_combo.currentText()
         
         self.new_digimon.base_hp = stats_page.hp_spin.value()
         self.new_digimon.base_sp = stats_page.sp_spin.value()
@@ -246,6 +253,12 @@ class DigimonCreationWizard(QWizard):
         # Evolution paths (from EvolutionPage)
         self.new_digimon.evolution_paths = evolution_page.evolution_paths.copy()
         self.new_digimon.deevolution_sources = evolution_page.deevolution_sources.copy()
+        
+        # Extract evolution conditions from evolution paths
+        self.new_digimon.evolution_conditions = []
+        for evo in evolution_page.evolution_paths:
+            if 'conditions' in evo:
+                self.new_digimon.evolution_conditions.append(evo['conditions'])
         
         self.new_digimon.model_id = model_page.model_id_edit.text()
         self.new_digimon.motion_id = model_page.motion_id_edit.text()
@@ -489,7 +502,7 @@ class DigimonCreationWizard(QWizard):
         parts.append(str(digimon.base_int))  # 68
         parts.append(str(digimon.base_spi))  # 69
         parts.append(str(digimon.base_spd))  # 70
-        parts.append("0")  # 71
+        parts.append(str(digimon.growth_pattern_id))  # 71 - Growth Pattern (1-18)
         
         # Signature skills (72-107) - pattern: id, empty, slot
         for i in range(12):
@@ -516,7 +529,27 @@ class DigimonCreationWizard(QWizard):
                 parts.append("0")
         
         # Remaining fields (120-135)
-        parts.extend(["2", "1", "1", "0", "true", "false", "0", '', "0", "0", "0", "0", str(digimon.id), "-1", "0", "-1"])
+        # 120-130: various flags/settings
+        # 131: field_guide_id, 132: script_id
+        # 133-135: additional fields
+        parts.extend([
+            "2",  # 120
+            "1",  # 121
+            "1",  # 122
+            "0",  # 123 (should be float but 0 works)
+            "true",  # 124
+            "false",  # 125
+            "0",  # 126
+            '',  # 127 empty
+            "0",  # 128
+            "0",  # 129
+            "0",  # 130
+            "0",  # 131 - Unused field
+            str(digimon.field_guide_id if digimon.field_guide_id >= 0 else digimon.id),  # 132 - Field Guide ID
+            str(digimon.script_id if digimon.script_id >= 0 else digimon.id),  # 133 - Script ID
+            "0",  # 134
+            "-1"  # 135
+        ])
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
@@ -625,8 +658,17 @@ class DigimonCreationWizard(QWizard):
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
+            # Deduplicate evolution paths by to_id
+            seen_to_ids = set()
+            
             for evo in digimon.evolution_paths:
                 to_id = evo.get('to_id', 0)
+                
+                # Skip duplicates
+                if to_id in seen_to_ids:
+                    continue
+                seen_to_ids.add(to_id)
+                
                 raw_data = evo.get('raw_data', [])
                 
                 # Generate evolution ID (100000 + base number)
@@ -645,28 +687,35 @@ class DigimonCreationWizard(QWizard):
     
     def _write_char_name_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write char_name.ap.csv"""
+        import csv
+        
         header = 'string2 0,string 1'
-        # Properly escape strings for CSV
-        escaped_key = self._escape_csv_value(digimon.char_key)
-        escaped_name = self._escape_csv_value(digimon.name)
-        parts = [f'"{escaped_key}"', f'"{escaped_name}"']
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
-            f.write(','.join(parts) + '\n')
+            # Use csv.writer to properly handle special characters
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow([digimon.char_key, digimon.name])
     
     def _write_profile_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write digimon_profile.ap.csv"""
+        import csv
+        import textwrap
+        
         header = 'string2 0,string 1'
         profile = digimon.profile_text if digimon.profile_text else f"A mysterious Digimon known as {digimon.name}."
-        # Properly escape strings for CSV (especially important for profile text!)
-        escaped_key = self._escape_csv_value(digimon.char_key)
-        escaped_profile = self._escape_csv_value(profile)
-        parts = [f'"{escaped_key}"', f'"{escaped_profile}"']
+        
+        # If profile doesn't already have line breaks, add them at reasonable intervals
+        # Check if profile has newlines already
+        if '\n' not in profile and len(profile) > 60:
+            # Wrap text to ~60 characters per line for readability
+            profile = '\n'.join(textwrap.wrap(profile, width=60, break_long_words=False, break_on_hyphens=False))
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
-            f.write(','.join(parts) + '\n')
+            # Use csv.writer to properly handle multi-line text
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow([digimon.char_key, profile])
     
     def _write_model_outline_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write model_outline_battle.ap.csv"""
@@ -688,24 +737,58 @@ class DigimonCreationWizard(QWizard):
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
-            # Create default evolution condition for the Digimon
-            parts = [
-                str(digimon.id),  # Evolution ID matches Digimon ID
-                '',  # empty
-                '4',  # Condition type (4 = standard evolution)
-                '0',  # Param 1
-                '0',  # Param 2 (friendship level, etc.)
-                '0',  # Param 3 (required level)
-                '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0', '0',  # Params 4-17
-                '',  # empty
-                '0', '0', '0', '0',  # More params
-                '',  # empty
-                '0',  # Param
-                '',  # empty
-                '0', '0',  # More params
-                '',  # empty
-                '0'  # Final param
-            ]
+            # Use evolution_conditions if available, otherwise create minimal default
+            if digimon.evolution_conditions and len(digimon.evolution_conditions) > 0:
+                condition = digimon.evolution_conditions[0]
+                
+                parts = [
+                    str(digimon.id),  # 0: dbId
+                    '',  # 1: empty
+                    str(condition.get('mode', 4)),  # 2: condition type/mode
+                    str(condition.get('tamerLevel', 0)),  # 3: tamer level
+                    str(condition.get('HP', 0)),  # 4: HP requirement
+                    str(condition.get('SP', 0)),  # 5: SP requirement
+                    str(condition.get('ATK', 0)),  # 6: ATK requirement
+                    str(condition.get('DEF', 0)),  # 7: DEF requirement
+                    str(condition.get('INT', 0)),  # 8: INT requirement
+                    str(condition.get('SPI', 0)),  # 9: SPI requirement
+                    str(condition.get('SPD', 0)),  # 10: SPD requirement
+                    str(condition.get('unknown1', 0)),  # 11
+                    str(condition.get('unknown2', 0)),  # 12
+                    str(condition.get('skillCountValor', 0)),  # 13
+                    str(condition.get('skillCountPhilantropy', 0)),  # 14
+                    str(condition.get('skillCountAmicable', 0)),  # 15
+                    str(condition.get('skillCountWisdom', 0)),  # 16
+                    '0', # 17
+                    '',  # 18: empty
+                    '0', '0', '0',  # 19-21
+                    str(condition.get('needsItem', 0)),  # 22
+                    '',  # 23: empty
+                    str(condition.get('jogressDbIdA', 0)),  # 24
+                    '',  # 25: empty
+                    str(condition.get('jogressPersonalityA', 0)),  # 26
+                    str(condition.get('jogressDbIdB', 0)),  # 27
+                    '',  # 28: empty
+                    str(condition.get('jogressPersonalityB', 0))  # 29
+                ]
+            else:
+                # Minimal default - no requirements
+                parts = [
+                    str(digimon.id),  # 0: dbId
+                    '',  # 1: empty
+                    '1',  # 2: mode 1 (no requirements)
+                    '0',  # 3: tamer level
+                    '0', '0', '0', '0', '0', '0', '0',  # 4-10: stat requirements
+                    '0', '0', '0', '0', '0', '0', '0',  # 11-17
+                    '',  # 18: empty
+                    '0', '0', '0', '0',  # 19-22
+                    '',  # 23: empty
+                    '0',  # 24
+                    '',  # 25: empty
+                    '0', '0',  # 26-27
+                    '',  # 28: empty
+                    '0'  # 29
+                ]
             f.write(','.join(parts) + '\n')
     
     def _write_chronodevolution_ap_csv(self, filepath: Path, digimon: DigimonData):
@@ -715,9 +798,17 @@ class DigimonCreationWizard(QWizard):
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
+            # Deduplicate de-evolution paths by from_id
+            seen_from_ids = set()
+            
             # Write chronodevolution entries (de-evolution paths)
             for de_evo in digimon.deevolution_sources:
                 from_id = de_evo.get('from_id', 0)
+                
+                # Skip duplicates
+                if from_id in seen_from_ids:
+                    continue
+                seen_from_ids.add(from_id)
                 
                 # Generate chronodevolution ID
                 chrono_id = 200000 + digimon.id * 100 + from_id
@@ -732,30 +823,21 @@ class DigimonCreationWizard(QWizard):
                 f.write(','.join(parts) + '\n')
     
     def _write_belong_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write belong.ap.csv (classification/category text)"""
+        """Write belong.ap.csv (tribe/species classification)"""
+        import csv
+        
         header = 'string2 0,string 1'
         
-        # Map stage_id to classification text
-        stage_text_map = {
-            0: "Baby",
-            1: "In-Training",
-            2: "Rookie",
-            3: "Champion",
-            4: "Ultimate",
-            5: "Mega",
-            6: "Ultra"
-        }
-        
-        classification = stage_text_map.get(digimon.stage_id, "Unknown")
-        
-        parts = [
-            f'"{digimon.id}"',  # Use ID as key (matches example format)
-            f'"{classification}"'
-        ]
+        # Use the tribe_name if available, otherwise fallback to "Unknown"
+        tribe_name = "Unknown"
+        if hasattr(digimon, 'tribe_name') and digimon.tribe_name:
+            tribe_name = digimon.tribe_name
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
-            f.write(','.join(parts) + '\n')
+            # Use csv.writer to properly handle any special characters
+            writer = csv.writer(f, quoting=csv.QUOTE_ALL)
+            writer.writerow([str(digimon.id), tribe_name])
 
 
 
@@ -946,7 +1028,7 @@ class ClassificationPage(QWizardPage):
         super().__init__()
         self.wizard = wizard
         self.setTitle("🏷️ Step 3: Classification")
-        self.setSubTitle("Set the Digimon's stage, type, and personality")
+        self.setSubTitle("Set the Digimon's stage, type/tribe, personality, and growth pattern")
         
         layout = QFormLayout()
         layout.setSpacing(15)
@@ -957,15 +1039,35 @@ class ClassificationPage(QWizardPage):
             stage_name = wizard.loader.get_generation_name(i)
             clean_name = wizard.loader.clean_ui_text(stage_name)
             self.stage_combo.addItem(clean_name, i)
+        self.stage_combo.setToolTip("Digimon stage/level (Baby, In-Training, Rookie, Champion, Ultimate, Mega, etc.)")
         layout.addRow("⭐ Stage:", self.stage_combo)
         
-        # Type
+        # Type (for game mechanics)
         self.type_combo = QComboBox()
-        for i in range(7):
+        for i in range(20):
             type_name = wizard.loader.get_type_name(i)
-            clean_name = wizard.loader.clean_ui_text(type_name)
-            self.type_combo.addItem(clean_name, i)
+            if not type_name or type_name == str(i):
+                type_name = f"Type {i}"
+            else:
+                type_name = wizard.loader.clean_ui_text(type_name)
+            self.type_combo.addItem(type_name, i)
+        self.type_combo.setToolTip("Digimon type (for game mechanics like weaknesses)")
         layout.addRow("🔷 Type:", self.type_combo)
+        
+        # Tribe/Species (Belong) - Load unique tribes from belong.mbe
+        self.tribe_combo = QComboBox()
+        unique_tribes = self._load_unique_tribes(wizard)
+        for tribe_name in sorted(unique_tribes):
+            self.tribe_combo.addItem(tribe_name)
+        self.tribe_combo.setToolTip("Digimon tribe/species classification (shown in Digimon profile)")
+        layout.addRow("🦁 Tribe/Species (Belong):", self.tribe_combo)
+        
+        # Growth Pattern
+        self.growth_combo = QComboBox()
+        for i in range(1, 19):  # Growth patterns 1-18
+            self.growth_combo.addItem(f"Growth Pattern {i}", i)
+        self.growth_combo.setToolTip("Growth curve pattern (1-18) - determines stat growth per level")
+        layout.addRow("📈 Growth Pattern:", self.growth_combo)
         
         # Personality
         self.personality_combo = QComboBox()
@@ -973,6 +1075,7 @@ class ClassificationPage(QWizardPage):
             personality_name = wizard.loader.get_personality_name(i)
             clean_name = wizard.loader.clean_ui_text(personality_name)
             self.personality_combo.addItem(clean_name, i)
+        self.personality_combo.setToolTip("Digimon personality type (affects skill learning)")
         layout.addRow("🎭 Personality:", self.personality_combo)
         
         # Set defaults from template
@@ -986,8 +1089,41 @@ class ClassificationPage(QWizardPage):
             personality_idx = self.personality_combo.findData(wizard.template_digimon.personality_id)
             if personality_idx >= 0:
                 self.personality_combo.setCurrentIndex(personality_idx)
+            growth_idx = self.growth_combo.findData(wizard.template_digimon.growth_pattern_id)
+            if growth_idx >= 0:
+                self.growth_combo.setCurrentIndex(growth_idx)
+            
+            # Load template's tribe from belong.mbe if available
+            if hasattr(wizard.template_digimon, 'tribe_name') and wizard.template_digimon.tribe_name:
+                tribe_idx = self.tribe_combo.findText(wizard.template_digimon.tribe_name)
+                if tribe_idx >= 0:
+                    self.tribe_combo.setCurrentIndex(tribe_idx)
         
         self.setLayout(layout)
+    
+    def _load_unique_tribes(self, wizard):
+        """Load unique tribe names from belong.mbe"""
+        unique_tribes = set()
+        try:
+            # Try to load from backup folder first (most complete)
+            belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
+            if not belong_file.exists():
+                # Try loader's text path
+                belong_file = wizard.loader.text_path / "belong.mbe" / "00_Sheet1.csv"
+            
+            if belong_file.exists():
+                rows = wizard.loader.load_csv(belong_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) >= 2:
+                        tribe_name = row[1].strip('"')
+                        if tribe_name:
+                            unique_tribes.add(tribe_name)
+        except Exception as e:
+            print(f"Error loading tribes: {e}")
+            # Fallback to common tribes
+            unique_tribes = {"None", "Mammal", "Beast Man", "Dragon", "Machine", "Beast"}
+        
+        return unique_tribes
     
     def initializePage(self):
         """Initialize page with template data when shown"""
@@ -1001,6 +1137,15 @@ class ClassificationPage(QWizardPage):
             personality_idx = self.personality_combo.findData(self.wizard.template_digimon.personality_id)
             if personality_idx >= 0:
                 self.personality_combo.setCurrentIndex(personality_idx)
+            growth_idx = self.growth_combo.findData(self.wizard.template_digimon.growth_pattern_id)
+            if growth_idx >= 0:
+                self.growth_combo.setCurrentIndex(growth_idx)
+            
+            # Load template's tribe from belong.mbe if available
+            if hasattr(self.wizard.template_digimon, 'tribe_name') and self.wizard.template_digimon.tribe_name:
+                tribe_idx = self.tribe_combo.findText(self.wizard.template_digimon.tribe_name)
+                if tribe_idx >= 0:
+                    self.tribe_combo.setCurrentIndex(tribe_idx)
 
 
 class StatsPage(QWizardPage):
@@ -1552,7 +1697,7 @@ class EvolutionPage(QWizardPage):
             digimon_list.addItem(f"Error loading Digimon list: {str(e)}")
     
     def add_evolution_path(self, to_id: int, to_chr_id: str):
-        """Add an evolution path"""
+        """Add an evolution path with requirements"""
         try:
             # Check if already exists
             for evo in self.evolution_paths:
@@ -1565,10 +1710,16 @@ class EvolutionPage(QWizardPage):
             if not to_name or to_name == to_chr_id:
                 to_name = f"Unknown (ID: {to_id})"
             
+            # Show evolution requirements dialog
+            conditions = self.show_evolution_requirements_dialog(to_name)
+            if conditions is None:
+                return  # User cancelled
+            
             # Add to list
             evo_data = {
                 'to_id': to_id,
                 'to_chr_id': to_chr_id,
+                'conditions': conditions,
                 'raw_data': [0, self.wizard.template_digimon.id if self.wizard.template_digimon else 0, 0, to_id]
             }
             self.evolution_paths.append(evo_data)
@@ -1579,7 +1730,9 @@ class EvolutionPage(QWizardPage):
                 if item and item.text().startswith("(No evolution"):
                     self.evolution_list.clear()
             
-            self.evolution_list.addItem(f"→ {to_name} (ID: {to_id})")
+            # Show requirements summary in list
+            req_text = self._format_requirements_summary(conditions)
+            self.evolution_list.addItem(f"→ {to_name} (ID: {to_id}) {req_text}")
         except Exception as e:
             print(f"Error adding evolution path: {e}")
             import traceback
@@ -1632,6 +1785,213 @@ class EvolutionPage(QWizardPage):
             self.deevolution_sources.pop(current_row)
             self.deevolution_list.takeItem(current_row)
     
+    def show_evolution_requirements_dialog(self, target_name: str):
+        """Show dialog to configure evolution requirements"""
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Evolution Requirements → {target_name}")
+        dialog.setMinimumWidth(500)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Scroll area for all fields
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        
+        # Info label
+        info = QLabel("Configure the requirements needed to evolve to this Digimon.\nLeave values at 0 for no requirement.")
+        info.setWordWrap(True)
+        info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
+        scroll_layout.addWidget(info)
+        
+        # Condition Mode
+        mode_group = QGroupBox("Evolution Mode")
+        mode_layout = QVBoxLayout()
+        mode_combo = QComboBox()
+        mode_combo.addItem("Mode 1: No Requirements (Always Available)", 1)
+        mode_combo.addItem("Mode 2: Item Required", 2)
+        mode_combo.addItem("Mode 3: Jogress/DNA Digivolution", 3)
+        mode_combo.addItem("Mode 4: Standard Evolution (Stats/Level)", 4)
+        mode_combo.setCurrentIndex(3)  # Default to Mode 4
+        mode_layout.addWidget(mode_combo)
+        mode_group.setLayout(mode_layout)
+        scroll_layout.addWidget(mode_group)
+        
+        # Tamer Level
+        tamer_group = QGroupBox("Tamer Requirements")
+        tamer_layout = QFormLayout()
+        tamer_level_spin = QSpinBox()
+        tamer_level_spin.setRange(0, 99)
+        tamer_level_spin.setSuffix(" (0 = no requirement)")
+        tamer_layout.addRow("Tamer Level:", tamer_level_spin)
+        tamer_group.setLayout(tamer_layout)
+        scroll_layout.addWidget(tamer_group)
+        
+        # Stat Requirements
+        stats_group = QGroupBox("Stat Requirements")
+        stats_layout = QFormLayout()
+        
+        hp_spin = QSpinBox()
+        hp_spin.setRange(0, 99999)
+        hp_spin.setSuffix(" HP")
+        stats_layout.addRow("HP:", hp_spin)
+        
+        sp_spin = QSpinBox()
+        sp_spin.setRange(0, 99999)
+        sp_spin.setSuffix(" SP")
+        stats_layout.addRow("SP:", sp_spin)
+        
+        atk_spin = QSpinBox()
+        atk_spin.setRange(0, 9999)
+        atk_spin.setSuffix(" ATK")
+        stats_layout.addRow("ATK:", atk_spin)
+        
+        def_spin = QSpinBox()
+        def_spin.setRange(0, 9999)
+        def_spin.setSuffix(" DEF")
+        stats_layout.addRow("DEF:", def_spin)
+        
+        int_spin = QSpinBox()
+        int_spin.setRange(0, 9999)
+        int_spin.setSuffix(" INT")
+        stats_layout.addRow("INT:", int_spin)
+        
+        spi_spin = QSpinBox()
+        spi_spin.setRange(0, 9999)
+        spi_spin.setSuffix(" SPI")
+        stats_layout.addRow("SPI:", spi_spin)
+        
+        spd_spin = QSpinBox()
+        spd_spin.setRange(0, 9999)
+        spd_spin.setSuffix(" SPD")
+        stats_layout.addRow("SPD:", spd_spin)
+        
+        stats_group.setLayout(stats_layout)
+        scroll_layout.addWidget(stats_group)
+        
+        # Skill Count Requirements
+        skills_group = QGroupBox("Skill Count Requirements (by Personality)")
+        skills_layout = QFormLayout()
+        
+        valor_spin = QSpinBox()
+        valor_spin.setRange(0, 999)
+        valor_spin.setSuffix(" skills")
+        skills_layout.addRow("Valor Skills:", valor_spin)
+        
+        philanthropy_spin = QSpinBox()
+        philanthropy_spin.setRange(0, 999)
+        philanthropy_spin.setSuffix(" skills")
+        skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
+        
+        amicable_spin = QSpinBox()
+        amicable_spin.setRange(0, 999)
+        amicable_spin.setSuffix(" skills")
+        skills_layout.addRow("Amicable Skills:", amicable_spin)
+        
+        wisdom_spin = QSpinBox()
+        wisdom_spin.setRange(0, 999)
+        wisdom_spin.setSuffix(" skills")
+        skills_layout.addRow("Wisdom Skills:", wisdom_spin)
+        
+        skills_group.setLayout(skills_layout)
+        scroll_layout.addWidget(skills_group)
+        
+        # Item Requirement
+        item_group = QGroupBox("Item Requirement (Mode 2)")
+        item_layout = QFormLayout()
+        item_spin = QSpinBox()
+        item_spin.setRange(0, 9999)
+        item_spin.setSuffix(" (Item ID, 0 = none)")
+        item_layout.addRow("Required Item:", item_spin)
+        item_group.setLayout(item_layout)
+        scroll_layout.addWidget(item_group)
+        
+        # Jogress Requirements
+        jogress_group = QGroupBox("Jogress/DNA Digivolution (Mode 3)")
+        jogress_layout = QFormLayout()
+        
+        jogress_a_id_spin = QSpinBox()
+        jogress_a_id_spin.setRange(0, 9999)
+        jogress_a_id_spin.setSuffix(" (Partner A ID)")
+        jogress_layout.addRow("Partner A Digimon ID:", jogress_a_id_spin)
+        
+        jogress_a_personality_spin = QSpinBox()
+        jogress_a_personality_spin.setRange(0, 99)
+        jogress_a_personality_spin.setSuffix(" (Personality)")
+        jogress_layout.addRow("Partner A Personality:", jogress_a_personality_spin)
+        
+        jogress_b_id_spin = QSpinBox()
+        jogress_b_id_spin.setRange(0, 9999)
+        jogress_b_id_spin.setSuffix(" (Partner B ID)")
+        jogress_layout.addRow("Partner B Digimon ID:", jogress_b_id_spin)
+        
+        jogress_b_personality_spin = QSpinBox()
+        jogress_b_personality_spin.setRange(0, 99)
+        jogress_b_personality_spin.setSuffix(" (Personality)")
+        jogress_layout.addRow("Partner B Personality:", jogress_b_personality_spin)
+        
+        jogress_group.setLayout(jogress_layout)
+        scroll_layout.addWidget(jogress_group)
+        
+        scroll_layout.addStretch()
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            return {
+                'mode': mode_combo.currentData(),
+                'tamerLevel': tamer_level_spin.value(),
+                'HP': hp_spin.value(),
+                'SP': sp_spin.value(),
+                'ATK': atk_spin.value(),
+                'DEF': def_spin.value(),
+                'INT': int_spin.value(),
+                'SPI': spi_spin.value(),
+                'SPD': spd_spin.value(),
+                'unknown1': 0,
+                'unknown2': 0,
+                'skillCountValor': valor_spin.value(),
+                'skillCountPhilantropy': philanthropy_spin.value(),
+                'skillCountAmicable': amicable_spin.value(),
+                'skillCountWisdom': wisdom_spin.value(),
+                'needsItem': item_spin.value(),
+                'jogressDbIdA': jogress_a_id_spin.value(),
+                'jogressPersonalityA': jogress_a_personality_spin.value(),
+                'jogressDbIdB': jogress_b_id_spin.value(),
+                'jogressPersonalityB': jogress_b_personality_spin.value()
+            }
+        return None  # Cancelled
+    
+    def _format_requirements_summary(self, conditions: dict) -> str:
+        """Format evolution requirements as a short summary"""
+        parts = []
+        if conditions.get('tamerLevel', 0) > 0:
+            parts.append(f"Tamer Lv{conditions['tamerLevel']}")
+        
+        stats = []
+        for stat in ['HP', 'SP', 'ATK', 'DEF', 'INT', 'SPI', 'SPD']:
+            if conditions.get(stat, 0) > 0:
+                stats.append(f"{stat}{conditions[stat]}")
+        if stats:
+            parts.append(", ".join(stats))
+        
+        if conditions.get('needsItem', 0) > 0:
+            parts.append(f"Item#{conditions['needsItem']}")
+        
+        if conditions.get('jogressDbIdA', 0) > 0:
+            parts.append(f"Jogress w/ ID{conditions['jogressDbIdA']}")
+        
+        if parts:
+            return f"[{'; '.join(parts)}]"
+        return "[No requirements]"
+    
     def initializePage(self):
         """Load evolution data from template when page is shown"""
         if not self.wizard.template_digimon:
@@ -1645,10 +2005,13 @@ class EvolutionPage(QWizardPage):
         self.evolution_paths = []
         self.deevolution_sources = []
         
-        # Populate evolution paths
+        # Populate evolution paths (deduplicate by to_id)
+        seen_to_ids = set()
         for evo in digimon.evolution_paths:
             to_id = evo.get('to_id', 0)
-            if to_id > 0:
+            if to_id > 0 and to_id not in seen_to_ids:
+                seen_to_ids.add(to_id)
+                
                 # Try to get name
                 to_chr_id = f"chr{to_id:03d}"
                 to_name = self.wizard.loader._get_digimon_name_by_chr_id(to_chr_id)
@@ -1672,10 +2035,13 @@ class EvolutionPage(QWizardPage):
                 req_str = f" [{', '.join(reqs)}]" if reqs else ""
                 self.evolution_list.addItem(f"→ {to_name}{req_str}")
         
-        # Populate de-evolution sources
+        # Populate de-evolution sources (deduplicate by from_id)
+        seen_from_ids = set()
         for deevo in digimon.deevolution_sources:
             from_id = deevo.get('from_id', 0)
-            if from_id > 0:
+            if from_id > 0 and from_id not in seen_from_ids:
+                seen_from_ids.add(from_id)
+                
                 from_chr_id = f"chr{from_id:03d}"
                 from_name = self.wizard.loader._get_digimon_name_by_chr_id(from_chr_id)
                 if not from_name or from_name == from_chr_id:
@@ -1988,6 +2354,7 @@ class DigimonEditor(QMainWindow):
         self.stage_combo.currentIndexChanged.connect(self.mark_as_modified)
         self.type_combo.currentIndexChanged.connect(self.mark_as_modified)
         self.personality_combo.currentIndexChanged.connect(self.mark_as_modified)
+        self.tribe_combo.currentIndexChanged.connect(self.mark_as_modified)
         self.profile_text_edit.textChanged.connect(self.mark_as_modified)
         
         # Stats
@@ -2556,6 +2923,15 @@ class DigimonEditor(QMainWindow):
         self.populate_personality_dropdown()
         classification_layout.addWidget(self.personality_combo, 2, 1)
         
+        # Tribe/Belong with dropdown
+        tribe_label = QLabel("🦁 Tribe (Belong):")
+        tribe_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        classification_layout.addWidget(tribe_label, 3, 0)
+        self.tribe_combo = QComboBox()
+        self.populate_tribe_dropdown()
+        self.tribe_combo.setToolTip("Tribe/species classification shown in Digimon profile")
+        classification_layout.addWidget(self.tribe_combo, 3, 1)
+        
         layout.addWidget(classification_group)
         
         # Profile/Description Group
@@ -2707,15 +3083,161 @@ class DigimonEditor(QMainWindow):
         tab = QWidget()
         layout = QVBoxLayout(tab)
         
-        # Signature Skills
-        self.signature_skills_editor = SkillEditor("signature", self.loader)
-        layout.addWidget(self.signature_skills_editor)
+        # Signature Skills Section
+        sig_group = QGroupBox("Signature Skills (up to 12)")
+        sig_layout = QVBoxLayout()
         
-        # Generic Skills
+        # Add skill button
+        sig_add_btn = QPushButton("➕ Add Signature Skill")
+        sig_add_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #667eea, stop:1 #764ba2);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-weight: bold;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #5568d3, stop:1 #653b8e);
+            }
+        """)
+        sig_add_btn.clicked.connect(lambda: self.add_skill_from_list("signature"))
+        sig_layout.addWidget(sig_add_btn)
+        
+        self.signature_skills_editor = SkillEditor("signature", self.loader)
+        sig_layout.addWidget(self.signature_skills_editor)
+        sig_group.setLayout(sig_layout)
+        layout.addWidget(sig_group)
+        
+        # Generic Skills Section
+        gen_group = QGroupBox("Generic Skills (up to 4)")
+        gen_layout = QVBoxLayout()
+        
+        # Add skill button
+        gen_add_btn = QPushButton("➕ Add Generic Skill")
+        gen_add_btn.setStyleSheet("""
+            QPushButton {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #84fab0, stop:1 #8fd3f4);
+                color: white;
+                border: none;
+                border-radius: 6px;
+                padding: 8px 16px;
+                font-weight: bold;
+                font-size: 10pt;
+            }
+            QPushButton:hover {
+                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
+                    stop:0 #6ee89f, stop:1 #7bc9e8);
+            }
+        """)
+        gen_add_btn.clicked.connect(lambda: self.add_skill_from_list("generic"))
+        gen_layout.addWidget(gen_add_btn)
+        
         self.generic_skills_editor = SkillEditor("generic", self.loader)
-        layout.addWidget(self.generic_skills_editor)
+        gen_layout.addWidget(self.generic_skills_editor)
+        gen_group.setLayout(gen_layout)
+        layout.addWidget(gen_group)
+        
+        layout.addStretch()
         
         return tab
+    
+    def add_skill_from_list(self, skill_type: str):
+        """Show dialog to select a skill from list"""
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Select {skill_type.title()} Skill")
+        dialog.setMinimumSize(600, 500)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Info label
+        info_label = QLabel(f"Select a skill to add to the first empty slot in {skill_type} skills.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; padding: 8px; background-color: #f0f0f0; border-radius: 4px;")
+        layout.addWidget(info_label)
+        
+        # Search box
+        search_label = QLabel("🔍 Search:")
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText("Type to search skills by name or ID...")
+        layout.addWidget(search_label)
+        layout.addWidget(search_edit)
+        
+        # Skill list
+        skill_list = QListWidget()
+        layout.addWidget(QLabel("Available Skills:"))
+        layout.addWidget(skill_list)
+        
+        # Populate skill list
+        self._populate_skill_list(skill_list)
+        
+        # Filter on search
+        def filter_skills(text):
+            for i in range(skill_list.count()):
+                item = skill_list.item(i)
+                item.setHidden(text.lower() not in item.text().lower())
+        search_edit.textChanged.connect(filter_skills)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            selected_item = skill_list.currentItem()
+            if selected_item:
+                skill_id = selected_item.data(Qt.ItemDataRole.UserRole)
+                self._add_skill_to_editor(skill_type, skill_id)
+    
+    def _populate_skill_list(self, skill_list: QListWidget):
+        """Populate skill list with all available skills"""
+        try:
+            skills_file = self.loader.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+            if not skills_file.exists():
+                return
+            
+            rows = self.loader.load_csv(skills_file)
+            
+            for row in rows[1:]:  # Skip header
+                if len(row) > 4:
+                    skill_id = int(row[0]) if row[0] else 0
+                    skill_name_id = row[4].strip('"') if len(row) > 4 else ""
+                    
+                    # Get skill name
+                    skill_name = self.loader.get_skill_name(skill_id)
+                    if not skill_name or skill_name == str(skill_id) or skill_name.startswith("Skill_"):
+                        skill_name = skill_name_id if skill_name_id else f"Skill {skill_id}"
+                    
+                    # Create list item
+                    item = QListWidgetItem(f"{skill_name} (ID: {skill_id})")
+                    item.setData(Qt.ItemDataRole.UserRole, skill_id)
+                    skill_list.addItem(item)
+        except Exception as e:
+            print(f"Error loading skills: {e}")
+    
+    def _add_skill_to_editor(self, skill_type: str, skill_id: int):
+        """Add a skill to the appropriate editor"""
+        editor = self.signature_skills_editor if skill_type == "signature" else self.generic_skills_editor
+        
+        # Find first empty slot
+        for i, skill_widget in enumerate(editor.skill_widgets):
+            skill_id_widget = skill_widget.findChild(QSpinBox, f"skill_id_{i}")
+            if skill_id_widget and skill_id_widget.value() == 0:
+                skill_id_widget.setValue(skill_id)
+                editor.update_skill_name(i)
+                self.mark_as_modified()
+                QMessageBox.information(self, "Skill Added", f"Skill {skill_id} added to slot {i+1}")
+                return
+        
+        # No empty slots found
+        max_slots = 12 if skill_type == "signature" else 4
+        QMessageBox.warning(self, "No Empty Slots", f"All {max_slots} {skill_type} skill slots are filled.\nClear a slot first by setting its ID to 0.")
     
     def create_model_tab(self) -> QWidget:
         """Create model and animation tab"""
@@ -4034,15 +4556,20 @@ class DigimonEditor(QMainWindow):
             if not to_name or to_name in [to_chr_id, f"chr{to_id:03d}", f"chr{to_id}"]:
                 to_name = f"Unknown (ID: {to_id})"
             
-            # Build requirements string
-            reqs = []
-            if 'raw_data' in evo and len(evo['raw_data']) > 2:
+            # Build requirements string - check for conditions first (new format), then raw_data (old format)
+            req_str = ""
+            if 'conditions' in evo and evo['conditions']:
+                # Use the comprehensive requirements summary
+                req_str = f" {self._format_requirements_summary(evo['conditions'])}"
+            elif 'raw_data' in evo and len(evo['raw_data']) > 2:
+                # Fall back to old raw_data format
+                reqs = []
                 level_req = evo['raw_data'][2] if len(evo['raw_data']) > 2 else 0
                 if level_req and str(level_req).isdigit() and int(level_req) > 0:
                     reqs.append(f"Lv{level_req}")
+                req_str = f" [{', '.join(reqs)}]" if reqs else ""
             
-            req_str = f" [{', '.join(reqs)}]" if reqs else ""
-            self.evolution_list.addItem(f"→ {to_name}{req_str}")
+            self.evolution_list.addItem(f"→ {to_name} (ID: {to_id}){req_str}")
         
         # Populate de-evolution sources
         for deevo in digimon.deevolution_sources:
@@ -4501,6 +5028,15 @@ class DigimonEditor(QMainWindow):
         else:
             # If personality_id is 0 or not found, set to index 0 (which should be "-")
             self.personality_combo.setCurrentIndex(0)
+        
+        # Set tribe combo box
+        if hasattr(digimon, 'tribe_name') and digimon.tribe_name:
+            tribe_index = self.tribe_combo.findText(digimon.tribe_name)
+            if tribe_index >= 0:
+                self.tribe_combo.setCurrentIndex(tribe_index)
+        else:
+            # Default to first item (usually "None" or alphabetically first)
+            self.tribe_combo.setCurrentIndex(0)
         
         # Profile text
         self.profile_text_edit.setPlainText(digimon.profile_text)
@@ -5270,6 +5806,7 @@ class DigimonEditor(QMainWindow):
         self.current_digimon.generation_id = self.stage_combo.currentData() if self.stage_combo.currentData() is not None else 0  # Generation is the same as stage
         self.current_digimon.personality_id = self.personality_combo.currentData() if self.personality_combo.currentData() is not None else 0
         self.current_digimon.base_personality = self.personality_combo.currentData() if self.personality_combo.currentData() is not None else 0
+        self.current_digimon.tribe_name = self.tribe_combo.currentText() if self.tribe_combo.currentText() else "None"
         
         # Profile text
         self.current_digimon.profile_text = self.profile_text_edit.toPlainText()
@@ -5373,6 +5910,235 @@ class DigimonEditor(QMainWindow):
                 self.update_evolution_tab(self.current_digimon)
                 QMessageBox.information(self, "Success", f"Added evolution to {target_digimon.name}")
     
+    def _show_evolution_requirements_dialog(self, target_name: str, existing_conditions: dict = None):
+        """Show comprehensive dialog to configure evolution requirements"""
+        if existing_conditions is None:
+            existing_conditions = {}
+        
+        dialog = QDialog(self)
+        dialog.setWindowTitle(f"Evolution Requirements → {target_name}")
+        dialog.setMinimumWidth(500)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Scroll area for all fields
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        
+        # Info label
+        info = QLabel("Configure the requirements needed to evolve to this Digimon.\nLeave values at 0 for no requirement.")
+        info.setWordWrap(True)
+        info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
+        scroll_layout.addWidget(info)
+        
+        # Condition Mode
+        mode_group = QGroupBox("Evolution Mode")
+        mode_layout = QVBoxLayout()
+        mode_combo = QComboBox()
+        mode_combo.addItem("Mode 1: No Requirements (Always Available)", 1)
+        mode_combo.addItem("Mode 2: Item Required", 2)
+        mode_combo.addItem("Mode 3: Jogress/DNA Digivolution", 3)
+        mode_combo.addItem("Mode 4: Standard Evolution (Stats/Level)", 4)
+        # Set existing mode
+        existing_mode = existing_conditions.get('mode', 4)
+        mode_combo.setCurrentIndex(mode_combo.findData(existing_mode) if mode_combo.findData(existing_mode) >= 0 else 3)
+        mode_layout.addWidget(mode_combo)
+        mode_group.setLayout(mode_layout)
+        scroll_layout.addWidget(mode_group)
+        
+        # Tamer Level
+        tamer_group = QGroupBox("Tamer Requirements")
+        tamer_layout = QFormLayout()
+        tamer_level_spin = QSpinBox()
+        tamer_level_spin.setRange(0, 99)
+        tamer_level_spin.setValue(existing_conditions.get('tamerLevel', 0))
+        tamer_level_spin.setSuffix(" (0 = no requirement)")
+        tamer_layout.addRow("Tamer Level:", tamer_level_spin)
+        tamer_group.setLayout(tamer_layout)
+        scroll_layout.addWidget(tamer_group)
+        
+        # Stat Requirements
+        stats_group = QGroupBox("Stat Requirements")
+        stats_layout = QFormLayout()
+        
+        hp_spin = QSpinBox()
+        hp_spin.setRange(0, 99999)
+        hp_spin.setValue(existing_conditions.get('HP', 0))
+        hp_spin.setSuffix(" HP")
+        stats_layout.addRow("HP:", hp_spin)
+        
+        sp_spin = QSpinBox()
+        sp_spin.setRange(0, 99999)
+        sp_spin.setValue(existing_conditions.get('SP', 0))
+        sp_spin.setSuffix(" SP")
+        stats_layout.addRow("SP:", sp_spin)
+        
+        atk_spin = QSpinBox()
+        atk_spin.setRange(0, 9999)
+        atk_spin.setValue(existing_conditions.get('ATK', 0))
+        atk_spin.setSuffix(" ATK")
+        stats_layout.addRow("ATK:", atk_spin)
+        
+        def_spin = QSpinBox()
+        def_spin.setRange(0, 9999)
+        def_spin.setValue(existing_conditions.get('DEF', 0))
+        def_spin.setSuffix(" DEF")
+        stats_layout.addRow("DEF:", def_spin)
+        
+        int_spin = QSpinBox()
+        int_spin.setRange(0, 9999)
+        int_spin.setValue(existing_conditions.get('INT', 0))
+        int_spin.setSuffix(" INT")
+        stats_layout.addRow("INT:", int_spin)
+        
+        spi_spin = QSpinBox()
+        spi_spin.setRange(0, 9999)
+        spi_spin.setValue(existing_conditions.get('SPI', 0))
+        spi_spin.setSuffix(" SPI")
+        stats_layout.addRow("SPI:", spi_spin)
+        
+        spd_spin = QSpinBox()
+        spd_spin.setRange(0, 9999)
+        spd_spin.setValue(existing_conditions.get('SPD', 0))
+        spd_spin.setSuffix(" SPD")
+        stats_layout.addRow("SPD:", spd_spin)
+        
+        stats_group.setLayout(stats_layout)
+        scroll_layout.addWidget(stats_group)
+        
+        # Skill Count Requirements
+        skills_group = QGroupBox("Skill Count Requirements (by Personality)")
+        skills_layout = QFormLayout()
+        
+        valor_spin = QSpinBox()
+        valor_spin.setRange(0, 999)
+        valor_spin.setValue(existing_conditions.get('skillCountValor', 0))
+        valor_spin.setSuffix(" skills")
+        skills_layout.addRow("Valor Skills:", valor_spin)
+        
+        philanthropy_spin = QSpinBox()
+        philanthropy_spin.setRange(0, 999)
+        philanthropy_spin.setValue(existing_conditions.get('skillCountPhilantropy', 0))
+        philanthropy_spin.setSuffix(" skills")
+        skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
+        
+        amicable_spin = QSpinBox()
+        amicable_spin.setRange(0, 999)
+        amicable_spin.setValue(existing_conditions.get('skillCountAmicable', 0))
+        amicable_spin.setSuffix(" skills")
+        skills_layout.addRow("Amicable Skills:", amicable_spin)
+        
+        wisdom_spin = QSpinBox()
+        wisdom_spin.setRange(0, 999)
+        wisdom_spin.setValue(existing_conditions.get('skillCountWisdom', 0))
+        wisdom_spin.setSuffix(" skills")
+        skills_layout.addRow("Wisdom Skills:", wisdom_spin)
+        
+        skills_group.setLayout(skills_layout)
+        scroll_layout.addWidget(skills_group)
+        
+        # Item Requirement
+        item_group = QGroupBox("Item Requirement (Mode 2)")
+        item_layout = QFormLayout()
+        item_spin = QSpinBox()
+        item_spin.setRange(0, 9999)
+        item_spin.setValue(existing_conditions.get('needsItem', 0))
+        item_spin.setSuffix(" (Item ID, 0 = none)")
+        item_layout.addRow("Required Item:", item_spin)
+        item_group.setLayout(item_layout)
+        scroll_layout.addWidget(item_group)
+        
+        # Jogress Requirements
+        jogress_group = QGroupBox("Jogress/DNA Digivolution (Mode 3)")
+        jogress_layout = QFormLayout()
+        
+        jogress_a_id_spin = QSpinBox()
+        jogress_a_id_spin.setRange(0, 9999)
+        jogress_a_id_spin.setValue(existing_conditions.get('jogressDbIdA', 0))
+        jogress_a_id_spin.setSuffix(" (Partner A ID)")
+        jogress_layout.addRow("Partner A Digimon ID:", jogress_a_id_spin)
+        
+        jogress_a_personality_spin = QSpinBox()
+        jogress_a_personality_spin.setRange(0, 99)
+        jogress_a_personality_spin.setValue(existing_conditions.get('jogressPersonalityA', 0))
+        jogress_a_personality_spin.setSuffix(" (Personality)")
+        jogress_layout.addRow("Partner A Personality:", jogress_a_personality_spin)
+        
+        jogress_b_id_spin = QSpinBox()
+        jogress_b_id_spin.setRange(0, 9999)
+        jogress_b_id_spin.setValue(existing_conditions.get('jogressDbIdB', 0))
+        jogress_b_id_spin.setSuffix(" (Partner B ID)")
+        jogress_layout.addRow("Partner B Digimon ID:", jogress_b_id_spin)
+        
+        jogress_b_personality_spin = QSpinBox()
+        jogress_b_personality_spin.setRange(0, 99)
+        jogress_b_personality_spin.setValue(existing_conditions.get('jogressPersonalityB', 0))
+        jogress_b_personality_spin.setSuffix(" (Personality)")
+        jogress_layout.addRow("Partner B Personality:", jogress_b_personality_spin)
+        
+        jogress_group.setLayout(jogress_layout)
+        scroll_layout.addWidget(jogress_group)
+        
+        scroll_layout.addStretch()
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            return {
+                'mode': mode_combo.currentData(),
+                'tamerLevel': tamer_level_spin.value(),
+                'HP': hp_spin.value(),
+                'SP': sp_spin.value(),
+                'ATK': atk_spin.value(),
+                'DEF': def_spin.value(),
+                'INT': int_spin.value(),
+                'SPI': spi_spin.value(),
+                'SPD': spd_spin.value(),
+                'unknown1': 0,
+                'unknown2': 0,
+                'skillCountValor': valor_spin.value(),
+                'skillCountPhilantropy': philanthropy_spin.value(),
+                'skillCountAmicable': amicable_spin.value(),
+                'skillCountWisdom': wisdom_spin.value(),
+                'needsItem': item_spin.value(),
+                'jogressDbIdA': jogress_a_id_spin.value(),
+                'jogressPersonalityA': jogress_a_personality_spin.value(),
+                'jogressDbIdB': jogress_b_id_spin.value(),
+                'jogressPersonalityB': jogress_b_personality_spin.value()
+            }
+        return None  # Cancelled
+    
+    def _format_requirements_summary(self, conditions: dict) -> str:
+        """Format evolution requirements as a short summary"""
+        parts = []
+        if conditions.get('tamerLevel', 0) > 0:
+            parts.append(f"Tamer Lv{conditions['tamerLevel']}")
+        
+        stats = []
+        for stat in ['HP', 'SP', 'ATK', 'DEF', 'INT', 'SPI', 'SPD']:
+            if conditions.get(stat, 0) > 0:
+                stats.append(f"{stat}{conditions[stat]}")
+        if stats:
+            parts.append(", ".join(stats))
+        
+        if conditions.get('needsItem', 0) > 0:
+            parts.append(f"Item#{conditions['needsItem']}")
+        
+        if conditions.get('jogressDbIdA', 0) > 0:
+            parts.append(f"Jogress w/ ID{conditions['jogressDbIdA']}")
+        
+        if parts:
+            return f"[{'; '.join(parts)}]"
+        return "[No requirements]"
+    
     def edit_evolution(self):
         """Edit selected evolution path with detailed requirements editor"""
         if not self.current_digimon:
@@ -5388,18 +6154,7 @@ class DigimonEditor(QMainWindow):
         
         evo = self.current_digimon.evolution_paths[current_index]
         
-        # Create detailed evolution requirements dialog
-        dialog = QDialog(self)
-        dialog.setWindowTitle("✏️ Edit Evolution Requirements")
-        dialog.setMinimumWidth(550)
-        dialog.setStyleSheet("""
-            QDialog {
-                background-color: #f8f9fa;
-            }
-        """)
-        layout = QVBoxLayout(dialog)
-        
-        # Target Digimon info
+        # Get target Digimon name
         to_id = evo['to_id']
         to_chr_id = f"chr{to_id:03d}"
         to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
@@ -5409,299 +6164,25 @@ class DigimonEditor(QMainWindow):
         if not to_name:
             to_name = f"ID {to_id}"
         
-        info_label = QLabel(f"🎯 Editing evolution to: <b>{to_name}</b>")
-        info_label.setStyleSheet("""
-            QLabel {
-                font-size: 13pt;
-                font-weight: bold;
-                padding: 15px;
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #667eea, stop:1 #764ba2);
-                color: white;
-                border-radius: 8px;
-            }
-        """)
-        layout.addWidget(info_label)
+        # Get existing conditions or create default
+        existing_conditions = evo.get('conditions', {})
         
-        # Requirements form
-        form_layout = QFormLayout()
+        # Use the same comprehensive dialog as the wizard
+        new_conditions = self._show_evolution_requirements_dialog(to_name, existing_conditions)
         
-        # Parse existing requirements from raw_data if available
-        raw_data = evo.get('raw_data', [])
-        
-        # Level requirement
-        level_spin = QSpinBox()
-        level_spin.setRange(0, 99)
-        level_spin.setValue(int(raw_data[2]) if len(raw_data) > 2 and str(raw_data[2]).isdigit() else 0)
-        form_layout.addRow("⭐ Level Required:", level_spin)
-        
-        # Stat requirements
-        stats_group = QGroupBox("📊 Stat Requirements")
-        stats_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #667eea;
-                border-radius: 8px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: white;
-            }
-            QGroupBox::title {
-                color: #667eea;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
-        stats_layout = QFormLayout(stats_group)
-        
-        atk_spin = QSpinBox()
-        atk_spin.setRange(0, 9999)
-        atk_spin.setValue(int(raw_data[3]) if len(raw_data) > 3 and str(raw_data[3]).isdigit() else 0)
-        stats_layout.addRow("ATK:", atk_spin)
-        
-        def_spin = QSpinBox()
-        def_spin.setRange(0, 9999)
-        def_spin.setValue(int(raw_data[4]) if len(raw_data) > 4 and str(raw_data[4]).isdigit() else 0)
-        stats_layout.addRow("DEF:", def_spin)
-        
-        int_spin = QSpinBox()
-        int_spin.setRange(0, 9999)
-        int_spin.setValue(int(raw_data[5]) if len(raw_data) > 5 and str(raw_data[5]).isdigit() else 0)
-        stats_layout.addRow("INT:", int_spin)
-        
-        spd_spin = QSpinBox()
-        spd_spin.setRange(0, 9999)
-        spd_spin.setValue(int(raw_data[6]) if len(raw_data) > 6 and str(raw_data[6]).isdigit() else 0)
-        stats_layout.addRow("SPD:", spd_spin)
-        
-        form_layout.addRow(stats_group)
-        
-        # Special requirements
-        special_group = QGroupBox("✨ Special Requirements")
-        special_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #f093fb;
-                border-radius: 8px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: white;
-            }
-            QGroupBox::title {
-                color: #c967cc;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
-        special_layout = QFormLayout(special_group)
-        
-        cam_spin = QSpinBox()
-        cam_spin.setRange(0, 100)
-        cam_spin.setValue(int(raw_data[7]) if len(raw_data) > 7 and str(raw_data[7]).isdigit() else 0)
-        special_layout.addRow("CAM (Camaraderie):", cam_spin)
-        
-        abi_spin = QSpinBox()
-        abi_spin.setRange(0, 100)
-        abi_spin.setValue(int(raw_data[8]) if len(raw_data) > 8 and str(raw_data[8]).isdigit() else 0)
-        special_layout.addRow("ABI (Ability):", abi_spin)
-        
-        item_spin = QSpinBox()
-        item_spin.setRange(-1, 9999)
-        item_spin.setSpecialValueText("None")
-        item_spin.setValue(int(raw_data[9]) if len(raw_data) > 9 and str(raw_data[9]).isdigit() else -1)
-        special_layout.addRow("Item Required (-1=None):", item_spin)
-        
-        form_layout.addRow(special_group)
-        
-        # Quick preset buttons
-        preset_group = QGroupBox("⚙️ Quick Presets")
-        preset_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #84fab0;
-                border-radius: 8px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: white;
-            }
-            QGroupBox::title {
-                color: #2c9558;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
-        preset_layout = QHBoxLayout(preset_group)
-        
-        def apply_easy():
-            level_spin.setValue(max(1, level_spin.value() // 2))
-            atk_spin.setValue(atk_spin.value() // 2)
-            def_spin.setValue(def_spin.value() // 2)
-            int_spin.setValue(int_spin.value() // 2)
-            spd_spin.setValue(spd_spin.value() // 2)
-            cam_spin.setValue(max(10, cam_spin.value() // 2))
-            abi_spin.setValue(max(0, abi_spin.value() // 2))
-        
-        def apply_hard():
-            level_spin.setValue(min(99, level_spin.value() * 2))
-            atk_spin.setValue(min(9999, int(atk_spin.value() * 1.5)))
-            def_spin.setValue(min(9999, int(def_spin.value() * 1.5)))
-            int_spin.setValue(min(9999, int(int_spin.value() * 1.5)))
-            spd_spin.setValue(min(9999, int(spd_spin.value() * 1.5)))
-            cam_spin.setValue(min(100, int(cam_spin.value() * 1.5)))
-            abi_spin.setValue(min(100, int(abi_spin.value() * 1.5)))
-        
-        def apply_instant():
-            level_spin.setValue(1)
-            atk_spin.setValue(0)
-            def_spin.setValue(0)
-            int_spin.setValue(0)
-            spd_spin.setValue(0)
-            cam_spin.setValue(0)
-            abi_spin.setValue(0)
-            item_spin.setValue(-1)
-        
-        easy_btn = QPushButton("⬇️ Make Easier (÷2)")
-        easy_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #84fab0, stop:1 #8fd3f4);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 15px;
-                font-weight: bold;
-                font-size: 10pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #6ee89f, stop:1 #7bc9e8);
-            }
-        """)
-        easy_btn.clicked.connect(apply_easy)
-        preset_layout.addWidget(easy_btn)
-        
-        hard_btn = QPushButton("⬆️ Make Harder (×1.5)")
-        hard_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #fa709a, stop:1 #fee140);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 15px;
-                font-weight: bold;
-                font-size: 10pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #e85c89, stop:1 #ecd32f);
-            }
-        """)
-        hard_btn.clicked.connect(apply_hard)
-        preset_layout.addWidget(hard_btn)
-        
-        instant_btn = QPushButton("⚡ Instant Evolution")
-        instant_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 10px 15px;
-                font-weight: bold;
-                font-size: 10pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #5568d3, stop:1 #653b8e);
-            }
-        """)
-        instant_btn.clicked.connect(apply_instant)
-        preset_layout.addWidget(instant_btn)
-        
-        form_layout.addRow(preset_group)
-        
-        layout.addLayout(form_layout)
-        
-        # Info text
-        info_text = QLabel(
-            "💡 <b>Tip:</b> Set values to 0 for no requirement. "
-            "<b>CAM</b> = friendship (0-100), <b>ABI</b> = training ability (0-100)"
-        )
-        info_text.setWordWrap(True)
-        info_text.setStyleSheet("""
-            QLabel {
-                color: #495057;
-                font-size: 10pt;
-                padding: 12px;
-                background-color: #e7f5ff;
-                border-radius: 6px;
-                border-left: 4px solid #339af0;
-            }
-        """)
-        layout.addWidget(info_text)
-        
-        # Buttons
-        buttons = QDialogButtonBox(
-            QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel
-        )
-        buttons.accepted.connect(dialog.accept)
-        buttons.rejected.connect(dialog.reject)
-        layout.addWidget(buttons)
-        
-        # Show dialog and update if accepted
-        if dialog.exec() == QDialog.DialogCode.Accepted:
-            # Update evolution requirements
-            # Note: This updates raw_data if available
-            if 'raw_data' not in evo or not evo['raw_data']:
-                # Create new raw_data array
-                evo['raw_data'] = [
-                    self.current_digimon.id,  # from_id
-                    to_id,  # to_id
-                    level_spin.value(),  # level
-                    atk_spin.value(),  # atk
-                    def_spin.value(),  # def
-                    int_spin.value(),  # int
-                    spd_spin.value(),  # spd
-                    cam_spin.value(),  # cam
-                    abi_spin.value(),  # abi
-                    item_spin.value(),  # item
-                    'false'  # special flag
-                ]
-            else:
-                # Update existing raw_data
-                if len(evo['raw_data']) > 2:
-                    evo['raw_data'][2] = level_spin.value()
-                if len(evo['raw_data']) > 3:
-                    evo['raw_data'][3] = atk_spin.value()
-                if len(evo['raw_data']) > 4:
-                    evo['raw_data'][4] = def_spin.value()
-                if len(evo['raw_data']) > 5:
-                    evo['raw_data'][5] = int_spin.value()
-                if len(evo['raw_data']) > 6:
-                    evo['raw_data'][6] = spd_spin.value()
-                if len(evo['raw_data']) > 7:
-                    evo['raw_data'][7] = cam_spin.value()
-                if len(evo['raw_data']) > 8:
-                    evo['raw_data'][8] = abi_spin.value()
-                if len(evo['raw_data']) > 9:
-                    evo['raw_data'][9] = item_spin.value()
+        if new_conditions is not None:
+            # Update the evolution path with new conditions
+            self.current_digimon.evolution_paths[current_index]['conditions'] = new_conditions
             
-            # Refresh the evolution tab
-            self.update_evolution_tab(self.current_digimon)
+            # Update display
+            req_text = self._format_requirements_summary(new_conditions)
+            item_text = f"→ {to_name} (ID: {to_id}) {req_text}"
+            self.evolution_list.item(current_index).setText(item_text)
             
-            QMessageBox.information(
-                self,
-                "Success",
-                f"Updated evolution requirements for {to_name}!\n\n"
-                f"Level: {level_spin.value()}, ATK: {atk_spin.value()}, DEF: {def_spin.value()}, "
-                f"INT: {int_spin.value()}, SPD: {spd_spin.value()}\n"
-                f"CAM: {cam_spin.value()}, ABI: {abi_spin.value()}, Item: {item_spin.value()}"
-            )
+            self.mark_as_modified()
+            QMessageBox.information(self, "Success", f"Evolution requirements updated for {to_name}")
+    
+    # Old evolution dialog has been replaced with _show_evolution_requirements_dialog
     
     def remove_evolution(self):
         """Remove selected evolution path"""
@@ -5882,6 +6363,31 @@ class DigimonEditor(QMainWindow):
             clean_name = self.loader.clean_ui_text(personality_name)
             self.personality_combo.addItem(clean_name, i)
     
+    def populate_tribe_dropdown(self):
+        """Populate the tribe dropdown with unique tribes from belong.mbe"""
+        unique_tribes = set()
+        try:
+            # Try to load from backup folder first (most complete)
+            belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
+            if not belong_file.exists():
+                # Try loader's text path
+                belong_file = self.loader.text_path / "belong.mbe" / "00_Sheet1.csv"
+            
+            if belong_file.exists():
+                rows = self.loader.load_csv(belong_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) >= 2:
+                        tribe_name = row[1].strip('"')
+                        if tribe_name:
+                            unique_tribes.add(tribe_name)
+        except Exception as e:
+            print(f"Error loading tribes: {e}")
+            # Fallback to common tribes
+            unique_tribes = {"None", "Mammal", "Beast Man", "Dragon", "Machine", "Beast", "Bird", "Insectoid", "Reptile"}
+        
+        # Add to combo box (sorted)
+        for tribe_name in sorted(unique_tribes):
+            self.tribe_combo.addItem(tribe_name)
     
     def populate_skill_browser(self):
         """Populate the skill browser list with all available skills"""
