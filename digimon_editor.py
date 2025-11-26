@@ -330,6 +330,11 @@ class DigimonCreationWizard(QWizard):
             for key, value in digimon.model_setting_data.items():
                 if isinstance(value, str) and old_chr_id_clean in value:
                     digimon.model_setting_data[key] = value.replace(old_chr_id_clean, new_chr_id_clean)
+                elif key == 'raw_data' and isinstance(value, list):
+                    # Update raw_data array - replace chr_id references in all string elements
+                    for idx, item in enumerate(value):
+                        if isinstance(item, str) and old_chr_id_clean in item:
+                            value[idx] = item.replace(old_chr_id_clean, new_chr_id_clean)
         
         # Update model_locator_data
         if digimon.model_locator_data:
@@ -529,9 +534,6 @@ class DigimonCreationWizard(QWizard):
                 parts.append("0")
         
         # Remaining fields (120-135)
-        # 120-130: various flags/settings
-        # 131: field_guide_id, 132: script_id
-        # 133-135: additional fields
         parts.extend([
             "2",  # 120
             "1",  # 121
@@ -544,9 +546,9 @@ class DigimonCreationWizard(QWizard):
             "0",  # 128
             "0",  # 129
             "0",  # 130
-            "0",  # 131 - Unused field
-            str(digimon.field_guide_id if digimon.field_guide_id >= 0 else digimon.id),  # 132 - Field Guide ID
-            str(digimon.script_id if digimon.script_id >= 0 else digimon.id),  # 133 - Script ID
+            "-1",  # 131 - Unused field
+            str(digimon.id),  # 132 - Digimon ID (IMPORTANT: Must match the ID)
+            "-1",  # 133 - Always -1
             "0",  # 134
             "-1"  # 135
         ])
@@ -584,10 +586,14 @@ class DigimonCreationWizard(QWizard):
         
         header = 'string2 0,empty 1,string2 2,string2 3,string2 4,float 5,empty 6,empty 7,float 8,float 9,float 10,float 11,float 12,float 13,float 14,float 15,float 16,float 17,float 18,float 19,float 20,float 21,float 22,float 23,float 24,float 25,float 26,string2 27,string2 28,string2 29,string2 30,string2 31,string2 32,float 33,float 34,float 35,float 36,int32 37,float 38,float 39,int32 40,float 41,float 42,float 43,float 44,float 45,float 46,float 47,empty 48,empty 49,empty 50,float 51,string2 52,float 53,float 54,float 55,float 56,float 57,float 58,float 59,float 60,float 61,float 62,float 63,int32 64,int32 65,int32 66,int8 67,int8 68,int8 69,int8 70,int32 71,empty 72,int32 73,int32 74,int8 75,int8 76,int8 77,int8 78,string2 79,int32 80,int32 81'
         
-        # Convert raw_data to proper format
-        raw_data = digimon.model_setting_data['raw_data']
+        # Convert raw_data to proper format and replace chr_id references
+        raw_data = digimon.model_setting_data['raw_data'].copy()
         header_types = header.split(',')
         parts = []
+        
+        # Get the template chr_id from raw_data[0] to know what to replace
+        template_chr_id = raw_data[0].strip('"') if raw_data[0] else ""
+        new_chr_id = digimon.chr_id
         
         for i, value in enumerate(raw_data):
             col_type = header_types[i] if i < len(header_types) else ''
@@ -595,8 +601,13 @@ class DigimonCreationWizard(QWizard):
             if 'string' in col_type:
                 # String columns: quote non-empty values, use "" for empty
                 if value and value != '""':
-                    # Remove existing quotes if present, then escape and re-quote
+                    # Remove existing quotes if present
                     clean_value = value.strip('"') if isinstance(value, str) else str(value)
+                    
+                    # Replace template chr_id with new chr_id in ALL string columns
+                    if template_chr_id and template_chr_id in clean_value:
+                        clean_value = clean_value.replace(template_chr_id, new_chr_id)
+                    
                     escaped_value = self._escape_csv_value(clean_value)
                     parts.append(f'"{escaped_value}"')
                 else:
@@ -711,11 +722,14 @@ class DigimonCreationWizard(QWizard):
             # Wrap text to ~60 characters per line for readability
             profile = '\n'.join(textwrap.wrap(profile, width=60, break_long_words=False, break_on_hyphens=False))
         
+        # Use correct profile key format: digimon_{id}_profile
+        profile_key = f"digimon_{digimon.id}_profile"
+        
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             # Use csv.writer to properly handle multi-line text
             writer = csv.writer(f, quoting=csv.QUOTE_ALL)
-            writer.writerow([digimon.char_key, profile])
+            writer.writerow([profile_key, profile])
     
     def _write_model_outline_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write model_outline_battle.ap.csv"""
@@ -1224,7 +1238,20 @@ class ResistancesPage(QWizardPage):
         layout = QGridLayout()
         
         self.resist_widgets = {}
-        resistances = ["Null", "Fire", "Water", "Ice", "Grass", "Wind", "Elec", "Ground", "Steel", "Light", "Dark"]
+        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resIce, resGrass, resWind, resElec, resGround, resSteel, resLight, resDark)
+        resistances = [
+            ("null", "Null"),
+            ("fire", "Fire"),
+            ("water", "Water"),
+            ("ice", "Ice"),
+            ("grass", "Plant"),
+            ("wind", "Wind"),
+            ("elec", "Electric"),
+            ("ground", "Earth"),
+            ("steel", "Steel"),
+            ("light", "Light"),
+            ("dark", "Dark")
+        ]
         
         resistance_labels = {
             0: "Normal (1.0x)",
@@ -1234,29 +1261,27 @@ class ResistancesPage(QWizardPage):
             4: "Immune (0.0x)"
         }
         
-        for i, resist in enumerate(resistances):
+        for i, (resist_key, resist_name) in enumerate(resistances):
             row = i // 2
             col = (i % 2) * 3
-            element_name = wizard.loader.get_element_name(i)
-            clean_name = wizard.loader.clean_ui_text(element_name)
-            layout.addWidget(QLabel(f"{clean_name}:"), row, col)
+            layout.addWidget(QLabel(f"{resist_name}:"), row, col)
             
             spin = QSpinBox()
             spin.setRange(0, 4)
-            spin.setObjectName(f"resist_{resist.lower()}")
+            spin.setObjectName(f"resist_{resist_key}")
             spin.setToolTip(
-                f"Set {clean_name} resistance:\n"
+                f"Set {resist_name} resistance:\n"
                 "0 = Normal (100% damage - 1.0x)\n"
                 "1 = Weak (150% damage - 1.5x)\n"
                 "2 = Very Weak (200% damage - 2.0x)\n"
                 "3 = Resistant (50% damage - 0.5x)\n"
                 "4 = Immune (0% damage - no damage taken)"
             )
-            self.resist_widgets[resist.lower()] = spin
+            self.resist_widgets[resist_key] = spin
             layout.addWidget(spin, row, col + 1)
             
             value_label = QLabel(resistance_labels[0])
-            value_label.setObjectName(f"resist_label_{resist.lower()}")
+            value_label.setObjectName(f"resist_label_{resist_key}")
             value_label.setStyleSheet("color: #666; font-size: 9pt;")
             layout.addWidget(value_label, row, col + 2)
             
@@ -3032,7 +3057,20 @@ class DigimonEditor(QMainWindow):
         
         # Create resistance spinboxes with element names
         self.resist_widgets = {}
-        resistances = ["Null", "Fire", "Water", "Ice", "Grass", "Wind", "Elec", "Ground", "Steel", "Light", "Dark"]
+        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resIce, resGrass, resWind, resElec, resGround, resSteel, resLight, resDark)
+        resistances = [
+            ("null", "Null"),
+            ("fire", "Fire"),
+            ("water", "Water"),
+            ("ice", "Ice"),
+            ("grass", "Plant"),
+            ("wind", "Wind"),
+            ("elec", "Electric"),
+            ("ground", "Earth"),
+            ("steel", "Steel"),
+            ("light", "Light"),
+            ("dark", "Dark")
+        ]
         
         resistance_labels = {
             0: "Normal (1.0x)",
@@ -3042,31 +3080,28 @@ class DigimonEditor(QMainWindow):
             4: "Immune (0.0x)"
         }
         
-        for i, resist in enumerate(resistances):
+        for i, (resist_key, resist_name) in enumerate(resistances):
             row = i // 2
             col = (i % 2) * 3  # Changed to *3 to make room for label
-            # Get localized element name
-            element_name = self.loader.get_element_name(i)
-            clean_name = self.loader.clean_ui_text(element_name)
-            resist_layout.addWidget(QLabel(f"{clean_name}:"), row, col)
+            resist_layout.addWidget(QLabel(f"{resist_name}:"), row, col)
             
             spin = QSpinBox()
             spin.setRange(0, 4)
-            spin.setObjectName(f"resist_{resist.lower()}")
+            spin.setObjectName(f"resist_{resist_key}")
             spin.setToolTip(
-                f"Set {clean_name} resistance:\n"
+                f"Set {resist_name} resistance:\n"
                 "0 = Normal (100% damage - 1.0x)\n"
                 "1 = Weak (150% damage - 1.5x)\n"
                 "2 = Very Weak (200% damage - 2.0x)\n"
                 "3 = Resistant (50% damage - 0.5x)\n"
                 "4 = Immune (0% damage - no damage taken)"
             )
-            self.resist_widgets[resist.lower()] = spin
+            self.resist_widgets[resist_key] = spin
             resist_layout.addWidget(spin, row, col + 1)
             
             # Add label that updates based on value
             value_label = QLabel(resistance_labels[0])
-            value_label.setObjectName(f"resist_label_{resist.lower()}")
+            value_label.setObjectName(f"resist_label_{resist_key}")
             value_label.setStyleSheet("color: #666; font-size: 9pt;")
             resist_layout.addWidget(value_label, row, col + 2)
             
