@@ -791,6 +791,7 @@ class MBELoader:
         self._load_battle_formation_data(digimon)
         self._load_encounter_groups(digimon)
         self._load_personality_data(digimon)
+        self._load_tribe_data(digimon)
     
     def _load_evolution_data(self, digimon: DigimonData):
         """Load evolution paths and conditions"""
@@ -1092,6 +1093,28 @@ class MBELoader:
             "can_mount": False,  # This would need to be determined from other flags
             "is_boss_variant": digimon.is_boss_variant
         }
+    
+    def _load_tribe_data(self, digimon: DigimonData):
+        """Load tribe/belong classification from belong.mbe"""
+        try:
+            # Check base game first
+            belong_file = self.text_path / "belong.mbe" / "00_Sheet1.csv"
+            if not belong_file.exists():
+                # Try backup folder
+                belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
+            
+            if belong_file.exists():
+                rows = self.load_csv(belong_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) >= 2:
+                        # Column 0 is Digimon ID, Column 1 is tribe name
+                        digimon_id_str = row[0].strip('"')
+                        if digimon_id_str and digimon_id_str.isdigit():
+                            if int(digimon_id_str) == digimon.id:
+                                digimon.tribe_name = row[1].strip('"')
+                                break
+        except Exception as e:
+            print(f"Error loading tribe data for Digimon {digimon.id}: {e}")
     
     def get_all_digimon_chr_ids(self, from_dlc: bool = False, dlc_name: str = "addcont_17") -> List[str]:
         """Get all available Digimon chr_ids

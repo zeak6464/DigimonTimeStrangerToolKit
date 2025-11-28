@@ -151,6 +151,10 @@ class DigimonCreationWizard(QWizard):
         
         self.setWindowTitle("✨ Digimon Creation Wizard - Export to dsts-loader")
         self.setMinimumSize(700, 600)
+        self.resize(900, 700)  # Set a larger default size
+        
+        # Enable maximize button and make window resizable
+        self.setWindowFlags(self.windowFlags() | Qt.WindowType.WindowMaximizeButtonHint)
         
         # Set wizard style
         self.setWizardStyle(QWizard.WizardStyle.ModernStyle)
@@ -281,8 +285,22 @@ class DigimonCreationWizard(QWizard):
         )
         
         if not export_dir:
-            QMessageBox.warning(self, "Cancelled", "Export cancelled by user")
-            return
+            # Don't lose work if user cancels - ask if they want to retry or exit
+            reply = QMessageBox.question(
+                self,
+                "Export Cancelled",
+                "Do you want to go back and review your Digimon, or discard all changes?",
+                QMessageBox.StandardButton.Retry | QMessageBox.StandardButton.Discard,
+                QMessageBox.StandardButton.Retry
+            )
+            
+            if reply == QMessageBox.StandardButton.Retry:
+                # Go back to review page
+                self.back()
+                return
+            else:
+                # User chose to discard - close wizard
+                return
         
         # Export to dsts-loader format
         if self._export_to_dsts_loader(Path(export_dir), self.new_digimon, animation_ref):
@@ -534,23 +552,26 @@ class DigimonCreationWizard(QWizard):
                 parts.append("0")
         
         # Remaining fields (120-135)
+        # Column 126: Signature Animation Reference - Formula: 20000 + (ID × 10) + 1
+        anim_ref = 20000 + (digimon.id * 10) + 1
+        
         parts.extend([
-            "2",  # 120
-            "1",  # 121
-            "1",  # 122
-            "0",  # 123 (should be float but 0 works)
-            "true",  # 124
-            "false",  # 125
-            "0",  # 126
-            '',  # 127 empty
-            "0",  # 128
-            "0",  # 129
-            "0",  # 130
-            "-1",  # 131 - Unused field
-            str(digimon.id),  # 132 - Digimon ID (IMPORTANT: Must match the ID)
-            "-1",  # 133 - Always -1
-            "0",  # 134
-            "-1"  # 135
+            "2",  # 120 - Size category
+            "1",  # 121 - Model type
+            "1",  # 122 - Animation set
+            "0",  # 123 - Model scale override (float, 0 = normal)
+            "true",  # 124 - Boolean flag
+            "false",  # 125 - Boolean flag
+            str(anim_ref),  # 126 - Signature Animation Reference (calculated)
+            '',  # 127 - empty
+            "0",  # 128 - Color/Palette ID (0 for new Digimon)
+            "0",  # 129 - Texture/Material ID (0 for new Digimon)
+            "0",  # 130 - Model Variant (0 for new Digimon)
+            "-1",  # 131 - Field Guide ID (-1 = not in guide)
+            str(digimon.id),  # 132 - Self-Reference ID (MUST match Column 0)
+            "-1",  # 133 - Reserved (always -1)
+            "0",  # 134 - Reserved (always 0)
+            "-1"  # 135 - Reserved (always -1)
         ])
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
@@ -671,19 +692,23 @@ class DigimonCreationWizard(QWizard):
             
             # Deduplicate evolution paths by to_id
             seen_to_ids = set()
+            evo_counter = 0
             
             for evo in digimon.evolution_paths:
                 to_id = evo.get('to_id', 0)
                 
-                # Skip duplicates
-                if to_id in seen_to_ids:
+                # Skip if to_id is 0 or already written
+                if to_id == 0 or to_id in seen_to_ids:
                     continue
                 seen_to_ids.add(to_id)
                 
-                raw_data = evo.get('raw_data', [])
+                # Generate unique evolution ID starting at 100000
+                # Use sequential numbering to avoid conflicts
+                evo_id = 100000 + (digimon.id * 10) + evo_counter
+                evo_counter += 1
                 
-                # Generate evolution ID (100000 + base number)
-                evo_id = 100000 + digimon.id * 100 + to_id
+                # Get evolution type/mode (default to 0 for normal evolution)
+                evo_type = evo.get('evolution_type', 0)
                 
                 parts = [
                     str(evo_id),
@@ -691,7 +716,7 @@ class DigimonCreationWizard(QWizard):
                     '',  # empty column
                     str(to_id),
                     '',  # empty column
-                    '2',  # Default evolution type
+                    str(evo_type),  # Evolution type: 0=Normal, 2=Mode Change, etc.
                     '-1', '-1', '-1', '-1', '-1'
                 ]
                 f.write(','.join(parts) + '\n')
@@ -718,9 +743,9 @@ class DigimonCreationWizard(QWizard):
         
         # If profile doesn't already have line breaks, add them at reasonable intervals
         # Check if profile has newlines already
-        if '\n' not in profile and len(profile) > 60:
-            # Wrap text to ~60 characters per line for readability
-            profile = '\n'.join(textwrap.wrap(profile, width=60, break_long_words=False, break_on_hyphens=False))
+        if '\n' not in profile and len(profile) > 50:
+            # Wrap text to ~50 characters per line to match base game format (max 55-58)
+            profile = '\n'.join(textwrap.wrap(profile, width=50, break_long_words=False, break_on_hyphens=False))
         
         # Use correct profile key format: digimon_{id}_profile
         profile_key = f"digimon_{digimon.id}_profile"
@@ -898,10 +923,17 @@ class TemplateSelectionPage(QWizardPage):
             except:
                 return 999999
         
-        chr_ids_sorted = sorted(chr_ids, key=sort_key)
+        # Deduplicate chr_ids (in case same Digimon appears in base game and DLC)
+        chr_ids_unique = list(dict.fromkeys(chr_ids))  # Preserves order, removes duplicates
+        chr_ids_sorted = sorted(chr_ids_unique, key=sort_key)
         
         for chr_id in chr_ids_sorted:
             name = wizard.loader._get_digimon_name_by_chr_id(chr_id)
+            
+            # Skip entries where name lookup failed (returns char_key or chr_id)
+            if not name or name.startswith("char_") or name == chr_id:
+                continue  # Skip - no proper name found
+            
             self.template_combo.addItem(f"{name} ({chr_id})", chr_id)
         
         # Default to chr805 (Darkshadow)
@@ -1532,7 +1564,7 @@ class EvolutionPage(QWizardPage):
         try:
             dialog = QDialog(self)
             dialog.setWindowTitle("Select Evolution Target")
-            dialog.setMinimumSize(500, 400)
+            dialog.setMinimumSize(500, 450)
             
             layout = QVBoxLayout(dialog)
             
@@ -1559,6 +1591,19 @@ class EvolutionPage(QWizardPage):
                         item.setHidden(text.lower() not in item.text().lower())
             search_edit.textChanged.connect(filter_digimon)
             
+            # Custom ID option (for mod Digimon not in base game)
+            custom_id_group = QGroupBox("Or Enter Custom ID")
+            custom_id_layout = QHBoxLayout()
+            custom_id_label = QLabel("Digimon ID:")
+            custom_id_spin = QSpinBox()
+            custom_id_spin.setRange(1, 9999)
+            custom_id_spin.setValue(1000)
+            custom_id_spin.setToolTip("Enter the ID of a custom/modded Digimon")
+            custom_id_layout.addWidget(custom_id_label)
+            custom_id_layout.addWidget(custom_id_spin)
+            custom_id_group.setLayout(custom_id_layout)
+            layout.addWidget(custom_id_group)
+            
             # Buttons
             buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             buttons.accepted.connect(dialog.accept)
@@ -1572,6 +1617,11 @@ class EvolutionPage(QWizardPage):
                     chr_id = selected_item.data(Qt.ItemDataRole.UserRole + 1)
                     if digimon_id and chr_id:
                         self.add_evolution_path(digimon_id, chr_id)
+                else:
+                    # No selection in list - use custom ID
+                    custom_id = custom_id_spin.value()
+                    custom_chr_id = f"chr{custom_id}"
+                    self.add_evolution_path(custom_id, custom_chr_id)
         except Exception as e:
             print(f"Error in add_evolution: {e}")
             import traceback
@@ -2735,8 +2785,8 @@ class DigimonEditor(QMainWindow):
         self.new_button.clicked.connect(self.launch_creation_wizard)
         self.new_button.setToolTip("Create a new Digimon using the step-by-step wizard\nExports to dsts-loader format")
         self.new_button.setStyleSheet(button_style.format(
-            color1="#84fab0", color2="#8fd3f4",
-            hover1="#6ee89f", hover2="#7bc9e8"
+            color1="#10b981", color2="#059669",
+            hover1="#059669", hover2="#047857"
         ))
         button_layout.addWidget(self.new_button)
         
@@ -2744,8 +2794,8 @@ class DigimonEditor(QMainWindow):
         self.import_button.clicked.connect(self.import_from_dsts_loader)
         self.import_button.setToolTip("Import Digimon from dsts-loader .ap.csv files\nAllows you to edit previously exported Digimon")
         self.import_button.setStyleSheet(button_style.format(
-            color1="#ffecd2", color2="#fcb69f",
-            hover1="#f5dcb8", hover2="#eba685"
+            color1="#f59e0b", color2="#d97706",
+            hover1="#d97706", hover2="#b45309"
         ))
         button_layout.addWidget(self.import_button)
         
@@ -4914,14 +4964,14 @@ class DigimonEditor(QMainWindow):
         for chr_id in chr_ids:
             # Get the name for this chr_id
             name = self.loader._get_digimon_name_by_chr_id(chr_id)
-            if name and name != chr_id:  # Only show if we have a proper name
-                display_name = f"{name} ({chr_id})"
-                digimon_names.append(display_name)
-                self.digimon_data[display_name] = chr_id
-            else:
-                # Fallback to chr_id if no name found
-                digimon_names.append(chr_id)
-                self.digimon_data[chr_id] = chr_id
+            
+            # Skip entries where name lookup failed (returns char_key or chr_id)
+            if not name or name.startswith("char_") or name == chr_id:
+                continue  # Skip - no proper name found
+            
+            display_name = f"{name} ({chr_id})"
+            digimon_names.append(display_name)
+            self.digimon_data[display_name] = chr_id
         
         # Add imported Digimon (marked with 📥)
         if hasattr(self.loader, 'imported_digimon'):
@@ -5214,14 +5264,33 @@ class DigimonEditor(QMainWindow):
             # Refresh the list
             self.load_digimon_list()
             
-            QMessageBox.information(
+            # Ask if user wants to load the first imported Digimon for editing
+            reply = QMessageBox.question(
                 self,
                 "Import Successful! 🎉",
                 f"✅ Successfully imported {imported_count} Digimon:\n\n" +
                 "\n".join(f"  • {name}" for name in imported_names[:10]) +
                 (f"\n  ... and {len(imported_names) - 10} more" if len(imported_names) > 10 else "") +
-                "\n\nThey are now available in the editor!"
+                "\n\nDo you want to load the first imported Digimon for editing?",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No,
+                QMessageBox.StandardButton.Yes
             )
+            
+            if reply == QMessageBox.StandardButton.Yes and hasattr(self.loader, 'imported_digimon') and self.loader.imported_digimon:
+                # Load the first imported Digimon
+                first_digimon = self.loader.imported_digimon[0]
+                self.load_digimon_data(first_digimon)
+                self.current_digimon = first_digimon
+                
+                # Try to select it in the list (if it exists)
+                try:
+                    display_name = f"📥 {first_digimon.name} ({first_digimon.chr_id})"
+                    matching_items = self.digimon_list.findItems(display_name, Qt.MatchFlag.MatchExactly)
+                    if matching_items:
+                        self.digimon_list.setCurrentItem(matching_items[0])
+                except Exception as select_error:
+                    # Don't fail import if we can't select the item
+                    print(f"Could not select imported item: {select_error}")
             
         except Exception as e:
             QMessageBox.critical(
