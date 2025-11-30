@@ -258,11 +258,8 @@ class DigimonCreationWizard(QWizard):
         self.new_digimon.evolution_paths = evolution_page.evolution_paths.copy()
         self.new_digimon.deevolution_sources = evolution_page.deevolution_sources.copy()
         
-        # Extract evolution conditions from evolution paths
-        self.new_digimon.evolution_conditions = []
-        for evo in evolution_page.evolution_paths:
-            if 'conditions' in evo:
-                self.new_digimon.evolution_conditions.append(evo['conditions'])
+        # Get evolution requirements from the single requirements section
+        self.new_digimon.evolution_conditions = [evolution_page.evolution_requirements]
         
         self.new_digimon.model_id = model_page.model_id_edit.text()
         self.new_digimon.motion_id = model_page.motion_id_edit.text()
@@ -581,14 +578,20 @@ class DigimonCreationWizard(QWizard):
     def _write_char_info_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write char_info.ap.csv"""
         header = 'string2 0,empty 1,empty 2,string2 3,string2 4,empty 5,int32 6,int32 7,string2 8,int32 9,string2 10,int32 11,string2 12,int32 13'
+        
+        # Get motion_ref from char_info_data if available, otherwise use empty string
+        motion_ref = ""
+        if hasattr(digimon, 'char_info_data') and digimon.char_info_data:
+            motion_ref = digimon.char_info_data.get('motion_ref', '')
+        
         parts = [
             f'"{self._escape_csv_value(digimon.char_key)}"',
             '', '',  # empty columns
             f'"{self._escape_csv_value(digimon.chr_id)}"',
-            f'"{10000 + digimon.id}"',
+            f'"{str(digimon.id)}"',  # Simplified ID formula
             '',  # empty
             '0', '0',
-            '""',  # empty string
+            f'"{motion_ref}"',  # Copy motion_ref from template
             '0',
             '""',  # empty string
             '0',
@@ -692,7 +695,10 @@ class DigimonCreationWizard(QWizard):
             
             # Deduplicate evolution paths by to_id
             seen_to_ids = set()
-            evo_counter = 0
+            
+            # Use user's suggested formula: (digimon.id * 100) + counter
+            # For ID 640: 64000, 64001, 64002, etc.
+            counter = 0
             
             for evo in digimon.evolution_paths:
                 to_id = evo.get('to_id', 0)
@@ -702,13 +708,12 @@ class DigimonCreationWizard(QWizard):
                     continue
                 seen_to_ids.add(to_id)
                 
-                # Generate unique evolution ID starting at 100000
-                # Use sequential numbering to avoid conflicts
-                evo_id = 100000 + (digimon.id * 10) + evo_counter
-                evo_counter += 1
-                
                 # Get evolution type/mode (default to 0 for normal evolution)
                 evo_type = evo.get('evolution_type', 0)
+                
+                # Calculate evolution ID
+                evo_id = (digimon.id * 100) + counter
+                counter += 1
                 
                 parts = [
                     str(evo_id),
@@ -770,64 +775,51 @@ class DigimonCreationWizard(QWizard):
             f.write(','.join(parts) + '\n')
     
     def _write_evolution_condition_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write evolution_condition.ap.csv"""
+        """Write evolution_condition.ap.csv - requirements to evolve INTO this new Digimon"""
         header = 'int32 0,empty 1,int32 2,int32 3,int32 4,int32 5,int32 6,int32 7,int32 8,int32 9,int32 10,int32 11,int32 12,int32 13,int32 14,int32 15,int32 16,int32 17,empty 18,int32 19,int32 20,int32 21,int32 22,empty 23,int32 24,empty 25,int32 26,int32 27,empty 28,int32 29'
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
-            # Use evolution_conditions if available, otherwise create minimal default
+            # For the NEW Digimon we're creating, we need to define what requirements
+            # are needed for OTHER Digimon to evolve INTO this new one
+            # Column 0 is THIS new Digimon's ID (what requirements to become it)
+            
+            # Use the evolution_requirements from the wizard
+            condition = {}
             if digimon.evolution_conditions and len(digimon.evolution_conditions) > 0:
                 condition = digimon.evolution_conditions[0]
-                
-                parts = [
-                    str(digimon.id),  # 0: dbId
-                    '',  # 1: empty
-                    str(condition.get('mode', 4)),  # 2: condition type/mode
-                    str(condition.get('tamerLevel', 0)),  # 3: tamer level
-                    str(condition.get('HP', 0)),  # 4: HP requirement
-                    str(condition.get('SP', 0)),  # 5: SP requirement
-                    str(condition.get('ATK', 0)),  # 6: ATK requirement
-                    str(condition.get('DEF', 0)),  # 7: DEF requirement
-                    str(condition.get('INT', 0)),  # 8: INT requirement
-                    str(condition.get('SPI', 0)),  # 9: SPI requirement
-                    str(condition.get('SPD', 0)),  # 10: SPD requirement
-                    str(condition.get('unknown1', 0)),  # 11
-                    str(condition.get('unknown2', 0)),  # 12
-                    str(condition.get('skillCountValor', 0)),  # 13
-                    str(condition.get('skillCountPhilantropy', 0)),  # 14
-                    str(condition.get('skillCountAmicable', 0)),  # 15
-                    str(condition.get('skillCountWisdom', 0)),  # 16
-                    '0', # 17
-                    '',  # 18: empty
-                    '0', '0', '0',  # 19-21
-                    str(condition.get('needsItem', 0)),  # 22
-                    '',  # 23: empty
-                    str(condition.get('jogressDbIdA', 0)),  # 24
-                    '',  # 25: empty
-                    str(condition.get('jogressPersonalityA', 0)),  # 26
-                    str(condition.get('jogressDbIdB', 0)),  # 27
-                    '',  # 28: empty
-                    str(condition.get('jogressPersonalityB', 0))  # 29
-                ]
-            else:
-                # Minimal default - no requirements
-                parts = [
-                    str(digimon.id),  # 0: dbId
-                    '',  # 1: empty
-                    '1',  # 2: mode 1 (no requirements)
-                    '0',  # 3: tamer level
-                    '0', '0', '0', '0', '0', '0', '0',  # 4-10: stat requirements
-                    '0', '0', '0', '0', '0', '0', '0',  # 11-17
-                    '',  # 18: empty
-                    '0', '0', '0', '0',  # 19-22
-                    '',  # 23: empty
-                    '0',  # 24
-                    '',  # 25: empty
-                    '0', '0',  # 26-27
-                    '',  # 28: empty
-                    '0'  # 29
-                ]
+            
+            parts = [
+                str(digimon.id),  # 0: THIS Digimon's ID (requirements to evolve INTO it)
+                '',  # 1: empty
+                str(condition.get('mode', 1)),  # 2: condition type/mode (default 1 = no requirements)
+                str(condition.get('tamerLevel', 0)),  # 3: tamer level
+                str(condition.get('HP', 0)),  # 4: HP requirement
+                str(condition.get('SP', 0)),  # 5: SP requirement
+                str(condition.get('ATK', 0)),  # 6: ATK requirement
+                str(condition.get('DEF', 0)),  # 7: DEF requirement
+                str(condition.get('INT', 0)),  # 8: INT requirement
+                str(condition.get('SPI', 0)),  # 9: SPI requirement
+                str(condition.get('SPD', 0)),  # 10: SPD requirement
+                str(condition.get('unknown1', 0)),  # 11
+                str(condition.get('unknown2', 0)),  # 12
+                str(condition.get('skillCountValor', 0)),  # 13
+                str(condition.get('skillCountPhilantropy', 0)),  # 14
+                str(condition.get('skillCountAmicable', 0)),  # 15
+                str(condition.get('skillCountWisdom', 0)),  # 16
+                '0', # 17
+                '',  # 18: empty
+                '0', '0', '0',  # 19-21
+                str(condition.get('needsItem', 0)),  # 22
+                '',  # 23: empty
+                str(condition.get('jogressDbIdA', 0)),  # 24
+                '',  # 25: empty
+                str(condition.get('jogressPersonalityA', 0)),  # 26
+                str(condition.get('jogressDbIdB', 0)),  # 27
+                '',  # 28: empty
+                str(condition.get('jogressPersonalityB', 0))  # 29
+            ]
             f.write(','.join(parts) + '\n')
     
     def _write_chronodevolution_ap_csv(self, filepath: Path, digimon: DigimonData):
@@ -839,6 +831,7 @@ class DigimonCreationWizard(QWizard):
             
             # Deduplicate de-evolution paths by from_id
             seen_from_ids = set()
+            counter = 0
             
             # Write chronodevolution entries (de-evolution paths)
             for de_evo in digimon.deevolution_sources:
@@ -849,14 +842,15 @@ class DigimonCreationWizard(QWizard):
                     continue
                 seen_from_ids.add(from_id)
                 
-                # Generate chronodevolution ID
-                chrono_id = 200000 + digimon.id * 100 + from_id
+                # Generate chronodevolution ID using same formula as evolution
+                chrono_id = (digimon.id * 100) + counter
+                counter += 1
                 
                 parts = [
                     str(chrono_id),
                     '',  # empty
-                    str(digimon.id),  # Current Digimon
-                    str(from_id),  # De-evolves to this
+                    str(digimon.id),  # Current Digimon (the target)
+                    str(from_id),  # Can de-evolve from this Digimon
                     '-1', '-1', '-1', '-1'  # Additional params
                 ]
                 f.write(','.join(parts) + '\n')
@@ -1499,18 +1493,56 @@ class EvolutionPage(QWizardPage):
         super().__init__()
         self.wizard = wizard
         self.setTitle("🔄 Step 7: Evolution")
-        self.setSubTitle("Configure evolution paths and pre-evolutions")
+        self.setSubTitle("Configure evolution requirements and paths")
         
         layout = QVBoxLayout()
         
         # Instructions
         info_label = QLabel(
-            "Configure evolution paths (what this Digimon can evolve into) and pre-evolutions (what can evolve into this Digimon).\n"
-            "Click 'Add Evolution' or 'Add Pre-Evolution' to select from a list of Digimon."
+            "First, set the requirements needed to evolve INTO this new Digimon.\n"
+            "Then configure evolution paths (what this Digimon can evolve into) and pre-evolutions."
         )
         info_label.setWordWrap(True)
         info_label.setStyleSheet("color: #666; padding: 10px; background-color: #f8f9fa; border-radius: 6px;")
         layout.addWidget(info_label)
+        
+        # Evolution Requirements section (for obtaining THIS Digimon)
+        req_group = QGroupBox("⭐ Requirements to Obtain This Digimon")
+        req_group.setStyleSheet("QGroupBox { font-weight: bold; }")
+        req_layout = QVBoxLayout()
+        
+        req_info = QLabel(
+            "These are the requirements that other Digimon must meet to evolve INTO this new Digimon.\n"
+            "Leave values at 0 for no requirement."
+        )
+        req_info.setWordWrap(True)
+        req_info.setStyleSheet("color: #555; font-size: 10pt; font-weight: normal;")
+        req_layout.addWidget(req_info)
+        
+        edit_req_btn = QPushButton("📝 Edit Requirements")
+        edit_req_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        edit_req_btn.clicked.connect(self.edit_evolution_requirements)
+        req_layout.addWidget(edit_req_btn)
+        
+        self.requirements_label = QLabel("Mode: No Requirements (default)")
+        self.requirements_label.setStyleSheet("color: #666; padding: 5px; background: #f0f0f0; border-radius: 3px;")
+        self.requirements_label.setWordWrap(True)
+        req_layout.addWidget(self.requirements_label)
+        
+        req_group.setLayout(req_layout)
+        layout.addWidget(req_group)
+        
+        # Store the evolution requirements (for THIS Digimon)
+        self.evolution_requirements = {
+            'mode': 1,  # Default: no requirements
+            'tamerLevel': 0,
+            'HP': 0, 'SP': 0, 'ATK': 0, 'DEF': 0, 'INT': 0, 'SPI': 0, 'SPD': 0,
+            'skillCountValor': 0, 'skillCountPhilantropy': 0, 
+            'skillCountAmicable': 0, 'skillCountWisdom': 0,
+            'needsItem': 0,
+            'jogressDbIdA': 0, 'jogressPersonalityA': 0,
+            'jogressDbIdB': 0, 'jogressPersonalityB': 0
+        }
         
         # Evolution paths section
         evo_group = QGroupBox("Evolution Paths (what this Digimon evolves into)")
@@ -1558,6 +1590,248 @@ class EvolutionPage(QWizardPage):
         
         layout.addStretch()
         self.setLayout(layout)
+    
+    def edit_evolution_requirements(self):
+        """Show dialog to edit evolution requirements for THIS Digimon"""
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Requirements to Obtain This Digimon")
+        dialog.setMinimumWidth(500)
+        
+        layout = QVBoxLayout(dialog)
+        
+        # Scroll area for all fields
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll_widget = QWidget()
+        scroll_layout = QVBoxLayout(scroll_widget)
+        
+        # Info label
+        info = QLabel("Configure the requirements needed for other Digimon to evolve INTO this new Digimon.\nLeave values at 0 for no requirement.")
+        info.setWordWrap(True)
+        info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
+        scroll_layout.addWidget(info)
+        
+        # Mode selection
+        mode_group = QGroupBox("Evolution Mode")
+        mode_layout = QFormLayout()
+        mode_combo = QComboBox()
+        
+        # Add all evolution modes with tooltips
+        mode_combo.addItem("Mode 1: No Requirements", 1)
+        mode_combo.setItemData(0, "Basic evolution with minimal or no stat requirements (default)", Qt.ItemDataRole.ToolTipRole)
+        
+        mode_combo.addItem("Mode 3: Basic Evolution", 3)
+        mode_combo.setItemData(1, "Standard evolution with moderate stat requirements", Qt.ItemDataRole.ToolTipRole)
+        
+        mode_combo.addItem("Mode 4: Stat Evolution", 4)
+        mode_combo.setItemData(2, "Evolution focused on specific stat thresholds", Qt.ItemDataRole.ToolTipRole)
+        
+        mode_combo.addItem("Mode 5: Advanced Evolution", 5)
+        mode_combo.setItemData(3, "Evolution with multiple high stat requirements", Qt.ItemDataRole.ToolTipRole)
+        
+        mode_combo.addItem("Mode 7: Jogress/DNA Digivolution", 7)
+        mode_combo.setItemData(4, "Fusion evolution requiring two specific Digimon partners (set Jogress IDs below)", Qt.ItemDataRole.ToolTipRole)
+        
+        mode_combo.addItem("Mode 8: Item Required Evolution", 8)
+        mode_combo.setItemData(5, "Evolution requiring a specific item (set Item ID below)", Qt.ItemDataRole.ToolTipRole)
+        
+        # Set current mode
+        current_mode_idx = mode_combo.findData(self.evolution_requirements.get('mode', 1))
+        if current_mode_idx >= 0:
+            mode_combo.setCurrentIndex(current_mode_idx)
+        
+        mode_combo.setToolTip("Select the evolution mode/type for obtaining this Digimon")
+        mode_layout.addRow("Mode:", mode_combo)
+        mode_group.setLayout(mode_layout)
+        scroll_layout.addWidget(mode_group)
+        
+        # Tamer Level
+        tamer_group = QGroupBox("Tamer Requirements")
+        tamer_layout = QFormLayout()
+        tamer_level_spin = QSpinBox()
+        tamer_level_spin.setRange(0, 99)
+        tamer_level_spin.setValue(self.evolution_requirements.get('tamerLevel', 0))
+        tamer_level_spin.setSuffix(" (0 = no requirement)")
+        tamer_layout.addRow("Tamer Level:", tamer_level_spin)
+        tamer_group.setLayout(tamer_layout)
+        scroll_layout.addWidget(tamer_group)
+        
+        # Stat Requirements
+        stats_group = QGroupBox("Stat Requirements")
+        stats_layout = QFormLayout()
+        
+        hp_spin = QSpinBox()
+        hp_spin.setRange(0, 99999)
+        hp_spin.setValue(self.evolution_requirements.get('HP', 0))
+        hp_spin.setSuffix(" HP")
+        stats_layout.addRow("HP:", hp_spin)
+        
+        sp_spin = QSpinBox()
+        sp_spin.setRange(0, 99999)
+        sp_spin.setValue(self.evolution_requirements.get('SP', 0))
+        sp_spin.setSuffix(" SP")
+        stats_layout.addRow("SP:", sp_spin)
+        
+        atk_spin = QSpinBox()
+        atk_spin.setRange(0, 9999)
+        atk_spin.setValue(self.evolution_requirements.get('ATK', 0))
+        atk_spin.setSuffix(" ATK")
+        stats_layout.addRow("ATK:", atk_spin)
+        
+        def_spin = QSpinBox()
+        def_spin.setRange(0, 9999)
+        def_spin.setValue(self.evolution_requirements.get('DEF', 0))
+        def_spin.setSuffix(" DEF")
+        stats_layout.addRow("DEF:", def_spin)
+        
+        int_spin = QSpinBox()
+        int_spin.setRange(0, 9999)
+        int_spin.setValue(self.evolution_requirements.get('INT', 0))
+        int_spin.setSuffix(" INT")
+        stats_layout.addRow("INT:", int_spin)
+        
+        spi_spin = QSpinBox()
+        spi_spin.setRange(0, 9999)
+        spi_spin.setValue(self.evolution_requirements.get('SPI', 0))
+        spi_spin.setSuffix(" SPI")
+        stats_layout.addRow("SPI:", spi_spin)
+        
+        spd_spin = QSpinBox()
+        spd_spin.setRange(0, 9999)
+        spd_spin.setValue(self.evolution_requirements.get('SPD', 0))
+        spd_spin.setSuffix(" SPD")
+        stats_layout.addRow("SPD:", spd_spin)
+        
+        stats_group.setLayout(stats_layout)
+        scroll_layout.addWidget(stats_group)
+        
+        # Skill Count Requirements
+        skills_group = QGroupBox("Skill Count Requirements (by Personality Type)")
+        skills_layout = QFormLayout()
+        
+        valor_spin = QSpinBox()
+        valor_spin.setRange(0, 999)
+        valor_spin.setValue(self.evolution_requirements.get('skillCountValor', 0))
+        valor_spin.setSuffix(" skills")
+        skills_layout.addRow("Valor Skills:", valor_spin)
+        
+        philanthropy_spin = QSpinBox()
+        philanthropy_spin.setRange(0, 999)
+        philanthropy_spin.setValue(self.evolution_requirements.get('skillCountPhilantropy', 0))
+        philanthropy_spin.setSuffix(" skills")
+        skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
+        
+        amicable_spin = QSpinBox()
+        amicable_spin.setRange(0, 999)
+        amicable_spin.setValue(self.evolution_requirements.get('skillCountAmicable', 0))
+        amicable_spin.setSuffix(" skills")
+        skills_layout.addRow("Amicable Skills:", amicable_spin)
+        
+        wisdom_spin = QSpinBox()
+        wisdom_spin.setRange(0, 999)
+        wisdom_spin.setValue(self.evolution_requirements.get('skillCountWisdom', 0))
+        wisdom_spin.setSuffix(" skills")
+        skills_layout.addRow("Wisdom Skills:", wisdom_spin)
+        
+        skills_group.setLayout(skills_layout)
+        scroll_layout.addWidget(skills_group)
+        
+        # Item Requirement
+        item_group = QGroupBox("Item Requirement")
+        item_layout = QFormLayout()
+        item_spin = QSpinBox()
+        item_spin.setRange(0, 9999)
+        item_spin.setValue(self.evolution_requirements.get('needsItem', 0))
+        item_spin.setSuffix(" (0 = no item needed)")
+        item_layout.addRow("Item ID:", item_spin)
+        item_group.setLayout(item_layout)
+        scroll_layout.addWidget(item_group)
+        
+        # Jogress Requirements
+        jogress_group = QGroupBox("Jogress/DNA Digivolution Requirements")
+        jogress_layout = QFormLayout()
+        
+        jogress_a_id = QSpinBox()
+        jogress_a_id.setRange(0, 9999)
+        jogress_a_id.setValue(self.evolution_requirements.get('jogressDbIdA', 0))
+        jogress_layout.addRow("Jogress Partner A ID:", jogress_a_id)
+        
+        jogress_a_personality = QSpinBox()
+        jogress_a_personality.setRange(0, 9999)
+        jogress_a_personality.setValue(self.evolution_requirements.get('jogressPersonalityA', 0))
+        jogress_layout.addRow("Partner A Personality:", jogress_a_personality)
+        
+        jogress_b_id = QSpinBox()
+        jogress_b_id.setRange(0, 9999)
+        jogress_b_id.setValue(self.evolution_requirements.get('jogressDbIdB', 0))
+        jogress_layout.addRow("Jogress Partner B ID:", jogress_b_id)
+        
+        jogress_b_personality = QSpinBox()
+        jogress_b_personality.setRange(0, 9999)
+        jogress_b_personality.setValue(self.evolution_requirements.get('jogressPersonalityB', 0))
+        jogress_layout.addRow("Partner B Personality:", jogress_b_personality)
+        
+        jogress_group.setLayout(jogress_layout)
+        scroll_layout.addWidget(jogress_group)
+        
+        scroll.setWidget(scroll_widget)
+        layout.addWidget(scroll)
+        
+        # Buttons
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            # Update requirements
+            self.evolution_requirements = {
+                'mode': mode_combo.currentData(),
+                'tamerLevel': tamer_level_spin.value(),
+                'HP': hp_spin.value(),
+                'SP': sp_spin.value(),
+                'ATK': atk_spin.value(),
+                'DEF': def_spin.value(),
+                'INT': int_spin.value(),
+                'SPI': spi_spin.value(),
+                'SPD': spd_spin.value(),
+                'unknown1': 0,
+                'unknown2': 0,
+                'skillCountValor': valor_spin.value(),
+                'skillCountPhilantropy': philanthropy_spin.value(),
+                'skillCountAmicable': amicable_spin.value(),
+                'skillCountWisdom': wisdom_spin.value(),
+                'needsItem': item_spin.value(),
+                'jogressDbIdA': jogress_a_id.value(),
+                'jogressPersonalityA': jogress_a_personality.value(),
+                'jogressDbIdB': jogress_b_id.value(),
+                'jogressPersonalityB': jogress_b_personality.value()
+            }
+            
+            # Update label
+            self.update_requirements_label()
+    
+    def update_requirements_label(self):
+        """Update the requirements display label"""
+        parts = []
+        mode = self.evolution_requirements.get('mode', 1)
+        mode_names = {1: "No Requirements", 3: "Basic", 4: "Stat", 5: "Advanced", 7: "Jogress", 8: "Item Required"}
+        parts.append(f"Mode: {mode_names.get(mode, f'Mode {mode}')}")
+        
+        if self.evolution_requirements.get('tamerLevel', 0) > 0:
+            parts.append(f"Tamer Lv{self.evolution_requirements['tamerLevel']}")
+        
+        stats = []
+        for stat in ['HP', 'SP', 'ATK', 'DEF', 'INT', 'SPI', 'SPD']:
+            if self.evolution_requirements.get(stat, 0) > 0:
+                stats.append(f"{stat}{self.evolution_requirements[stat]}")
+        if stats:
+            parts.append(", ".join(stats))
+        
+        if self.evolution_requirements.get('needsItem', 0) > 0:
+            parts.append(f"Item#{self.evolution_requirements['needsItem']}")
+        
+        self.requirements_label.setText(" | ".join(parts) if len(parts) > 1 else parts[0])
     
     def add_evolution(self):
         """Show dialog to select a Digimon to evolve into"""
@@ -1633,7 +1907,7 @@ class EvolutionPage(QWizardPage):
         try:
             dialog = QDialog(self)
             dialog.setWindowTitle("Select Pre-Evolution Source")
-            dialog.setMinimumSize(500, 400)
+            dialog.setMinimumSize(500, 450)
             
             layout = QVBoxLayout(dialog)
             
@@ -1660,6 +1934,19 @@ class EvolutionPage(QWizardPage):
                         item.setHidden(text.lower() not in item.text().lower())
             search_edit.textChanged.connect(filter_digimon)
             
+            # Custom ID option (for mod Digimon not in base game)
+            custom_id_group = QGroupBox("Or Enter Custom ID")
+            custom_id_layout = QHBoxLayout()
+            custom_id_label = QLabel("Digimon ID:")
+            custom_id_spin = QSpinBox()
+            custom_id_spin.setRange(1, 9999)
+            custom_id_spin.setValue(1000)
+            custom_id_spin.setToolTip("Enter the ID of a custom/modded Digimon")
+            custom_id_layout.addWidget(custom_id_label)
+            custom_id_layout.addWidget(custom_id_spin)
+            custom_id_group.setLayout(custom_id_layout)
+            layout.addWidget(custom_id_group)
+            
             # Buttons
             buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
             buttons.accepted.connect(dialog.accept)
@@ -1673,6 +1960,11 @@ class EvolutionPage(QWizardPage):
                     chr_id = selected_item.data(Qt.ItemDataRole.UserRole + 1)
                     if digimon_id and chr_id:
                         self.add_pre_evolution_source(digimon_id, chr_id)
+                else:
+                    # No selection in list - use custom ID
+                    custom_id = custom_id_spin.value()
+                    custom_chr_id = f"chr{custom_id}"
+                    self.add_pre_evolution_source(custom_id, custom_chr_id)
         except Exception as e:
             print(f"Error in add_pre_evolution: {e}")
             import traceback
@@ -1772,7 +2064,7 @@ class EvolutionPage(QWizardPage):
             digimon_list.addItem(f"Error loading Digimon list: {str(e)}")
     
     def add_evolution_path(self, to_id: int, to_chr_id: str):
-        """Add an evolution path with requirements"""
+        """Add an evolution path (no longer needs per-path requirements)"""
         try:
             # Check if already exists
             for evo in self.evolution_paths:
@@ -1785,16 +2077,10 @@ class EvolutionPage(QWizardPage):
             if not to_name or to_name == to_chr_id:
                 to_name = f"Unknown (ID: {to_id})"
             
-            # Show evolution requirements dialog
-            conditions = self.show_evolution_requirements_dialog(to_name)
-            if conditions is None:
-                return  # User cancelled
-            
-            # Add to list
+            # Add to list (no per-evolution requirements anymore)
             evo_data = {
                 'to_id': to_id,
                 'to_chr_id': to_chr_id,
-                'conditions': conditions,
                 'raw_data': [0, self.wizard.template_digimon.id if self.wizard.template_digimon else 0, 0, to_id]
             }
             self.evolution_paths.append(evo_data)
@@ -1805,9 +2091,8 @@ class EvolutionPage(QWizardPage):
                 if item and item.text().startswith("(No evolution"):
                     self.evolution_list.clear()
             
-            # Show requirements summary in list
-            req_text = self._format_requirements_summary(conditions)
-            self.evolution_list.addItem(f"→ {to_name} (ID: {to_id}) {req_text}")
+            # Simple display without requirements
+            self.evolution_list.addItem(f"→ {to_name} (ID: {to_id})")
         except Exception as e:
             print(f"Error adding evolution path: {e}")
             import traceback
