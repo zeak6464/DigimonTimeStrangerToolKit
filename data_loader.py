@@ -433,6 +433,9 @@ class MBELoader:
         Args:
             char_key: Character key to look up
             check_dlc: If True, also check DLC files
+        
+        Returns:
+            Digimon name if found in char_name.mbe, None otherwise
         """
         # Normalize char_key (remove quotes for comparison)
         normalized_key = char_key.strip('"')
@@ -461,7 +464,8 @@ class MBELoader:
                         if row_key == normalized_key:
                             return row[1].strip('"')  # Also strip quotes from name
         
-        return normalized_key
+        # Name not found - return None instead of char_key
+        return None
     
     def _get_digimon_name_by_chr_id(self, chr_id: str, check_dlc: bool = True) -> str:
         """Get Digimon name by chr_id
@@ -1099,10 +1103,6 @@ class MBELoader:
         try:
             # Check base game first
             belong_file = self.text_path / "belong.mbe" / "00_Sheet1.csv"
-            if not belong_file.exists():
-                # Try backup folder
-                belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
-            
             if belong_file.exists():
                 rows = self.load_csv(belong_file)
                 for row in rows[1:]:  # Skip header
@@ -1112,7 +1112,22 @@ class MBELoader:
                         if digimon_id_str and digimon_id_str.isdigit():
                             if int(digimon_id_str) == digimon.id:
                                 digimon.tribe_name = row[1].strip('"')
-                                break
+                                return  # Found it, exit
+            
+            # Check DLC if not found in base game
+            dlc_exporter = DLCExporter(self)
+            dlc_text = dlc_exporter.get_dlc_text_path("addcont_17_text01") / "text" / "mbe"
+            dlc_belong_file = dlc_text / "belong_dlc17.mbe" / "00_Sheet1.csv"
+            
+            if dlc_belong_file.exists():
+                rows = self.load_csv(dlc_belong_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) >= 2:
+                        digimon_id_str = row[0].strip('"')
+                        if digimon_id_str and digimon_id_str.isdigit():
+                            if int(digimon_id_str) == digimon.id:
+                                digimon.tribe_name = row[1].strip('"')
+                                return
         except Exception as e:
             print(f"Error loading tribe data for Digimon {digimon.id}: {e}")
     
@@ -1857,6 +1872,35 @@ class MBELoader:
                         
                 except Exception as e:
                     print(f"Error loading digimon profiles: {e}")
+            
+            # Also load DLC profiles
+            dlc_exporter = DLCExporter(self)
+            dlc_text = dlc_exporter.get_dlc_text_path("addcont_17_text01") / "text" / "mbe"
+            # Try both 00_ and 000_ prefixes
+            dlc_profile_file = dlc_text / "digimon_profile_dlc17.mbe" / "00_Sheet1.csv"
+            if not dlc_profile_file.exists():
+                dlc_profile_file = dlc_text / "digimon_profile_dlc17.mbe" / "000_Sheet1.csv"
+            
+            if dlc_profile_file.exists():
+                try:
+                    rows = self.load_csv(dlc_profile_file)
+                    for row in rows[1:]:  # Skip header
+                        if len(row) >= 2:
+                            key = row[0].strip('"').strip() if row[0] else ""
+                            if key.startswith('digimon_') and key.endswith('_profile'):
+                                try:
+                                    id_str = key.replace('digimon_', '').replace('_profile', '')
+                                    profile_id = int(id_str)
+                                    if row[1]:
+                                        profile_text = row[1].strip()
+                                        profile_text = profile_text.replace('\n', ' ').replace('\r', ' ')
+                                        profile_text = re.sub(r'\s+', ' ', profile_text).strip()
+                                        if profile_text:
+                                            self._digimon_profiles_cache[profile_id] = profile_text
+                                except ValueError:
+                                    pass
+                except Exception as e:
+                    print(f"Error loading DLC digimon profiles: {e}")
         
         return self._digimon_profiles_cache.get(digimon_id, "")
     
@@ -2088,7 +2132,13 @@ class DLCExporter:
     
     def __init__(self, loader: 'MBELoader'):
         self.loader = loader
-        self.workspace_root = loader.data_path.parent
+        # Get workspace root - go up from data_path to find the actual workspace
+        # If data_path is "Base/data", we need to go up 2 levels to get workspace root
+        data_path = Path(loader.data_path)
+        if data_path.name == "data" and data_path.parent.name == "Base":
+            self.workspace_root = data_path.parent.parent  # Base/data -> Base -> workspace
+        else:
+            self.workspace_root = loader.data_path.parent  # Fallback for other structures
     
     def _identify_bool_columns(self, header_row: List[str], file_type: str = "") -> set:
         """

@@ -2344,8 +2344,9 @@ class DigimonEditor(QMainWindow):
     
     def __init__(self):
         super().__init__()
-        self.loader = MBELoader()
-        self.exporter = CSVExporter()
+        # Use Base folders for base game data
+        self.loader = MBELoader(data_path="Base/data", text_path="Base/text")
+        self.exporter = CSVExporter(data_path="Base/data", text_path="Base/text")
         self.current_digimon: Optional[DigimonData] = None
         self.has_unsaved_changes = False
         self.setup_ui()
@@ -4962,12 +4963,12 @@ class DigimonEditor(QMainWindow):
         
         digimon_names = []
         for chr_id in chr_ids:
-            # Get the name for this chr_id
+            # Get the name for this chr_id (returns None if not found in char_name.mbe)
             name = self.loader._get_digimon_name_by_chr_id(chr_id)
             
-            # Skip entries where name lookup failed (returns char_key or chr_id)
-            if not name or name.startswith("char_") or name == chr_id:
-                continue  # Skip - no proper name found
+            # Skip if no name found (not in char_name.mbe)
+            if not name:
+                continue
             
             display_name = f"{name} ({chr_id})"
             digimon_names.append(display_name)
