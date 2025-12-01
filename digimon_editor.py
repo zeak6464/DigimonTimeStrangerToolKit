@@ -148,6 +148,7 @@ class DigimonCreationWizard(QWizard):
         self.loader = loader
         self.template_digimon: Optional[DigimonData] = None
         self.new_digimon: Optional[DigimonData] = None
+        self.last_export_path: Optional[Path] = None  # Store export path for later import
         
         self.setWindowTitle("✨ Digimon Creation Wizard - Export to dsts-loader")
         self.setMinimumSize(700, 600)
@@ -164,6 +165,7 @@ class DigimonCreationWizard(QWizard):
         self.addPage(TemplateSelectionPage(self))
         self.addPage(BasicInfoPage(self))
         self.addPage(ClassificationPage(self))
+        self.addPage(ProfilePage(self))
         self.addPage(StatsPage(self))
         self.addPage(ResistancesPage(self))
         self.addPage(SkillsPage(self))
@@ -188,84 +190,131 @@ class DigimonCreationWizard(QWizard):
     
     def finish_wizard(self):
         """Called when wizard is finished - export to DLC"""
-        # Get all data from pages
-        template_page = self.page(0)
-        basic_page = self.page(1)
-        class_page = self.page(2)
-        stats_page = self.page(3)
-        resist_page = self.page(4)
-        skills_page = self.page(5)
-        evolution_page = self.page(6)
-        model_page = self.page(7)
-        
-        # Create new Digimon from template
-        if not self.template_digimon:
-            QMessageBox.warning(self, "Error", "No template Digimon selected!")
+        try:
+            # Get all data from pages
+            template_page = self.page(0)
+            basic_page = self.page(1)
+            class_page = self.page(2)
+            profile_page = self.page(3)
+            stats_page = self.page(4)
+            resist_page = self.page(5)
+            skills_page = self.page(6)
+            evolution_page = self.page(7)
+            model_page = self.page(8)
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            QMessageBox.critical(
+                self,
+                "Wizard Error",
+                f"Error getting wizard pages:\n\n{str(e)}\n\nSee console for details."
+            )
+            print(f"\n{'='*80}")
+            print("WIZARD PAGE ERROR:")
+            print(error_trace)
+            print(f"{'='*80}\n")
             return
         
-        # Copy template
-        from copy import deepcopy
-        self.new_digimon = deepcopy(self.template_digimon)
+        # Create new Digimon from template
+        try:
+            if not self.template_digimon:
+                QMessageBox.warning(self, "Error", "No template Digimon selected!")
+                return
+            
+            # Copy template
+            from copy import deepcopy
+            self.new_digimon = deepcopy(self.template_digimon)
+            
+            # Store template chr_id for reference
+            template_chr_id = self.template_digimon.chr_id
+            
+            # Update with wizard data
+            self.new_digimon.id = basic_page.id_spin.value()
+            self.new_digimon.name = basic_page.name_edit.text()
+            self.new_digimon.char_key = basic_page.char_key_edit.text()
+            new_chr_id = basic_page.chr_id_edit.text()
+            self.new_digimon.chr_id = new_chr_id
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            QMessageBox.critical(
+                self,
+                "Wizard Error",
+                f"Error collecting basic data:\n\n{str(e)}\n\nSee console for details."
+            )
+            print(f"\n{'='*80}")
+            print("DATA COLLECTION ERROR:")
+            print(error_trace)
+            print(f"{'='*80}\n")
+            return
         
-        # Store template chr_id for reference
-        template_chr_id = self.template_digimon.chr_id
-        
-        # Update with wizard data
-        self.new_digimon.id = basic_page.id_spin.value()
-        self.new_digimon.name = basic_page.name_edit.text()
-        self.new_digimon.char_key = basic_page.char_key_edit.text()
-        new_chr_id = basic_page.chr_id_edit.text()
-        self.new_digimon.chr_id = new_chr_id
-        
-        self.new_digimon.stage_id = class_page.stage_combo.currentData() if class_page.stage_combo.currentData() is not None else 0
-        self.new_digimon.type_id = class_page.type_combo.currentData() if class_page.type_combo.currentData() is not None else 0
-        self.new_digimon.generation_id = self.new_digimon.stage_id
-        self.new_digimon.personality_id = class_page.personality_combo.currentData() if class_page.personality_combo.currentData() is not None else 0
-        self.new_digimon.base_personality = self.new_digimon.personality_id
-        self.new_digimon.growth_pattern_id = class_page.growth_combo.currentData() if class_page.growth_combo.currentData() is not None else 1
-        self.new_digimon.tribe_name = class_page.tribe_combo.currentText() if class_page.tribe_combo.currentText() else "None"
-        
-        # Store selected tribe name for belong export
-        if not hasattr(self.new_digimon, 'tribe_name'):
-            self.new_digimon.tribe_name = None
-        self.new_digimon.tribe_name = class_page.tribe_combo.currentText()
-        
-        self.new_digimon.base_hp = stats_page.hp_spin.value()
-        self.new_digimon.base_sp = stats_page.sp_spin.value()
-        self.new_digimon.base_atk = stats_page.atk_spin.value()
-        self.new_digimon.base_def = stats_page.def_spin.value()
-        self.new_digimon.base_int = stats_page.int_spin.value()
-        self.new_digimon.base_spi = stats_page.spi_spin.value()
-        self.new_digimon.base_spd = stats_page.spd_spin.value()
-        
-        self.new_digimon.res_null = resist_page.resist_widgets["null"].value()
-        self.new_digimon.res_fire = resist_page.resist_widgets["fire"].value()
-        self.new_digimon.res_water = resist_page.resist_widgets["water"].value()
-        self.new_digimon.res_ice = resist_page.resist_widgets["ice"].value()
-        self.new_digimon.res_grass = resist_page.resist_widgets["grass"].value()
-        self.new_digimon.res_wind = resist_page.resist_widgets["wind"].value()
-        self.new_digimon.res_elec = resist_page.resist_widgets["elec"].value()
-        self.new_digimon.res_ground = resist_page.resist_widgets["ground"].value()
-        self.new_digimon.res_steel = resist_page.resist_widgets["steel"].value()
-        self.new_digimon.res_light = resist_page.resist_widgets["light"].value()
-        self.new_digimon.res_dark = resist_page.resist_widgets["dark"].value()
-        
-        # Skills
-        self.new_digimon.signature_skills = skills_page.signature_skills_editor.get_skills()
-        self.new_digimon.generic_skills = skills_page.generic_skills_editor.get_skills()
-        
-        # Evolution paths (from EvolutionPage)
-        self.new_digimon.evolution_paths = evolution_page.evolution_paths.copy()
-        self.new_digimon.deevolution_sources = evolution_page.deevolution_sources.copy()
-        
-        # Get evolution requirements from the single requirements section
-        self.new_digimon.evolution_conditions = [evolution_page.evolution_requirements]
-        
-        self.new_digimon.model_id = model_page.model_id_edit.text()
-        self.new_digimon.motion_id = model_page.motion_id_edit.text()
-        
-        # Update chr_id references in all data structures
-        self._update_chr_id_references(self.new_digimon, template_chr_id, new_chr_id)
+        try:
+            self.new_digimon.stage_id = class_page.stage_combo.currentData() if class_page.stage_combo.currentData() is not None else 0
+            self.new_digimon.type_id = class_page.type_combo.currentData() if class_page.type_combo.currentData() is not None else 0
+            self.new_digimon.generation_id = self.new_digimon.stage_id
+            self.new_digimon.personality_id = class_page.personality_combo.currentData() if class_page.personality_combo.currentData() is not None else 0
+            self.new_digimon.base_personality = self.new_digimon.personality_id
+            self.new_digimon.growth_pattern_id = class_page.growth_combo.currentData() if class_page.growth_combo.currentData() is not None else 1
+            self.new_digimon.tribe_name = class_page.tribe_combo.currentText() if class_page.tribe_combo.currentText() else "None"
+            
+            # Store selected tribe name for belong export
+            if not hasattr(self.new_digimon, 'tribe_name'):
+                self.new_digimon.tribe_name = None
+            self.new_digimon.tribe_name = class_page.tribe_combo.currentText()
+            
+            # Profile
+            self.new_digimon.profile_text = profile_page.profile_edit.toPlainText()
+            
+            # Stats
+            self.new_digimon.base_hp = stats_page.hp_spin.value()
+            self.new_digimon.base_sp = stats_page.sp_spin.value()
+            self.new_digimon.base_atk = stats_page.atk_spin.value()
+            self.new_digimon.base_def = stats_page.def_spin.value()
+            self.new_digimon.base_int = stats_page.int_spin.value()
+            self.new_digimon.base_spi = stats_page.spi_spin.value()
+            self.new_digimon.base_spd = stats_page.spd_spin.value()
+            
+            self.new_digimon.res_null = resist_page.resist_widgets["null"].value()
+            self.new_digimon.res_fire = resist_page.resist_widgets["fire"].value()
+            self.new_digimon.res_water = resist_page.resist_widgets["water"].value()
+            self.new_digimon.res_ice = resist_page.resist_widgets["ice"].value()
+            self.new_digimon.res_grass = resist_page.resist_widgets["grass"].value()
+            self.new_digimon.res_wind = resist_page.resist_widgets["wind"].value()
+            self.new_digimon.res_elec = resist_page.resist_widgets["elec"].value()
+            self.new_digimon.res_ground = resist_page.resist_widgets["ground"].value()
+            self.new_digimon.res_steel = resist_page.resist_widgets["steel"].value()
+            self.new_digimon.res_light = resist_page.resist_widgets["light"].value()
+            self.new_digimon.res_dark = resist_page.resist_widgets["dark"].value()
+            
+            # Skills
+            self.new_digimon.signature_skills = skills_page.signature_skills_editor.get_skills()
+            self.new_digimon.generic_skills = skills_page.generic_skills_editor.get_skills()
+            
+            # Evolution paths (from EvolutionPage)
+            self.new_digimon.evolution_paths = evolution_page.evolution_paths.copy()
+            self.new_digimon.deevolution_sources = evolution_page.deevolution_sources.copy()
+            
+            # Get evolution requirements from the single requirements section
+            self.new_digimon.evolution_conditions = [evolution_page.evolution_requirements]
+            
+            self.new_digimon.model_id = model_page.model_id_edit.text()
+            self.new_digimon.motion_id = model_page.motion_id_edit.text()
+            
+            # Update chr_id references in all data structures
+            self._update_chr_id_references(self.new_digimon, template_chr_id, new_chr_id)
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            QMessageBox.critical(
+                self,
+                "Wizard Error",
+                f"Error collecting wizard data:\n\n{str(e)}\n\nSee console for details."
+            )
+            print(f"\n{'='*80}")
+            print("WIZARD DATA COLLECTION ERROR:")
+            print(error_trace)
+            print(f"{'='*80}\n")
+            return
         
         # Get animation reference
         animation_ref = model_page.animation_ref_edit.text().strip() if model_page.animation_ref_edit.text().strip() else template_chr_id
@@ -299,8 +348,27 @@ class DigimonCreationWizard(QWizard):
                 # User chose to discard - close wizard
                 return
         
+        # Store export path for later import
+        self.last_export_path = Path(export_dir)
+        
         # Export to dsts-loader format
-        if self._export_to_dsts_loader(Path(export_dir), self.new_digimon, animation_ref):
+        try:
+            success = self._export_to_dsts_loader(Path(export_dir), self.new_digimon, animation_ref)
+        except Exception as e:
+            import traceback
+            error_trace = traceback.format_exc()
+            QMessageBox.critical(
+                self,
+                "Export Error",
+                f"An error occurred during export:\n\n{str(e)}\n\nSee console for full traceback."
+            )
+            print(f"\n{'='*80}")
+            print("EXPORT ERROR:")
+            print(error_trace)
+            print(f"{'='*80}\n")
+            return
+        
+        if success:
             QMessageBox.information(
                 self,
                 "Success! 🎉",
@@ -619,6 +687,14 @@ class DigimonCreationWizard(QWizard):
         template_chr_id = raw_data[0].strip('"') if raw_data[0] else ""
         new_chr_id = digimon.chr_id
         
+        # Update model_id and motion_id from the digimon object if they're set
+        if hasattr(digimon, 'model_id') and digimon.model_id:
+            if len(raw_data) > 2:
+                raw_data[2] = f'"{digimon.model_id}"'
+        if hasattr(digimon, 'motion_id') and digimon.motion_id:
+            if len(raw_data) > 3:
+                raw_data[3] = f'"{digimon.motion_id}"'
+        
         for i, value in enumerate(raw_data):
             col_type = header_types[i] if i < len(header_types) else ''
             
@@ -823,35 +899,36 @@ class DigimonCreationWizard(QWizard):
             f.write(','.join(parts) + '\n')
     
     def _write_chronodevolution_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write chronodevolution.ap.csv (reverse evolution/de-evolution)"""
+        """Write chronodevolution.ap.csv (de-digivolution targets)
+        
+        Structure: [Digimon ID],"",[\De-Digi target 1],[target 2],[target 3],[target 4],[target 5],[target 6]
+        This defines what this NEW Digimon can de-digivolve INTO (not what can de-digivolve into it)
+        """
         header = 'int32 0,empty 1,int32 2,int32 3,int32 4,int32 5,int32 6,int32 7'
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
-            # Deduplicate de-evolution paths by from_id
-            seen_from_ids = set()
-            counter = 0
-            
-            # Write chronodevolution entries (de-evolution paths)
+            # Collect all de-evolution target IDs (what this Digimon can de-digivolve into)
+            de_evo_targets = []
             for de_evo in digimon.deevolution_sources:
                 from_id = de_evo.get('from_id', 0)
+                if from_id > 0:
+                    de_evo_targets.append(from_id)
+            
+            # Only write if there are de-evolution targets
+            if de_evo_targets:
+                # Pad to 6 targets with -1
+                while len(de_evo_targets) < 6:
+                    de_evo_targets.append(-1)
                 
-                # Skip duplicates
-                if from_id in seen_from_ids:
-                    continue
-                seen_from_ids.add(from_id)
-                
-                # Generate chronodevolution ID using same formula as evolution
-                chrono_id = (digimon.id * 100) + counter
-                counter += 1
+                # Only use first 6 targets
+                de_evo_targets = de_evo_targets[:6]
                 
                 parts = [
-                    str(chrono_id),
+                    str(digimon.id),  # This Digimon's ID
                     '',  # empty
-                    str(digimon.id),  # Current Digimon (the target)
-                    str(from_id),  # Can de-evolve from this Digimon
-                    '-1', '-1', '-1', '-1'  # Additional params
+                    *[str(target) for target in de_evo_targets]  # Up to 6 de-evolution targets
                 ]
                 f.write(','.join(parts) + '\n')
     
@@ -1188,13 +1265,61 @@ class ClassificationPage(QWizardPage):
                     self.tribe_combo.setCurrentIndex(tribe_idx)
 
 
-class StatsPage(QWizardPage):
-    """Step 4: Base Stats"""
+class ProfilePage(QWizardPage):
+    """Step 4: Profile / Description"""
     
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("📊 Step 4: Base Stats")
+        self.setTitle("📖 Step 4: Profile / Description")
+        self.setSubTitle("Enter the Digimon's profile text (will be wrapped automatically for display)")
+        
+        layout = QVBoxLayout()
+        
+        # Info label
+        info = QLabel(
+            "The profile text will be automatically wrapped to 50 characters per line for proper in-game display.\n"
+            "You can enter it as one paragraph or pre-format it with line breaks."
+        )
+        info.setWordWrap(True)
+        info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
+        layout.addWidget(info)
+        
+        # Profile text editor
+        layout.addWidget(QLabel("Profile Text:"))
+        self.profile_edit = QTextEdit()
+        self.profile_edit.setPlaceholderText("Enter Digimon profile/description here...")
+        self.profile_edit.setMinimumHeight(200)
+        layout.addWidget(self.profile_edit)
+        
+        # Character counter
+        self.char_count_label = QLabel("Characters: 0")
+        self.char_count_label.setStyleSheet("color: #666; font-size: 9pt;")
+        self.profile_edit.textChanged.connect(self.update_char_count)
+        layout.addWidget(self.char_count_label)
+        
+        layout.addStretch()
+        self.setLayout(layout)
+    
+    def update_char_count(self):
+        """Update character counter"""
+        text = self.profile_edit.toPlainText()
+        char_count = len(text)
+        self.char_count_label.setText(f"Characters: {char_count}")
+    
+    def initializePage(self):
+        """Initialize with template data"""
+        if self.wizard.template_digimon and self.wizard.template_digimon.profile_text:
+            self.profile_edit.setPlainText(self.wizard.template_digimon.profile_text)
+
+
+class StatsPage(QWizardPage):
+    """Step 5: Base Stats"""
+    
+    def __init__(self, wizard):
+        super().__init__()
+        self.wizard = wizard
+        self.setTitle("📊 Step 5: Base Stats")
         self.setSubTitle("Set the base stats for your Digimon")
         
         layout = QFormLayout()
@@ -1258,23 +1383,23 @@ class ResistancesPage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("🛡️ Step 5: Elemental Resistances")
-        self.setSubTitle("Set elemental resistances based on Grindosaur.com data")
+        self.setTitle("🛡️ Step 6: Elemental Resistances")
+        self.setSubTitle("Set elemental resistances (0=Normal, 1=Weak, 2=Very Weak, 3=Resist, 4=Immune)")
         
         layout = QGridLayout()
         
         self.resist_widgets = {}
-        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resIce, resGrass, resWind, resElec, resGround, resSteel, resLight, resDark)
+        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resGrass, resIce, resElec, resGround, resSteel, resWind, resLight, resDark)
         resistances = [
             ("null", "Null"),
             ("fire", "Fire"),
             ("water", "Water"),
-            ("ice", "Ice"),
             ("grass", "Plant"),
-            ("wind", "Wind"),
+            ("ice", "Ice"),
             ("elec", "Electric"),
             ("ground", "Earth"),
             ("steel", "Steel"),
+            ("wind", "Wind"),
             ("light", "Light"),
             ("dark", "Dark")
         ]
@@ -1297,11 +1422,11 @@ class ResistancesPage(QWizardPage):
             spin.setObjectName(f"resist_{resist_key}")
             spin.setToolTip(
                 f"Set {resist_name} resistance:\n"
-                "0 = Normal (100% damage - 1.0x)\n"
-                "1 = Weak (150% damage - 1.5x)\n"
-                "2 = Very Weak (200% damage - 2.0x)\n"
-                "3 = Resistant (50% damage - 0.5x)\n"
-                "4 = Immune (0% damage - no damage taken)"
+                "0 = Weak (150% damage - 1.5x)\n"
+                "1 = Normal (100% damage - 1.0x)\n"
+                "2 = Resist (75% damage - 0.75x)\n"
+                "3 = Null (50% damage - 0.5x)\n"
+                "4 = Absorb (heals instead of damages)"
             )
             self.resist_widgets[resist_key] = spin
             layout.addWidget(spin, row, col + 1)
@@ -1351,7 +1476,7 @@ class SkillsPage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("⚔️ Step 6: Skills")
+        self.setTitle("⚔️ Step 7: Skills")
         self.setSubTitle("Configure signature and generic skills for your Digimon")
         
         layout = QVBoxLayout()
@@ -1492,7 +1617,7 @@ class EvolutionPage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("🔄 Step 7: Evolution")
+        self.setTitle("🔄 Step 8: Evolution")
         self.setSubTitle("Configure evolution requirements and paths")
         
         layout = QVBoxLayout()
@@ -1611,50 +1736,28 @@ class EvolutionPage(QWizardPage):
         info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
         scroll_layout.addWidget(info)
         
-        # Mode selection
-        mode_group = QGroupBox("Evolution Mode")
-        mode_layout = QFormLayout()
-        mode_combo = QComboBox()
+        # Agent Rank Requirement
+        rank_group = QGroupBox("Agent Rank Requirement")
+        rank_layout = QFormLayout()
+        rank_spin = QSpinBox()
+        rank_spin.setRange(1, 8)
+        rank_spin.setValue(self.evolution_requirements.get('mode', 1))  # Column 2 is actually Agent Rank
+        rank_spin.setToolTip("Required Agent Rank to evolve into this Digimon (1-8)")
+        rank_layout.addRow("Agent Rank:", rank_spin)
+        rank_group.setLayout(rank_layout)
         
-        # Add all evolution modes with tooltips
-        mode_combo.addItem("Mode 1: No Requirements", 1)
-        mode_combo.setItemData(0, "Basic evolution with minimal or no stat requirements (default)", Qt.ItemDataRole.ToolTipRole)
-        
-        mode_combo.addItem("Mode 3: Basic Evolution", 3)
-        mode_combo.setItemData(1, "Standard evolution with moderate stat requirements", Qt.ItemDataRole.ToolTipRole)
-        
-        mode_combo.addItem("Mode 4: Stat Evolution", 4)
-        mode_combo.setItemData(2, "Evolution focused on specific stat thresholds", Qt.ItemDataRole.ToolTipRole)
-        
-        mode_combo.addItem("Mode 5: Advanced Evolution", 5)
-        mode_combo.setItemData(3, "Evolution with multiple high stat requirements", Qt.ItemDataRole.ToolTipRole)
-        
-        mode_combo.addItem("Mode 7: Jogress/DNA Digivolution", 7)
-        mode_combo.setItemData(4, "Fusion evolution requiring two specific Digimon partners (set Jogress IDs below)", Qt.ItemDataRole.ToolTipRole)
-        
-        mode_combo.addItem("Mode 8: Item Required Evolution", 8)
-        mode_combo.setItemData(5, "Evolution requiring a specific item (set Item ID below)", Qt.ItemDataRole.ToolTipRole)
-        
-        # Set current mode
-        current_mode_idx = mode_combo.findData(self.evolution_requirements.get('mode', 1))
-        if current_mode_idx >= 0:
-            mode_combo.setCurrentIndex(current_mode_idx)
-        
-        mode_combo.setToolTip("Select the evolution mode/type for obtaining this Digimon")
-        mode_layout.addRow("Mode:", mode_combo)
-        mode_group.setLayout(mode_layout)
-        scroll_layout.addWidget(mode_group)
-        
-        # Tamer Level
-        tamer_group = QGroupBox("Tamer Requirements")
-        tamer_layout = QFormLayout()
-        tamer_level_spin = QSpinBox()
-        tamer_level_spin.setRange(0, 99)
-        tamer_level_spin.setValue(self.evolution_requirements.get('tamerLevel', 0))
-        tamer_level_spin.setSuffix(" (0 = no requirement)")
-        tamer_layout.addRow("Tamer Level:", tamer_level_spin)
-        tamer_group.setLayout(tamer_layout)
-        scroll_layout.addWidget(tamer_group)
+        # Digimon Level Requirement
+        level_group = QGroupBox("Digimon Level Requirement")
+        level_layout = QFormLayout()
+        digimon_level_spin = QSpinBox()
+        digimon_level_spin.setRange(0, 99)
+        digimon_level_spin.setValue(self.evolution_requirements.get('tamerLevel', 0))  # tamerLevel is actually Digimon level
+        digimon_level_spin.setSuffix(" (0 = no requirement)")
+        digimon_level_spin.setToolTip("Required Digimon level to evolve (0 = no level requirement)")
+        level_layout.addRow("Digimon Level:", digimon_level_spin)
+        level_group.setLayout(level_layout)
+        scroll_layout.addWidget(rank_group)
+        scroll_layout.addWidget(level_group)
         
         # Stat Requirements
         stats_group = QGroupBox("Stat Requirements")
@@ -1663,43 +1766,36 @@ class EvolutionPage(QWizardPage):
         hp_spin = QSpinBox()
         hp_spin.setRange(0, 99999)
         hp_spin.setValue(self.evolution_requirements.get('HP', 0))
-        hp_spin.setSuffix(" HP")
         stats_layout.addRow("HP:", hp_spin)
         
         sp_spin = QSpinBox()
         sp_spin.setRange(0, 99999)
         sp_spin.setValue(self.evolution_requirements.get('SP', 0))
-        sp_spin.setSuffix(" SP")
         stats_layout.addRow("SP:", sp_spin)
         
         atk_spin = QSpinBox()
         atk_spin.setRange(0, 9999)
         atk_spin.setValue(self.evolution_requirements.get('ATK', 0))
-        atk_spin.setSuffix(" ATK")
         stats_layout.addRow("ATK:", atk_spin)
         
         def_spin = QSpinBox()
         def_spin.setRange(0, 9999)
         def_spin.setValue(self.evolution_requirements.get('DEF', 0))
-        def_spin.setSuffix(" DEF")
         stats_layout.addRow("DEF:", def_spin)
         
         int_spin = QSpinBox()
         int_spin.setRange(0, 9999)
         int_spin.setValue(self.evolution_requirements.get('INT', 0))
-        int_spin.setSuffix(" INT")
         stats_layout.addRow("INT:", int_spin)
         
         spi_spin = QSpinBox()
         spi_spin.setRange(0, 9999)
         spi_spin.setValue(self.evolution_requirements.get('SPI', 0))
-        spi_spin.setSuffix(" SPI")
         stats_layout.addRow("SPI:", spi_spin)
         
         spd_spin = QSpinBox()
         spd_spin.setRange(0, 9999)
         spd_spin.setValue(self.evolution_requirements.get('SPD', 0))
-        spd_spin.setSuffix(" SPD")
         stats_layout.addRow("SPD:", spd_spin)
         
         stats_group.setLayout(stats_layout)
@@ -1712,25 +1808,21 @@ class EvolutionPage(QWizardPage):
         valor_spin = QSpinBox()
         valor_spin.setRange(0, 999)
         valor_spin.setValue(self.evolution_requirements.get('skillCountValor', 0))
-        valor_spin.setSuffix(" skills")
         skills_layout.addRow("Valor Skills:", valor_spin)
         
         philanthropy_spin = QSpinBox()
         philanthropy_spin.setRange(0, 999)
         philanthropy_spin.setValue(self.evolution_requirements.get('skillCountPhilantropy', 0))
-        philanthropy_spin.setSuffix(" skills")
         skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
         
         amicable_spin = QSpinBox()
         amicable_spin.setRange(0, 999)
         amicable_spin.setValue(self.evolution_requirements.get('skillCountAmicable', 0))
-        amicable_spin.setSuffix(" skills")
         skills_layout.addRow("Amicable Skills:", amicable_spin)
         
         wisdom_spin = QSpinBox()
         wisdom_spin.setRange(0, 999)
         wisdom_spin.setValue(self.evolution_requirements.get('skillCountWisdom', 0))
-        wisdom_spin.setSuffix(" skills")
         skills_layout.addRow("Wisdom Skills:", wisdom_spin)
         
         skills_group.setLayout(skills_layout)
@@ -1740,7 +1832,7 @@ class EvolutionPage(QWizardPage):
         item_group = QGroupBox("Item Requirement")
         item_layout = QFormLayout()
         item_spin = QSpinBox()
-        item_spin.setRange(0, 9999)
+        item_spin.setRange(0, 999999)
         item_spin.setValue(self.evolution_requirements.get('needsItem', 0))
         item_spin.setSuffix(" (0 = no item needed)")
         item_layout.addRow("Item ID:", item_spin)
@@ -1752,7 +1844,7 @@ class EvolutionPage(QWizardPage):
         jogress_layout = QFormLayout()
         
         jogress_a_id = QSpinBox()
-        jogress_a_id.setRange(0, 9999)
+        jogress_a_id.setRange(0, 999999)
         jogress_a_id.setValue(self.evolution_requirements.get('jogressDbIdA', 0))
         jogress_layout.addRow("Jogress Partner A ID:", jogress_a_id)
         
@@ -1762,7 +1854,7 @@ class EvolutionPage(QWizardPage):
         jogress_layout.addRow("Partner A Personality:", jogress_a_personality)
         
         jogress_b_id = QSpinBox()
-        jogress_b_id.setRange(0, 9999)
+        jogress_b_id.setRange(0, 999999)
         jogress_b_id.setValue(self.evolution_requirements.get('jogressDbIdB', 0))
         jogress_layout.addRow("Jogress Partner B ID:", jogress_b_id)
         
@@ -1786,8 +1878,8 @@ class EvolutionPage(QWizardPage):
         if dialog.exec() == QDialog.DialogCode.Accepted:
             # Update requirements
             self.evolution_requirements = {
-                'mode': mode_combo.currentData(),
-                'tamerLevel': tamer_level_spin.value(),
+                'mode': rank_spin.value(),  # Agent Rank (1-8)
+                'tamerLevel': digimon_level_spin.value(),  # Digimon Level
                 'HP': hp_spin.value(),
                 'SP': sp_spin.value(),
                 'ATK': atk_spin.value(),
@@ -1814,12 +1906,11 @@ class EvolutionPage(QWizardPage):
     def update_requirements_label(self):
         """Update the requirements display label"""
         parts = []
-        mode = self.evolution_requirements.get('mode', 1)
-        mode_names = {1: "No Requirements", 3: "Basic", 4: "Stat", 5: "Advanced", 7: "Jogress", 8: "Item Required"}
-        parts.append(f"Mode: {mode_names.get(mode, f'Mode {mode}')}")
+        agent_rank = self.evolution_requirements.get('mode', 1)  # mode is actually Agent Rank
+        parts.append(f"Agent Rank: {agent_rank}")
         
         if self.evolution_requirements.get('tamerLevel', 0) > 0:
-            parts.append(f"Tamer Lv{self.evolution_requirements['tamerLevel']}")
+            parts.append(f"Digimon Lv{self.evolution_requirements['tamerLevel']}")
         
         stats = []
         for stat in ['HP', 'SP', 'ATK', 'DEF', 'INT', 'SPI', 'SPD']:
@@ -1870,7 +1961,7 @@ class EvolutionPage(QWizardPage):
             custom_id_layout = QHBoxLayout()
             custom_id_label = QLabel("Digimon ID:")
             custom_id_spin = QSpinBox()
-            custom_id_spin.setRange(1, 9999)
+            custom_id_spin.setRange(1, 999999)
             custom_id_spin.setValue(1000)
             custom_id_spin.setToolTip("Enter the ID of a custom/modded Digimon")
             custom_id_layout.addWidget(custom_id_label)
@@ -1939,7 +2030,7 @@ class EvolutionPage(QWizardPage):
             custom_id_layout = QHBoxLayout()
             custom_id_label = QLabel("Digimon ID:")
             custom_id_spin = QSpinBox()
-            custom_id_spin.setRange(1, 9999)
+            custom_id_spin.setRange(1, 999999)
             custom_id_spin.setValue(1000)
             custom_id_spin.setToolTip("Enter the ID of a custom/modded Digimon")
             custom_id_layout.addWidget(custom_id_label)
@@ -2165,15 +2256,19 @@ class EvolutionPage(QWizardPage):
         info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
         scroll_layout.addWidget(info)
         
-        # Condition Mode
-        mode_group = QGroupBox("Evolution Mode")
+        # Agent Rank (column 2 in evolution_condition.csv)
+        mode_group = QGroupBox("Agent Rank Requirement")
         mode_layout = QVBoxLayout()
         mode_combo = QComboBox()
-        mode_combo.addItem("Mode 1: No Requirements (Always Available)", 1)
-        mode_combo.addItem("Mode 2: Item Required", 2)
-        mode_combo.addItem("Mode 3: Jogress/DNA Digivolution", 3)
-        mode_combo.addItem("Mode 4: Standard Evolution (Stats/Level)", 4)
-        mode_combo.setCurrentIndex(3)  # Default to Mode 4
+        mode_combo.addItem("Rank 1", 1)
+        mode_combo.addItem("Rank 2", 2)
+        mode_combo.addItem("Rank 3", 3)
+        mode_combo.addItem("Rank 4", 4)
+        mode_combo.addItem("Rank 5", 5)
+        mode_combo.addItem("Rank 6", 6)
+        mode_combo.addItem("Rank 7", 7)
+        mode_combo.addItem("Rank 8", 8)
+        mode_combo.setCurrentIndex(0)  # Default to Rank 1
         mode_layout.addWidget(mode_combo)
         mode_group.setLayout(mode_layout)
         scroll_layout.addWidget(mode_group)
@@ -2236,22 +2331,18 @@ class EvolutionPage(QWizardPage):
         
         valor_spin = QSpinBox()
         valor_spin.setRange(0, 999)
-        valor_spin.setSuffix(" skills")
         skills_layout.addRow("Valor Skills:", valor_spin)
         
         philanthropy_spin = QSpinBox()
         philanthropy_spin.setRange(0, 999)
-        philanthropy_spin.setSuffix(" skills")
         skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
         
         amicable_spin = QSpinBox()
         amicable_spin.setRange(0, 999)
-        amicable_spin.setSuffix(" skills")
         skills_layout.addRow("Amicable Skills:", amicable_spin)
         
         wisdom_spin = QSpinBox()
         wisdom_spin.setRange(0, 999)
-        wisdom_spin.setSuffix(" skills")
         skills_layout.addRow("Wisdom Skills:", wisdom_spin)
         
         skills_group.setLayout(skills_layout)
@@ -2261,7 +2352,7 @@ class EvolutionPage(QWizardPage):
         item_group = QGroupBox("Item Requirement (Mode 2)")
         item_layout = QFormLayout()
         item_spin = QSpinBox()
-        item_spin.setRange(0, 9999)
+        item_spin.setRange(0, 999999)
         item_spin.setSuffix(" (Item ID, 0 = none)")
         item_layout.addRow("Required Item:", item_spin)
         item_group.setLayout(item_layout)
@@ -2272,7 +2363,7 @@ class EvolutionPage(QWizardPage):
         jogress_layout = QFormLayout()
         
         jogress_a_id_spin = QSpinBox()
-        jogress_a_id_spin.setRange(0, 9999)
+        jogress_a_id_spin.setRange(0, 999999)
         jogress_a_id_spin.setSuffix(" (Partner A ID)")
         jogress_layout.addRow("Partner A Digimon ID:", jogress_a_id_spin)
         
@@ -2282,7 +2373,7 @@ class EvolutionPage(QWizardPage):
         jogress_layout.addRow("Partner A Personality:", jogress_a_personality_spin)
         
         jogress_b_id_spin = QSpinBox()
-        jogress_b_id_spin.setRange(0, 9999)
+        jogress_b_id_spin.setRange(0, 999999)
         jogress_b_id_spin.setSuffix(" (Partner B ID)")
         jogress_layout.addRow("Partner B Digimon ID:", jogress_b_id_spin)
         
@@ -2372,13 +2463,9 @@ class EvolutionPage(QWizardPage):
             if to_id > 0 and to_id not in seen_to_ids:
                 seen_to_ids.add(to_id)
                 
-                # Try to get name
-                to_chr_id = f"chr{to_id:03d}"
-                to_name = self.wizard.loader._get_digimon_name_by_chr_id(to_chr_id)
-                if not to_name or to_name == to_chr_id:
-                    to_chr_id = f"chr{to_id}"
-                    to_name = self.wizard.loader._get_digimon_name_by_chr_id(to_chr_id)
-                if not to_name or to_name in [to_chr_id, f"chr{to_id:03d}", f"chr{to_id}"]:
+                # Get name by numeric ID
+                to_name = self.wizard.loader._get_digimon_name_by_id(to_id)
+                if not to_name:
                     to_name = f"Unknown (ID: {to_id})"
                 
                 # Store evolution data
@@ -2402,12 +2489,9 @@ class EvolutionPage(QWizardPage):
             if from_id > 0 and from_id not in seen_from_ids:
                 seen_from_ids.add(from_id)
                 
-                from_chr_id = f"chr{from_id:03d}"
-                from_name = self.wizard.loader._get_digimon_name_by_chr_id(from_chr_id)
-                if not from_name or from_name == from_chr_id:
-                    from_chr_id = f"chr{from_id}"
-                    from_name = self.wizard.loader._get_digimon_name_by_chr_id(from_chr_id)
-                if not from_name or from_name in [from_chr_id, f"chr{from_id:03d}", f"chr{from_id}"]:
+                # Get name by numeric ID
+                from_name = self.wizard.loader._get_digimon_name_by_id(from_id)
+                if not from_name:
                     from_name = f"Unknown (ID: {from_id})"
                 
                 # Store deevolution data
@@ -2428,7 +2512,7 @@ class ModelPage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("🎨 Step 8: Model & Animation")
+        self.setTitle("🎨 Step 9: Model & Animation")
         self.setSubTitle("Set model and animation references")
         
         layout = QFormLayout()
@@ -2439,10 +2523,10 @@ class ModelPage(QWizardPage):
         self.model_id_edit.setPlaceholderText("e.g., model_001")
         layout.addRow("🎭 Model ID:", self.model_id_edit)
         
-        # Motion ID
+        # Audio ID (motion_ref in char_info)
         self.motion_id_edit = QLineEdit()
-        self.motion_id_edit.setPlaceholderText("e.g., motion_001")
-        layout.addRow("🎬 Motion ID:", self.motion_id_edit)
+        self.motion_id_edit.setPlaceholderText("e.g., ymc007")
+        layout.addRow("🔊 Audio ID:", self.motion_id_edit)
         
         # Animation Reference
         self.animation_ref_edit = QLineEdit()
@@ -2477,7 +2561,7 @@ class ReviewPage(QWizardPage):
     def __init__(self, wizard):
         super().__init__()
         self.wizard = wizard
-        self.setTitle("✅ Step 9: Review & Export")
+        self.setTitle("✅ Step 10: Review & Export")
         self.setSubTitle("Review your Digimon settings and export to dsts-loader")
         
         layout = QVBoxLayout()
@@ -2505,11 +2589,16 @@ class ReviewPage(QWizardPage):
         template_page = self.wizard.page(0)
         basic_page = self.wizard.page(1)
         class_page = self.wizard.page(2)
-        stats_page = self.wizard.page(3)
-        resist_page = self.wizard.page(4)
-        skills_page = self.wizard.page(5)
-        evolution_page = self.wizard.page(6)
-        model_page = self.wizard.page(7)
+        profile_page = self.wizard.page(3)  # New page
+        stats_page = self.wizard.page(4)    # Updated index
+        resist_page = self.wizard.page(5)   # Updated index
+        skills_page = self.wizard.page(6)   # Updated index
+        evolution_page = self.wizard.page(7) # Updated index
+        model_page = self.wizard.page(8)    # Updated index
+        
+        # Get profile text preview (first 100 chars)
+        profile_text = profile_page.profile_edit.toPlainText()
+        profile_preview = profile_text[:100] + "..." if len(profile_text) > 100 else profile_text
         
         review_html = f"""
         <h2>📋 Digimon Summary</h2>
@@ -2521,6 +2610,7 @@ class ReviewPage(QWizardPage):
         <tr><td style="padding: 5px;"><b>Stage:</b></td><td style="padding: 5px;">{class_page.stage_combo.currentText()}</td></tr>
         <tr><td style="padding: 5px;"><b>Type:</b></td><td style="padding: 5px;">{class_page.type_combo.currentText()}</td></tr>
         <tr><td style="padding: 5px;"><b>Personality:</b></td><td style="padding: 5px;">{class_page.personality_combo.currentText()}</td></tr>
+        <tr><td style="padding: 5px;"><b>Profile:</b></td><td style="padding: 5px; font-style: italic;">{profile_preview}</td></tr>
         <tr><td style="padding: 5px;"><b>HP:</b></td><td style="padding: 5px;">{stats_page.hp_spin.value()}</td></tr>
         <tr><td style="padding: 5px;"><b>SP:</b></td><td style="padding: 5px;">{stats_page.sp_spin.value()}</td></tr>
         <tr><td style="padding: 5px;"><b>ATK:</b></td><td style="padding: 5px;">{stats_page.atk_spin.value()}</td></tr>
@@ -3388,22 +3478,22 @@ class DigimonEditor(QMainWindow):
         layout.addWidget(growth_group)
         
         # Elemental Resistances Group
-        resist_group = QGroupBox("🛡️ Elemental Resistances - Per Digimon (verified via Grindosaur.com)")
+        resist_group = QGroupBox("🛡️ Elemental Resistances")
         resist_layout = QGridLayout(resist_group)
         
         # Create resistance spinboxes with element names
         self.resist_widgets = {}
-        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resIce, resGrass, resWind, resElec, resGround, resSteel, resLight, resDark)
+        # IMPORTANT: Order must match CSV columns 7-17 (resNull, resFire, resWater, resGrass, resIce, resElec, resGround, resSteel, resWind, resLight, resDark)
         resistances = [
             ("null", "Null"),
             ("fire", "Fire"),
             ("water", "Water"),
-            ("ice", "Ice"),
             ("grass", "Plant"),
-            ("wind", "Wind"),
+            ("ice", "Ice"),
             ("elec", "Electric"),
             ("ground", "Earth"),
             ("steel", "Steel"),
+            ("wind", "Wind"),
             ("light", "Light"),
             ("dark", "Dark")
         ]
@@ -3624,8 +3714,8 @@ class DigimonEditor(QMainWindow):
         self.model_id_edit = QLineEdit()
         model_layout.addWidget(self.model_id_edit, 0, 1)
         
-        # Motion ID
-        model_layout.addWidget(QLabel("Motion ID:"), 1, 0)
+        # Audio ID (motion_ref in char_info)
+        model_layout.addWidget(QLabel("Audio ID:"), 1, 0)
         self.motion_id_edit = QLineEdit()
         model_layout.addWidget(self.motion_id_edit, 1, 1)
         
@@ -4303,12 +4393,13 @@ class DigimonEditor(QMainWindow):
         return tab
     
     def create_evolution_tab(self) -> QWidget:
-        """Create evolution management tab with visual tree"""
+        """Create evolution management tab - matching wizard layout"""
         tab = QWidget()
         layout = QVBoxLayout(tab)
+        layout.setSpacing(15)
         
-        # Title with improved styling
-        title = QLabel("🔄 Evolution Tree & Requirements")
+        # Title
+        title = QLabel("🔄 Evolution Management")
         title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
         title.setStyleSheet("""
             QLabel {
@@ -4322,90 +4413,60 @@ class DigimonEditor(QMainWindow):
         """)
         layout.addWidget(title)
         
-        # Create splitter for visual tree and details
-        splitter = QSplitter(Qt.Orientation.Horizontal)
+        # Instructions
+        info_label = QLabel(
+            "First, set the requirements needed to evolve INTO this Digimon.\n"
+            "Then configure evolution paths (what this Digimon can evolve into) and view pre-evolutions."
+        )
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; padding: 10px; background-color: #f8f9fa; border-radius: 6px;")
+        layout.addWidget(info_label)
         
-        # Left side: Visual Evolution Tree
-        tree_widget = QWidget()
-        tree_layout = QVBoxLayout(tree_widget)
+        # Evolution Requirements section (for obtaining THIS Digimon)
+        req_group = QGroupBox("⭐ Requirements to Obtain This Digimon")
+        req_group.setStyleSheet("QGroupBox { font-weight: bold; font-size: 11pt; }")
+        req_layout = QVBoxLayout()
         
-        # Styled header for tree visualization
-        tree_header = QLabel("🌳 Evolution Tree Visualization")
-        tree_header.setStyleSheet("""
-            QLabel {
-                font-size: 13pt;
-                font-weight: bold;
-                color: #667eea;
-                padding: 10px;
-                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
-                    stop:0 #f8f9fa, stop:1 #e9ecef);
-                border-radius: 6px;
-                border: 1px solid #dee2e6;
-            }
-        """)
-        tree_layout.addWidget(tree_header)
+        req_info = QLabel(
+            "These are the requirements that other Digimon must meet to evolve INTO this Digimon.\n"
+            "Leave values at 0 for no requirement."
+        )
+        req_info.setWordWrap(True)
+        req_info.setStyleSheet("color: #555; font-size: 10pt; font-weight: normal;")
+        req_layout.addWidget(req_info)
         
-        # Scroll area for the tree
-        tree_scroll = QScrollArea()
-        tree_scroll.setWidgetResizable(True)
-        tree_scroll.setStyleSheet("""
-            QScrollArea {
-                border: 2px solid #667eea;
-                border-radius: 8px;
-                background-color: white;
-            }
-        """)
-        self.evolution_tree_canvas = QWidget()
-        self.evolution_tree_canvas.setMinimumSize(400, 300)
-        self.evolution_tree_canvas.setStyleSheet("background-color: white;")
+        edit_req_btn = QPushButton("📝 Edit Requirements")
+        edit_req_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        edit_req_btn.clicked.connect(self.edit_evolution_requirements)
+        req_layout.addWidget(edit_req_btn)
         
-        # Add initial placeholder
-        canvas_layout = QVBoxLayout(self.evolution_tree_canvas)
-        canvas_layout.setContentsMargins(0, 0, 0, 0)
-        placeholder = QLabel("🔍 Load a Digimon to see its evolution tree")
-        placeholder.setStyleSheet("""
-            QLabel {
-                color: #999;
-                font-size: 12pt;
-                padding: 40px;
-                text-align: center;
-            }
-        """)
-        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        placeholder.setWordWrap(True)
-        canvas_layout.addWidget(placeholder)
+        self.requirements_label = QLabel("Mode: No Requirements (default)")
+        self.requirements_label.setStyleSheet("color: #666; padding: 5px; background: #f0f0f0; border-radius: 3px;")
+        self.requirements_label.setWordWrap(True)
+        req_layout.addWidget(self.requirements_label)
         
-        tree_scroll.setWidget(self.evolution_tree_canvas)
-        tree_layout.addWidget(tree_scroll)
+        req_group.setLayout(req_layout)
+        layout.addWidget(req_group)
         
-        splitter.addWidget(tree_widget)
+        # Evolution paths section
+        evo_group = QGroupBox("➡️ Evolution Paths (What this Digimon evolves into)")
+        evo_group.setStyleSheet("QGroupBox { font-weight: bold; font-size: 11pt; }")
+        evo_layout = QVBoxLayout()
         
-        # Right side: Detailed Lists and Management
-        details_widget = QWidget()
-        details_layout = QVBoxLayout(details_widget)
-        
-        # Evolution paths (what this Digimon can evolve into)
-        evo_group = QGroupBox("Evolution Paths (What this Digimon evolves into)")
-        evo_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #84fab0;
-                border-radius: 8px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: #f8f9fa;
-            }
-            QGroupBox::title {
-                color: #2c5f2d;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
-        evo_layout = QVBoxLayout(evo_group)
+        evo_buttons = QHBoxLayout()
+        add_evo_btn = QPushButton("➕ Add Evolution")
+        add_evo_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        add_evo_btn.clicked.connect(self.add_evolution)
+        remove_evo_btn = QPushButton("➖ Remove Selected")
+        remove_evo_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        remove_evo_btn.clicked.connect(self.remove_evolution)
+        evo_buttons.addWidget(add_evo_btn)
+        evo_buttons.addWidget(remove_evo_btn)
+        evo_buttons.addStretch()
+        evo_layout.addLayout(evo_buttons)
         
         self.evolution_list = QListWidget()
-        self.evolution_list.setSelectionMode(QListWidget.SelectionMode.SingleSelection)
+        self.evolution_list.setMinimumHeight(150)
         self.evolution_list.setStyleSheet("""
             QListWidget {
                 border: 1px solid #ddd;
@@ -4427,105 +4488,16 @@ class DigimonEditor(QMainWindow):
             }
         """)
         evo_layout.addWidget(self.evolution_list)
+        evo_group.setLayout(evo_layout)
+        layout.addWidget(evo_group)
         
-        evo_buttons = QHBoxLayout()
-        self.add_evo_btn = QPushButton("➕ Add Evolution")
-        self.add_evo_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #84fab0, stop:1 #8fd3f4);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-                font-weight: bold;
-                font-size: 11pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #6ee89f, stop:1 #7bc9e8);
-            }
-            QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #6ee89f, stop:1 #6dbdd6);
-            }
-        """)
-        self.add_evo_btn.clicked.connect(self.add_evolution)
-        
-        self.edit_evo_btn = QPushButton("✏️ Edit Requirements")
-        self.edit_evo_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #667eea, stop:1 #764ba2);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-                font-weight: bold;
-                font-size: 11pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #5568d3, stop:1 #653b8e);
-            }
-            QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #4a5abf, stop:1 #552f7a);
-            }
-        """)
-        self.edit_evo_btn.clicked.connect(self.edit_evolution)
-        
-        self.remove_evo_btn = QPushButton("❌ Remove")
-        self.remove_evo_btn.setStyleSheet("""
-            QPushButton {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #f093fb, stop:1 #f5576c);
-                color: white;
-                border: none;
-                border-radius: 6px;
-                padding: 8px 16px;
-                font-weight: bold;
-                font-size: 11pt;
-            }
-            QPushButton:hover {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #e67ee8, stop:1 #e8425a);
-            }
-            QPushButton:pressed {
-                background: qlineargradient(x1:0, y1:0, x2:0, y2:1,
-                    stop:0 #d969d5, stop:1 #d63149);
-            }
-        """)
-        self.remove_evo_btn.clicked.connect(self.remove_evolution)
-        
-        evo_buttons.addWidget(self.add_evo_btn)
-        evo_buttons.addWidget(self.edit_evo_btn)
-        evo_buttons.addWidget(self.remove_evo_btn)
-        evo_layout.addLayout(evo_buttons)
-        
-        details_layout.addWidget(evo_group)
-        
-        # De-evolution sources (what can evolve into this Digimon)
-        deevo_group = QGroupBox("Pre-Evolution Sources (What evolves into this)")
-        deevo_group.setStyleSheet("""
-            QGroupBox {
-                font-weight: bold;
-                border: 2px solid #a18cd1;
-                border-radius: 8px;
-                margin-top: 12px;
-                padding-top: 10px;
-                background-color: #f8f9fa;
-            }
-            QGroupBox::title {
-                color: #5e4a7e;
-                subcontrol-origin: margin;
-                left: 10px;
-                padding: 0 5px;
-            }
-        """)
-        deevo_layout = QVBoxLayout(deevo_group)
+        # Pre-evolution section
+        deevo_group = QGroupBox("⬅️ Pre-Evolutions (What evolves into this Digimon)")
+        deevo_group.setStyleSheet("QGroupBox { font-weight: bold; font-size: 11pt; }")
+        deevo_layout = QVBoxLayout()
         
         self.deevolution_list = QListWidget()
+        self.deevolution_list.setMinimumHeight(120)
         self.deevolution_list.setStyleSheet("""
             QListWidget {
                 border: 1px solid #ddd;
@@ -4545,26 +4517,78 @@ class DigimonEditor(QMainWindow):
         deevo_layout.addWidget(self.deevolution_list)
         
         deevo_info = QLabel("ℹ️ Read-only - Automatically determined by other Digimon's evolution paths")
+        deevo_info.setWordWrap(True)
         deevo_info.setStyleSheet("""
             color: #666;
             font-style: italic;
             font-size: 9pt;
-            padding: 5px;
+            padding: 8px;
             background-color: #fff9e6;
             border-radius: 4px;
             border-left: 3px solid #ffc107;
         """)
         deevo_layout.addWidget(deevo_info)
         
-        details_layout.addWidget(deevo_group)
+        deevo_group.setLayout(deevo_layout)
+        layout.addWidget(deevo_group)
         
-        splitter.addWidget(details_widget)
+        layout.addStretch()
         
-        # Set splitter proportions (40% tree, 60% details)
-        splitter.setStretchFactor(0, 40)
-        splitter.setStretchFactor(1, 60)
+        return tab
+    
+    def create_evolution_tree_tab(self) -> QWidget:
+        """Create a visual evolution tree tab (like Digimon evolution chart)"""
+        tab = QWidget()
+        layout = QVBoxLayout(tab)
         
-        layout.addWidget(splitter)
+        # Title
+        title = QLabel("🌳 Evolution Tree")
+        title.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
+        title.setStyleSheet("""
+            QLabel {
+                color: #667eea;
+                padding: 15px;
+                background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
+                    stop:0 #f8f9fa, stop:1 #e9ecef);
+                border-radius: 8px;
+                border: 2px solid #dee2e6;
+            }
+        """)
+        layout.addWidget(title)
+        
+        # Scroll area for the tree
+        tree_scroll = QScrollArea()
+        tree_scroll.setWidgetResizable(True)
+        tree_scroll.setStyleSheet("""
+            QScrollArea {
+                border: 2px solid #667eea;
+                border-radius: 8px;
+                background-color: white;
+            }
+        """)
+        
+        self.evolution_tree_canvas = QWidget()
+        self.evolution_tree_canvas.setMinimumSize(800, 600)
+        self.evolution_tree_canvas.setStyleSheet("background-color: white;")
+        
+        # Add initial placeholder
+        canvas_layout = QVBoxLayout(self.evolution_tree_canvas)
+        canvas_layout.setContentsMargins(0, 0, 0, 0)
+        placeholder = QLabel("🔍 Load a Digimon to see its evolution tree")
+        placeholder.setStyleSheet("""
+            QLabel {
+                color: #999;
+                font-size: 14pt;
+                padding: 100px;
+                text-align: center;
+            }
+        """)
+        placeholder.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        placeholder.setWordWrap(True)
+        canvas_layout.addWidget(placeholder)
+        
+        tree_scroll.setWidget(self.evolution_tree_canvas)
+        layout.addWidget(tree_scroll)
         
         return tab
     
@@ -4914,17 +4938,89 @@ class DigimonEditor(QMainWindow):
         self.evolution_list.clear()
         self.deevolution_list.clear()
         
+        # Update evolution requirements label (using wizard format)
+        if digimon.evolution_conditions:
+            # Check what type we have
+            cond_data = digimon.evolution_conditions
+            
+            # If it's a list of dicts (multiple conditions), take the first one
+            if isinstance(cond_data, list) and len(cond_data) > 0:
+                if isinstance(cond_data[0], dict):
+                    cond_data = cond_data[0]  # Take first condition dict
+            
+            # Now process based on type
+            if isinstance(cond_data, dict):
+                parts = []
+                
+                # Agent Rank (Mode)
+                agent_rank = cond_data.get('mode', 1)
+                parts.append(f"Agent Rank: {agent_rank}")
+                
+                # Digimon Level
+                tamer_level = cond_data.get('tamerLevel', 0)
+                if isinstance(tamer_level, (int, str)) and int(tamer_level) > 0:
+                    parts.append(f"Digimon Lv{tamer_level}")
+                
+                # Stats (compact format)
+                stats = []
+                for stat in ['HP', 'SP', 'ATK', 'DEF', 'INT', 'SPI', 'SPD']:
+                    val = cond_data.get(stat, 0)
+                    if isinstance(val, (int, str)) and int(val) > 0:
+                        stats.append(f"{stat}{val}")
+                if stats:
+                    parts.append(", ".join(stats))
+                
+                # Item requirement
+                item_val = cond_data.get('needsItem', 0)
+                if isinstance(item_val, (int, str)) and int(item_val) > 0:
+                    parts.append(f"Item#{item_val}")
+                
+                # Jogress partners
+                jogress_a = cond_data.get('jogressDbIdA', 0)
+                if isinstance(jogress_a, (int, str)) and int(jogress_a) > 0:
+                    parts.append(f"Jogress#{jogress_a}")
+                
+                self.requirements_label.setText(" | ".join(parts) if len(parts) > 1 else parts[0])
+            elif isinstance(cond_data, list):
+                # Raw CSV row format
+                row = cond_data
+                parts = []
+                
+                # Agent Rank
+                if len(row) > 2 and row[2]:
+                    parts.append(f"Agent Rank: {row[2]}")
+                else:
+                    parts.append("Agent Rank: 1")
+                
+                # Digimon Level
+                if len(row) > 3 and row[3]:
+                    try:
+                        level = int(row[3])
+                        if level > 0:
+                            parts.append(f"Digimon Lv{level}")
+                    except:
+                        pass
+                
+                self.requirements_label.setText(" | ".join(parts))
+            else:
+                self.requirements_label.setText("Agent Rank: 1")
+        else:
+            self.requirements_label.setText("Agent Rank: 1")
+        
         # Populate evolution paths with detailed requirements
         for evo in digimon.evolution_paths:
             to_id = evo['to_id']
-            # Try both zero-padded (chr025) and non-padded (chr25) formats
-            to_chr_id = f"chr{to_id:03d}"
-            to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
-            if not to_name or to_name == to_chr_id:
-                # Try without padding
-                to_chr_id = f"chr{to_id}"
+            # Try looking up by numeric ID first
+            to_name = self.loader._get_digimon_name_by_id(to_id)
+            if not to_name:
+                # Fall back to chr_id lookup
+                to_chr_id = f"chr{to_id:03d}"
                 to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
-            if not to_name or to_name in [to_chr_id, f"chr{to_id:03d}", f"chr{to_id}"]:
+                if not to_name or to_name == to_chr_id:
+                    # Try without padding
+                    to_chr_id = f"chr{to_id}"
+                    to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
+            if not to_name:
                 to_name = f"Unknown (ID: {to_id})"
             
             # Build requirements string - check for conditions first (new format), then raw_data (old format)
@@ -4945,19 +5041,59 @@ class DigimonEditor(QMainWindow):
         # Populate de-evolution sources
         for deevo in digimon.deevolution_sources:
             from_id = deevo['from_id']
-            # Try both zero-padded (chr025) and non-padded (chr25) formats
-            from_chr_id = f"chr{from_id:03d}"
-            from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
-            if not from_name or from_name == from_chr_id:
-                # Try without padding
-                from_chr_id = f"chr{from_id}"
-                from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
-            if not from_name or from_name in [from_chr_id, f"chr{from_id:03d}", f"chr{from_id}"]:
+            # Get name by numeric ID
+            from_name = self.loader._get_digimon_name_by_id(from_id)
+            if not from_name:
                 from_name = f"Unknown (ID: {from_id})"
             self.deevolution_list.addItem(f"← {from_name} (ID: {from_id})")
+    
+    def edit_evolution_requirements(self):
+        """Edit requirements to obtain this Digimon"""
+        if not self.current_digimon:
+            QMessageBox.warning(self, "No Digimon Loaded", "Please load a Digimon first.")
+            return
         
-        # Draw visual evolution tree
-        self.draw_evolution_tree(digimon)
+        # Get existing requirements or create defaults
+        existing = self.current_digimon.evolution_conditions if self.current_digimon.evolution_conditions else {
+            'mode': 1, 'tamerLevel': 0,
+            'HP': 0, 'SP': 0, 'ATK': 0, 'DEF': 0, 'INT': 0, 'SPI': 0, 'SPD': 0,
+            'skillCountValor': 0, 'skillCountPhilantropy': 0, 
+            'skillCountAmicable': 0, 'skillCountWisdom': 0,
+            'needsItem': 0,
+            'jogressDbIdA': 0, 'jogressPersonalityA': 0,
+            'jogressDbIdB': 0, 'jogressPersonalityB': 0
+        }
+        
+        # Show the same dialog as used for evolution paths
+        new_conditions = self._show_evolution_requirements_dialog(
+            f"{self.current_digimon.name} (Requirements to obtain THIS Digimon)",
+            existing
+        )
+        
+        if new_conditions is not None:
+            self.current_digimon.evolution_conditions = new_conditions
+            self.update_evolution_tab(self.current_digimon)
+            QMessageBox.information(self, "Success", "Evolution requirements updated!")
+    
+    def update_evolution_tree_tab(self, digimon: DigimonData):
+        """Update the visual evolution tree tab with current Digimon"""
+        # This will be implemented to show the tree structure
+        # For now, just clear the canvas
+        old_layout = self.evolution_tree_canvas.layout()
+        if old_layout:
+            while old_layout.count():
+                child = old_layout.takeAt(0)
+                if child.widget():
+                    child.widget().deleteLater()
+            QWidget().setLayout(old_layout)
+        
+        canvas_layout = QVBoxLayout(self.evolution_tree_canvas)
+        canvas_layout.setContentsMargins(0, 0, 0, 0)
+        label = QLabel(f"Evolution tree for {digimon.name} (ID: {digimon.id}) will be displayed here")
+        label.setStyleSheet("color: #666; font-size: 12pt; padding: 40px;")
+        label.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        label.setWordWrap(True)
+        canvas_layout.addWidget(label)
     
     def draw_evolution_tree(self, digimon: DigimonData):
         """Draw visual representation of evolution tree"""
@@ -4970,12 +5106,10 @@ class DigimonEditor(QMainWindow):
             # Add pre-evolutions (sources)
             for i, deevo in enumerate(digimon.deevolution_sources):
                 from_id = deevo.get('from_id', 0)
-                from_chr_id = f"chr{from_id:03d}"
-                from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
-                if not from_name or from_name == from_chr_id:
-                    from_chr_id = f"chr{from_id}"
-                    from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
-                if not from_name or from_name in [from_chr_id, f"chr{from_id:03d}", f"chr{from_id}"]:
+                
+                # Get name by numeric ID
+                from_name = self.loader._get_digimon_name_by_id(from_id)
+                if not from_name:
                     from_name = f"ID:{from_id}"
                 
                 nodes.append({
@@ -4994,12 +5128,10 @@ class DigimonEditor(QMainWindow):
             # Add evolutions (targets)
             for i, evo in enumerate(digimon.evolution_paths):
                 to_id = evo.get('to_id', 0)
-                to_chr_id = f"chr{to_id:03d}"
-                to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
-                if not to_name or to_name == to_chr_id:
-                    to_chr_id = f"chr{to_id}"
-                    to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
-                if not to_name or to_name in [to_chr_id, f"chr{to_id:03d}", f"chr{to_id}"]:
+                
+                # Get name by numeric ID
+                to_name = self.loader._get_digimon_name_by_id(to_id)
+                if not to_name:
                     to_name = f"ID:{to_id}"
                 
                 nodes.append({
@@ -5056,7 +5188,7 @@ class DigimonEditor(QMainWindow):
             new_layout.addWidget(error_label)
     
     def generate_tree_html(self, nodes, digimon):
-        """Generate HTML representation of evolution tree - QTextBrowser compatible"""
+        """Generate HTML representation of evolution tree - Tournament bracket style"""
         html = """
         <html>
         <head>
@@ -5064,107 +5196,173 @@ class DigimonEditor(QMainWindow):
             body { 
                 font-family: Arial, sans-serif; 
                 padding: 20px;
-                background-color: #667eea;
+                background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                 margin: 0;
             }
-            table {
+            .tournament-container {
+                display: table;
                 width: 100%;
-                border-collapse: collapse;
+                table-layout: fixed;
             }
-            td {
-                text-align: center;
+            .tournament-row {
+                display: table-row;
+            }
+            .tournament-cell {
+                display: table-cell;
                 vertical-align: middle;
                 padding: 10px;
             }
-            .node { 
-                background-color: #764ba2;
+            .column-left {
+                width: 35%;
+                text-align: right;
+            }
+            .column-center {
+                width: 30%;
+                text-align: center;
+            }
+            .column-right {
+                width: 35%;
+                text-align: left;
+            }
+            .section-title { 
                 color: white;
+                font-size: 12px;
+                font-weight: bold;
+                text-transform: uppercase;
+                letter-spacing: 1px;
+                margin-bottom: 10px;
+                padding: 5px 10px;
+                background: rgba(255, 255, 255, 0.2);
+                border-radius: 5px;
+                display: inline-block;
+            }
+            .node { 
+                background: rgba(255, 255, 255, 0.95);
+                color: #333;
                 border: 2px solid white;
-                padding: 15px;
-                margin: 5px;
+                border-radius: 8px;
+                padding: 10px 12px;
+                margin: 5px 0;
                 font-weight: bold;
                 font-size: 12px;
+                box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+                display: inline-block;
+                min-width: 150px;
             }
             .node-current { 
-                background-color: #f5576c;
-                font-size: 16px;
+                background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+                color: white;
+                font-size: 15px;
                 padding: 20px;
                 border: 3px solid white;
+                min-width: 180px;
             }
             .node-source { 
-                background-color: #a18cd1;
+                background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
+                color: white;
             }
             .node-target { 
-                background-color: #84fab0;
+                background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);
+                color: #333;
             }
-            .arrow { 
-                color: white;
-                font-size: 32px; 
+            .node-name {
                 font-weight: bold;
             }
-            .label { 
-                color: white;
+            .node-id {
                 font-size: 10px;
+                opacity: 0.8;
+                margin-top: 4px;
+            }
+            .connector {
+                color: white;
+                font-size: 24px;
                 font-weight: bold;
-                margin-bottom: 8px;
+                padding: 0 10px;
+            }
+            .nodes-container {
+                display: inline-block;
             }
             .empty-state {
                 color: white;
                 text-align: center;
-                padding: 40px;
+                padding: 40px 20px;
                 font-size: 14px;
+                background: rgba(255, 255, 255, 0.1);
+                border-radius: 10px;
+            }
+            .count-badge {
+                background: rgba(255, 255, 255, 0.4);
+                color: white;
+                padding: 2px 6px;
+                border-radius: 10px;
+                font-size: 10px;
+                margin-left: 5px;
             }
         </style>
         </head>
         <body>
-        <table>
-        <tr>
         """
         
-        # Pre-evolutions column
+        # Pre-evolutions, current, and target nodes
         sources = [n for n in nodes if n['type'] == 'source']
         current = [n for n in nodes if n['type'] == 'current']
         targets = [n for n in nodes if n['type'] == 'target']
         
         # Check if we have any data
         if not sources and not targets:
-            html += '<td colspan="3"><div class="empty-state">'
-            html += '<b>No evolution data available</b><br/><br/>'
+            html += '<div class="empty-state">'
+            html += '<b style="font-size: 16px;">⚠️ No Evolution Data Available</b><br/><br/>'
             html += 'This Digimon has no defined pre-evolutions or evolutions.<br/>'
-            html += 'Use the "Add Evolution" button to create evolution paths.'
-            html += '</div></td>'
+            html += 'Use the buttons above to add evolution paths.'
+            html += '</div>'
         else:
-            # Pre-evolutions column
-            if sources:
-                html += '<td style="width:30%">'
-                html += '<div class="label">PRE-EVOLUTION</div>'
-                for node in sources:
-                    html += f'<div class="node node-source">{node["name"]}<br/><small>ID: {node["id"]}</small></div>'
-                html += '</td>'
-                html += '<td style="width:5%"><div class="arrow">→</div></td>'
+            html += '<div class="tournament-container">'
+            html += '<div class="tournament-row">'
             
-            # Current Digimon
+            # Left column - Pre-evolutions
+            html += '<div class="tournament-cell column-left">'
+            if sources:
+                html += f'<div class="section-title">⬅️ PRE-EVOLUTION <span class="count-badge">{len(sources)}</span></div><br/>'
+                html += '<div class="nodes-container">'
+                for node in sources:
+                    html += f'<div class="node node-source"><div class="node-name">{node["name"]}</div><div class="node-id">ID: {node["id"]}</div></div><br/>'
+                html += '</div>'
+            html += '</div>'
+            
+            # Center connector arrow
+            html += '<div class="tournament-cell" style="width: 5%; text-align: center;">'
+            if sources:
+                html += '<div class="connector">→</div>'
+            html += '</div>'
+            
+            # Center column - Current Digimon
+            html += '<div class="tournament-cell column-center">'
             if current:
                 current_node = current[0]
-                if not sources:
-                    html += '<td style="width:35%"></td><td style="width:5%"></td>'
-                html += '<td style="width:30%">'
-                html += '<div class="label">CURRENT</div>'
-                html += f'<div class="node node-current">{current_node["name"]}<br/><small>ID: {current_node["id"]}</small></div>'
-                html += '</td>'
+                html += '<div class="section-title">📍 CURRENT</div><br/>'
+                html += f'<div class="node node-current"><div class="node-name">{current_node["name"]}</div><div class="node-id">ID: {current_node["id"]}</div></div>'
+            html += '</div>'
             
-            # Evolutions column
+            # Center-Right connector arrow
+            html += '<div class="tournament-cell" style="width: 5%; text-align: center;">'
             if targets:
-                html += '<td style="width:5%"><div class="arrow">→</div></td>'
-                html += '<td style="width:30%">'
-                html += '<div class="label">EVOLUTION</div>'
+                html += '<div class="connector">→</div>'
+            html += '</div>'
+            
+            # Right column - Evolutions
+            html += '<div class="tournament-cell column-right">'
+            if targets:
+                html += f'<div class="section-title">➡️ EVOLUTION <span class="count-badge">{len(targets)}</span></div><br/>'
+                html += '<div class="nodes-container">'
                 for node in targets:
-                    html += f'<div class="node node-target">{node["name"]}<br/><small>ID: {node["id"]}</small></div>'
-                html += '</td>'
+                    html += f'<div class="node node-target"><div class="node-name">{node["name"]}</div><div class="node-id">ID: {node["id"]}</div></div><br/>'
+                html += '</div>'
+            html += '</div>'
+            
+            html += '</div>' # Close tournament-row
+            html += '</div>' # Close tournament-container
         
         html += """
-        </tr>
-        </table>
         </body>
         </html>
         """
@@ -5476,27 +5674,83 @@ class DigimonEditor(QMainWindow):
         wizard = DigimonCreationWizard(self, self.loader)
         wizard.exec()
         
-        # Refresh the digimon list if a new Digimon was created
+        # Inform user if a new Digimon was created
         if wizard.new_digimon:
-            self.load_digimon_list()
-            # Optionally load the newly created Digimon
+            # Ask if they want to import it for editing
             reply = QMessageBox.question(
                 self,
                 "Digimon Created",
-                f"✅ {wizard.new_digimon.name} has been added to DLC!\n\n"
-                f"Would you like to load it for editing?",
+                f"✅ {wizard.new_digimon.name} has been exported to dsts-loader format!\n\n"
+                f"Would you like to import it for editing?\n"
+                f"(This will import the Digimon from the folder you just exported to)",
                 QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
             )
             if reply == QMessageBox.StandardButton.Yes:
-                # Switch to DLC source and load the new Digimon
-                self.source_combo.setCurrentIndex(1)  # DLC
-                self.load_digimon_list()
-                # Find and select the new Digimon
-                for i in range(self.digimon_list.count()):
-                    if wizard.new_digimon.chr_id in self.digimon_list.itemText(i):
-                        self.digimon_list.setCurrentIndex(i)
-                        self.load_selected_digimon()
-                        break
+                # Import from the dsts-loader folder that was just exported to
+                if hasattr(wizard, 'last_export_path') and wizard.last_export_path:
+                    try:
+                        from pathlib import Path
+                        loader_path = wizard.last_export_path
+                        
+                        # Look for the exported digimon_status_data.ap.csv
+                        status_files = list((loader_path / "patch" / "data" / "digimon_status.mbe").glob("*.ap.csv"))
+                        
+                        if not status_files:
+                            QMessageBox.warning(
+                                self,
+                                "Import Failed",
+                                "Could not find exported files.\n"
+                                "Try using 'Import from dsts-loader' manually."
+                            )
+                            return
+                        
+                        # Parse and import
+                        if not hasattr(self.loader, 'imported_digimon'):
+                            self.loader.imported_digimon = []
+                        
+                        imported_before = len(self.loader.imported_digimon)
+                        
+                        for status_file in status_files:
+                            digimon_list = self._parse_digimon_status_csv(status_file, loader_path)
+                            for digimon in digimon_list:
+                                self.loader.imported_digimon.append(digimon)
+                        
+                        if len(self.loader.imported_digimon) > imported_before:
+                            # Refresh list to show imported Digimon
+                            self.load_digimon_list()
+                            
+                            # Find and select the newly imported Digimon
+                            first_digimon = self.loader.imported_digimon[-1]  # Get last imported
+                            self.load_digimon_data(first_digimon)
+                            self.current_digimon = first_digimon
+                            
+                            # Try to select it in the list
+                            display_name = f"📥 {first_digimon.name} ({first_digimon.chr_id})"
+                            index = self.digimon_list.findText(display_name, Qt.MatchFlag.MatchExactly)
+                            if index >= 0:
+                                self.digimon_list.setCurrentIndex(index)
+                            
+                            QMessageBox.information(
+                                self,
+                                "Import Successful",
+                                f"✅ {first_digimon.name} has been loaded for editing!"
+                            )
+                        else:
+                            QMessageBox.warning(
+                                self,
+                                "Import Failed",
+                                "Could not import the newly created Digimon.\n"
+                                "Try using 'Import from dsts-loader' manually."
+                            )
+                    except Exception as e:
+                        import traceback
+                        traceback.print_exc()
+                        QMessageBox.warning(
+                            self,
+                            "Import Failed",
+                            f"Could not import the newly created Digimon:\n\n{str(e)}\n\n"
+                            f"Try using 'Import from dsts-loader' manually."
+                        )
     
     def import_from_dsts_loader(self):
         """Import Digimon from dsts-loader format files"""
@@ -5571,9 +5825,9 @@ class DigimonEditor(QMainWindow):
                 # Try to select it in the list (if it exists)
                 try:
                     display_name = f"📥 {first_digimon.name} ({first_digimon.chr_id})"
-                    matching_items = self.digimon_list.findItems(display_name, Qt.MatchFlag.MatchExactly)
-                    if matching_items:
-                        self.digimon_list.setCurrentItem(matching_items[0])
+                    index = self.digimon_list.findText(display_name, Qt.MatchFlag.MatchExactly)
+                    if index >= 0:
+                        self.digimon_list.setCurrentIndex(index)
                 except Exception as select_error:
                     # Don't fail import if we can't select the item
                     print(f"Could not select imported item: {select_error}")
@@ -5615,17 +5869,17 @@ class DigimonEditor(QMainWindow):
                 digimon.type_id = int(row[6]) if len(row) > 6 and row[6] else 0
                 digimon.generation_id = digimon.stage_id
                 
-                # Parse resistances (columns 7-17)
+                # Parse resistances (columns 7-17) - CORRECTED ORDER
                 if len(row) > 17:
                     digimon.res_null = int(row[7]) if row[7] else 0
                     digimon.res_fire = int(row[8]) if row[8] else 0
                     digimon.res_water = int(row[9]) if row[9] else 0
-                    digimon.res_ice = int(row[10]) if row[10] else 0
-                    digimon.res_grass = int(row[11]) if row[11] else 0
-                    digimon.res_wind = int(row[12]) if row[12] else 0
-                    digimon.res_elec = int(row[13]) if row[13] else 0
-                    digimon.res_ground = int(row[14]) if row[14] else 0
-                    digimon.res_steel = int(row[15]) if row[15] else 0
+                    digimon.res_ice = int(row[10]) if row[10] else 0      # Col10 = Ice
+                    digimon.res_grass = int(row[11]) if row[11] else 0    # Col11 = Grass
+                    digimon.res_wind = int(row[12]) if row[12] else 0     # Col12 = Wind
+                    digimon.res_elec = int(row[13]) if row[13] else 0     # Col13 = Elec
+                    digimon.res_ground = int(row[14]) if row[14] else 0   # Col14 = Ground
+                    digimon.res_steel = int(row[15]) if row[15] else 0    # Col15 = Steel
                     digimon.res_light = int(row[16]) if row[16] else 0
                     digimon.res_dark = int(row[17]) if row[17] else 0
                 
@@ -5671,7 +5925,16 @@ class DigimonEditor(QMainWindow):
                 
                 # Load profile from digimon_profile
                 profile_file = base_path / "patch_text01" / "text" / "digimon_profile.mbe"
-                digimon.profile_text = self._load_profile_from_csv(profile_file, digimon.char_key)
+                digimon.profile_text = self._load_profile_from_csv(profile_file, digimon.id)
+                print(f"DEBUG: Loaded profile for ID {digimon.id}: '{digimon.profile_text[:50] if digimon.profile_text else 'EMPTY'}'...")
+                
+                # Load char_info data (contains motion_ref and model_ref)
+                char_info_file = base_path / "patch" / "data" / "char_info.mbe"
+                char_info_data = self._load_char_info_from_csv(char_info_file, digimon.char_key)
+                if char_info_data:
+                    digimon.motion_id = char_info_data.get('motion_ref', "")
+                    digimon.model_id = char_info_data.get('model_ref', "")
+                    print(f"DEBUG: Loaded from char_info - model_id: '{digimon.model_id}', motion_id: '{digimon.motion_id}'")
                 
                 # Load model settings
                 model_file = base_path / "patch" / "data" / "model_setting.mbe"
@@ -5681,9 +5944,19 @@ class DigimonEditor(QMainWindow):
                 lod_file = base_path / "patch" / "data" / "lod_chara.mbe"
                 digimon.lod_data = self._load_lod_from_csv(lod_file, digimon.chr_id)
                 
+                # Load evolution data
+                evolution_file = base_path / "patch" / "data" / "evolution.mbe"
+                digimon.evolution_paths, digimon.evolution_conditions = self._load_evolution_from_csv(evolution_file, digimon.id)
+                
+                # Load de-evolution (chronodevolution) data
+                chronodev_file = base_path / "patch" / "data" / "evolution.mbe"
+                digimon.deevolution_sources = self._load_chronodevolution_from_csv(chronodev_file, digimon.id)
+                
+                # Load tribe/belong data
+                belong_file = base_path / "patch_text01" / "text" / "belong.mbe"
+                digimon.tribe_name = self._load_tribe_from_csv(belong_file, digimon.id)
+                
                 # Initialize other required data structures
-                digimon.evolution_paths = []
-                digimon.deevolution_sources = []
                 digimon.model_locator_data = {}
                 digimon.model_locator_motion_data = []
                 digimon.field_move_animation_data = []
@@ -5710,8 +5983,8 @@ class DigimonEditor(QMainWindow):
                 continue
         return "Unknown"
     
-    def _load_profile_from_csv(self, base_path: Path, char_key: str) -> str:
-        """Load Digimon profile from digimon_profile CSV files"""
+    def _load_char_info_from_csv(self, base_path: Path, char_key: str) -> dict:
+        """Load char_info data from CSV files"""
         import csv
         
         csv_files = list(base_path.glob("*.ap.csv"))
@@ -5721,8 +5994,32 @@ class DigimonEditor(QMainWindow):
                     reader = csv.reader(f)
                     next(reader)  # Skip header
                     for row in reader:
-                        if len(row) >= 2 and row[0].strip('"') == char_key:
-                            return row[1].strip('"')
+                        if len(row) >= 1 and row[0] == char_key:
+                            # Extract relevant fields
+                            return {
+                                'motion_ref': row[8] if len(row) > 8 else "",  # Column 8: motion_ref
+                                'model_ref': row[10] if len(row) > 10 else ""  # Column 10: model_ref
+                            }
+            except:
+                continue
+        return {}
+    
+    def _load_profile_from_csv(self, base_path: Path, digimon_id: int) -> str:
+        """Load Digimon profile from digimon_profile CSV files"""
+        import csv
+        
+        # Profile key format is "digimon_{id}_profile"
+        profile_key = f"digimon_{digimon_id}_profile"
+        
+        csv_files = list(base_path.glob("*.ap.csv"))
+        for csv_file in csv_files:
+            try:
+                with open(csv_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 2 and row[0] == profile_key:
+                            return row[1]  # Don't strip quotes - csv.reader already handles that
             except:
                 continue
         return ""
@@ -5765,6 +6062,116 @@ class DigimonEditor(QMainWindow):
                 pass
         
         return {'lod_distance_1': 20, 'lod_distance_2': 65, 'lod_distance_3': 500}
+    
+    def _load_evolution_from_csv(self, base_path: Path, digimon_id: int):
+        """Load evolution paths and conditions from CSV files"""
+        import csv
+        
+        evolution_paths = []
+        evolution_conditions = []
+        
+        # Load evolution paths from 001_evolution_to.ap.csv
+        evo_file = base_path / "001_evolution_to.ap.csv"
+        if evo_file.exists():
+            try:
+                with open(evo_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 4:
+                            from_id = int(row[1]) if row[1] else 0
+                            if from_id == digimon_id:
+                                to_id = int(row[3]) if row[3] else 0
+                                evo_type = int(row[5]) if len(row) > 5 and row[5] else 0
+                                if to_id > 0:
+                                    evolution_paths.append({
+                                        'to_id': to_id,
+                                        'evolution_type': evo_type
+                                    })
+            except Exception as e:
+                print(f"Error loading evolution paths: {e}")
+        
+        # Load evolution conditions from 00_evolution_condition.ap.csv
+        cond_file = base_path / "00_evolution_condition.ap.csv"
+        if cond_file.exists():
+            try:
+                with open(cond_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 3:
+                            target_id = int(row[0]) if row[0] else 0
+                            if target_id == digimon_id:
+                                evolution_conditions.append({
+                                    'mode': int(row[2]) if row[2] else 1,
+                                    'tamerLevel': int(row[3]) if len(row) > 3 and row[3] else 0,
+                                    'HP': int(row[4]) if len(row) > 4 and row[4] else 0,
+                                    'SP': int(row[5]) if len(row) > 5 and row[5] else 0,
+                                    'ATK': int(row[6]) if len(row) > 6 and row[6] else 0,
+                                    'DEF': int(row[7]) if len(row) > 7 and row[7] else 0,
+                                    'INT': int(row[8]) if len(row) > 8 and row[8] else 0,
+                                    'SPI': int(row[9]) if len(row) > 9 and row[9] else 0,
+                                    'SPD': int(row[10]) if len(row) > 10 and row[10] else 0,
+                                    'skillCountValor': int(row[13]) if len(row) > 13 and row[13] else 0,
+                                    'skillCountPhilantropy': int(row[14]) if len(row) > 14 and row[14] else 0,
+                                    'skillCountAmicable': int(row[15]) if len(row) > 15 and row[15] else 0,
+                                    'skillCountWisdom': int(row[16]) if len(row) > 16 and row[16] else 0,
+                                    'needsItem': int(row[22]) if len(row) > 22 and row[22] else 0,
+                                    'jogressDbIdA': int(row[24]) if len(row) > 24 and row[24] else 0,
+                                    'jogressPersonalityA': int(row[26]) if len(row) > 26 and row[26] else 0,
+                                    'jogressDbIdB': int(row[27]) if len(row) > 27 and row[27] else 0,
+                                    'jogressPersonalityB': int(row[29]) if len(row) > 29 and row[29] else 0
+                                })
+            except Exception as e:
+                print(f"Error loading evolution conditions: {e}")
+        
+        return evolution_paths, evolution_conditions
+    
+    def _load_chronodevolution_from_csv(self, base_path: Path, digimon_id: int):
+        """Load de-evolution (chronodevolution) data from CSV"""
+        import csv
+        
+        deevolution_sources = []
+        
+        chrono_file = base_path / "002_chronodevolution.ap.csv"
+        if chrono_file.exists():
+            try:
+                with open(chrono_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 3:
+                            from_id = int(row[0]) if row[0] else 0
+                            if from_id == digimon_id:
+                                # Columns 2-7 are de-evolution targets
+                                for i in range(2, min(8, len(row))):
+                                    target_id = int(row[i]) if row[i] and row[i] != '-1' else 0
+                                    if target_id > 0:
+                                        deevolution_sources.append({'from_id': target_id})
+            except Exception as e:
+                print(f"Error loading chronodevolution: {e}")
+        
+        return deevolution_sources
+    
+    def _load_tribe_from_csv(self, base_path: Path, digimon_id: int) -> str:
+        """Load tribe/belong data from CSV"""
+        import csv
+        
+        tribe_file = base_path / "000_Sheet1.ap.csv"
+        if tribe_file.exists():
+            try:
+                with open(tribe_file, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    next(reader)  # Skip header
+                    for row in reader:
+                        if len(row) >= 2:
+                            row_id = int(row[0]) if row[0] else 0
+                            if row_id == digimon_id:
+                                return row[1].strip('"') if row[1] else "None"
+            except Exception as e:
+                print(f"Error loading tribe: {e}")
+        
+        return "None"
     
     def create_new_digimon(self):
         """Create a new Digimon entry using a selected Digimon as template"""
@@ -6305,6 +6712,41 @@ class DigimonEditor(QMainWindow):
         if existing_conditions is None:
             existing_conditions = {}
         
+        # Convert list format to dict format if needed
+        if isinstance(existing_conditions, list):
+            row = existing_conditions
+            def safe_int(val):
+                try:
+                    if val is None or val == '':
+                        return 0
+                    return int(val)
+                except (ValueError, TypeError):
+                    return 0
+            
+            existing_conditions = {
+                'mode': safe_int(row[2]) if len(row) > 2 else 4,
+                'tamerLevel': safe_int(row[3]) if len(row) > 3 else 0,
+                'HP': safe_int(row[4]) if len(row) > 4 else 0,
+                'SP': safe_int(row[5]) if len(row) > 5 else 0,
+                'ATK': safe_int(row[6]) if len(row) > 6 else 0,
+                'DEF': safe_int(row[7]) if len(row) > 7 else 0,
+                'INT': safe_int(row[8]) if len(row) > 8 else 0,
+                'SPI': safe_int(row[9]) if len(row) > 9 else 0,
+                'SPD': safe_int(row[10]) if len(row) > 10 else 0,
+                'skillCountValor': safe_int(row[13]) if len(row) > 13 else 0,
+                'skillCountPhilantropy': safe_int(row[14]) if len(row) > 14 else 0,
+                'skillCountAmicable': safe_int(row[15]) if len(row) > 15 else 0,
+                'skillCountWisdom': safe_int(row[16]) if len(row) > 16 else 0,
+                'needsItem': safe_int(row[22]) if len(row) > 22 else 0,
+                'jogressDbIdA': safe_int(row[24]) if len(row) > 24 else 0,
+                'jogressPersonalityA': safe_int(row[26]) if len(row) > 26 else 0,
+                'jogressDbIdB': safe_int(row[27]) if len(row) > 27 else 0,
+                'jogressPersonalityB': safe_int(row[29]) if len(row) > 29 else 0
+            }
+        elif not isinstance(existing_conditions, dict):
+            # If it's neither list nor dict, create default
+            existing_conditions = {}
+        
         dialog = QDialog(self)
         dialog.setWindowTitle(f"Evolution Requirements → {target_name}")
         dialog.setMinimumWidth(500)
@@ -6323,17 +6765,21 @@ class DigimonEditor(QMainWindow):
         info.setStyleSheet("color: #666; padding: 8px; background: #f0f0f0; border-radius: 4px; margin-bottom: 10px;")
         scroll_layout.addWidget(info)
         
-        # Condition Mode
-        mode_group = QGroupBox("Evolution Mode")
+        # Agent Rank (column 2 in evolution_condition.csv)
+        mode_group = QGroupBox("Agent Rank Requirement")
         mode_layout = QVBoxLayout()
         mode_combo = QComboBox()
-        mode_combo.addItem("Mode 1: No Requirements (Always Available)", 1)
-        mode_combo.addItem("Mode 2: Item Required", 2)
-        mode_combo.addItem("Mode 3: Jogress/DNA Digivolution", 3)
-        mode_combo.addItem("Mode 4: Standard Evolution (Stats/Level)", 4)
-        # Set existing mode
-        existing_mode = existing_conditions.get('mode', 4)
-        mode_combo.setCurrentIndex(mode_combo.findData(existing_mode) if mode_combo.findData(existing_mode) >= 0 else 3)
+        mode_combo.addItem("Rank 1", 1)
+        mode_combo.addItem("Rank 2", 2)
+        mode_combo.addItem("Rank 3", 3)
+        mode_combo.addItem("Rank 4", 4)
+        mode_combo.addItem("Rank 5", 5)
+        mode_combo.addItem("Rank 6", 6)
+        mode_combo.addItem("Rank 7", 7)
+        mode_combo.addItem("Rank 8", 8)
+        # Set existing rank
+        existing_mode = existing_conditions.get('mode', 1)
+        mode_combo.setCurrentIndex(mode_combo.findData(existing_mode) if mode_combo.findData(existing_mode) >= 0 else 0)
         mode_layout.addWidget(mode_combo)
         mode_group.setLayout(mode_layout)
         scroll_layout.addWidget(mode_group)
@@ -6405,25 +6851,21 @@ class DigimonEditor(QMainWindow):
         valor_spin = QSpinBox()
         valor_spin.setRange(0, 999)
         valor_spin.setValue(existing_conditions.get('skillCountValor', 0))
-        valor_spin.setSuffix(" skills")
         skills_layout.addRow("Valor Skills:", valor_spin)
         
         philanthropy_spin = QSpinBox()
         philanthropy_spin.setRange(0, 999)
         philanthropy_spin.setValue(existing_conditions.get('skillCountPhilantropy', 0))
-        philanthropy_spin.setSuffix(" skills")
         skills_layout.addRow("Philanthropy Skills:", philanthropy_spin)
         
         amicable_spin = QSpinBox()
         amicable_spin.setRange(0, 999)
         amicable_spin.setValue(existing_conditions.get('skillCountAmicable', 0))
-        amicable_spin.setSuffix(" skills")
         skills_layout.addRow("Amicable Skills:", amicable_spin)
         
         wisdom_spin = QSpinBox()
         wisdom_spin.setRange(0, 999)
         wisdom_spin.setValue(existing_conditions.get('skillCountWisdom', 0))
-        wisdom_spin.setSuffix(" skills")
         skills_layout.addRow("Wisdom Skills:", wisdom_spin)
         
         skills_group.setLayout(skills_layout)
@@ -6433,7 +6875,7 @@ class DigimonEditor(QMainWindow):
         item_group = QGroupBox("Item Requirement (Mode 2)")
         item_layout = QFormLayout()
         item_spin = QSpinBox()
-        item_spin.setRange(0, 9999)
+        item_spin.setRange(0, 999999)
         item_spin.setValue(existing_conditions.get('needsItem', 0))
         item_spin.setSuffix(" (Item ID, 0 = none)")
         item_layout.addRow("Required Item:", item_spin)
@@ -6445,7 +6887,7 @@ class DigimonEditor(QMainWindow):
         jogress_layout = QFormLayout()
         
         jogress_a_id_spin = QSpinBox()
-        jogress_a_id_spin.setRange(0, 9999)
+        jogress_a_id_spin.setRange(0, 999999)
         jogress_a_id_spin.setValue(existing_conditions.get('jogressDbIdA', 0))
         jogress_a_id_spin.setSuffix(" (Partner A ID)")
         jogress_layout.addRow("Partner A Digimon ID:", jogress_a_id_spin)
@@ -6457,7 +6899,7 @@ class DigimonEditor(QMainWindow):
         jogress_layout.addRow("Partner A Personality:", jogress_a_personality_spin)
         
         jogress_b_id_spin = QSpinBox()
-        jogress_b_id_spin.setRange(0, 9999)
+        jogress_b_id_spin.setRange(0, 999999)
         jogress_b_id_spin.setValue(existing_conditions.get('jogressDbIdB', 0))
         jogress_b_id_spin.setSuffix(" (Partner B ID)")
         jogress_layout.addRow("Partner B Digimon ID:", jogress_b_id_spin)
@@ -6546,11 +6988,7 @@ class DigimonEditor(QMainWindow):
         
         # Get target Digimon name
         to_id = evo['to_id']
-        to_chr_id = f"chr{to_id:03d}"
-        to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
-        if not to_name or to_name == to_chr_id:
-            to_chr_id = f"chr{to_id}"
-            to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
+        to_name = self.loader._get_digimon_name_by_id(to_id)
         if not to_name:
             to_name = f"ID {to_id}"
         

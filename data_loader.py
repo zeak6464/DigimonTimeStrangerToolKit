@@ -159,7 +159,7 @@ class MBELoader:
                 "growthPatternId": 71,  # Growth pattern (1-18)
                 # Traits
                 "traitsBaseIdx": 19,  # next 41 are trait bool flags
-                # Elemental resistance
+                # Elemental resistance - CORRECTED ORDER (v3 - FIXED!)
                 "resNull": 7, "resFire": 8, "resWater": 9, "resIce": 10,
                 "resGrass": 11, "resWind": 12, "resElec": 13, "resGround": 14,
                 "resSteel": 15, "resLight": 16, "resDark": 17,
@@ -467,6 +467,48 @@ class MBELoader:
         # Name not found - return None instead of char_key
         return None
     
+    def _get_digimon_name_by_id(self, digimon_id: int, check_dlc: bool = True) -> str:
+        """Get Digimon name by numeric ID
+        
+        Args:
+            digimon_id: Numeric Digimon ID to look up
+            check_dlc: If True, also check DLC files
+        """
+        # First check base game
+        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        if status_file.exists():
+            status_rows = self.load_csv(status_file)
+            for row in status_rows[1:]:  # Skip header
+                if len(row) > 0 and row[0] == str(digimon_id):
+                    char_key = row[2].strip('"') if len(row) > 2 else None  # Column 2 is char_key
+                    if char_key:
+                        name = self._get_digimon_name(char_key, check_dlc=False)
+                        if name:
+                            return name
+                        # Fallback to char_key if no name found in char_name.mbe
+                        return char_key
+        
+        # Check DLC if not found in base game
+        if check_dlc:
+            dlc_exporter = DLCExporter(self)
+            dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            
+            if dlc_status_file.exists():
+                dlc_status_rows = self.load_csv(dlc_status_file)
+                for row in dlc_status_rows[1:]:  # Skip header
+                    if len(row) > 0 and row[0] == str(digimon_id):
+                        char_key = row[2].strip('"') if len(row) > 2 else None  # Column 2 is char_key
+                        if char_key:
+                            # For DLC Digimon, check DLC names too
+                            name = self._get_digimon_name(char_key, check_dlc=True)
+                            if name:
+                                return name
+                            # Fallback to char_key if no name found in char_name.mbe
+                            return char_key
+        
+        return None
+    
     def _get_digimon_name_by_chr_id(self, chr_id: str, check_dlc: bool = True) -> str:
         """Get Digimon name by chr_id
         
@@ -501,7 +543,7 @@ class MBELoader:
                         break
         
         if not char_key:
-            return chr_id
+            return None
             
         # Now get the name using the char_key (which will also check DLC)
         return self._get_digimon_name(char_key, check_dlc=check_dlc)
@@ -552,6 +594,9 @@ class MBELoader:
                         "empty4": row[12] if len(row) > 12 else "",
                         "flag4": int(row[13]) if len(row) > 13 and row[13] else 0
                     }
+                    # Populate model_id and motion_id from char_info for editor display
+                    digimon.motion_id = row[8].strip('"') if len(row) > 8 else ""
+                    digimon.model_id = row[10].strip('"') if len(row) > 10 else ""
                     return
         
         # Check DLC files if not found in base game
@@ -578,6 +623,9 @@ class MBELoader:
                         "empty4": row[12].strip('"') if len(row) > 12 else "",
                         "flag4": int(row[13]) if len(row) > 13 and row[13] else 0
                     }
+                    # Populate model_id and motion_id from char_info for editor display
+                    digimon.motion_id = row[8].strip('"') if len(row) > 8 else ""
+                    digimon.model_id = row[10].strip('"') if len(row) > 10 else ""
                     break
     
     def _load_model_setting_data(self, digimon: DigimonData):
