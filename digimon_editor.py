@@ -506,14 +506,10 @@ class DigimonCreationWizard(QWizard):
             # Export animation reference
             self._write_anim_setting_ap_csv(patch_data / "anim_setting.mbe" / "001_same_animation_data.ap.csv", digimon.chr_id, animation_ref)
             
-            # Export evolution data
-            if digimon.evolution_paths:
+            # Export evolution data (includes both evolutions FROM this Digimon and pre-evolutions TO this Digimon)
+            if digimon.evolution_paths or digimon.deevolution_sources:
                 self._write_evolution_ap_csv(patch_data / "evolution.mbe" / "001_evolution_to.ap.csv", digimon)
                 self._write_evolution_condition_ap_csv(patch_data / "evolution.mbe" / "000_evolution_condition.ap.csv", digimon)
-            
-            # Export chronodevolution (de-evolution) data
-            if digimon.deevolution_sources:
-                self._write_chronodevolution_ap_csv(patch_data / "evolution.mbe" / "002_chronodevolution.ap.csv", digimon)
             
             # Export char_name
             self._write_char_name_ap_csv(patch_text / "char_name.mbe" / "000_Sheet1.ap.csv", digimon)
@@ -644,27 +640,42 @@ class DigimonCreationWizard(QWizard):
             f.write(','.join(parts) + '\n')
     
     def _write_char_info_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write char_info.ap.csv"""
+        """Write char_info.ap.csv
+        
+        Columns:
+        0: char_key, 1-2: empty, 3: chr_id, 4: id, 5: empty
+        6-7: 0,0, 8: audio_id (motion_id), 9: 0, 10: model_id
+        11: 0, 12: empty, 13: 0
+        """
         header = 'string2 0,empty 1,empty 2,string2 3,string2 4,empty 5,int32 6,int32 7,string2 8,int32 9,string2 10,int32 11,string2 12,int32 13'
         
-        # Get motion_ref from char_info_data if available, otherwise use empty string
-        motion_ref = ""
-        if hasattr(digimon, 'char_info_data') and digimon.char_info_data:
-            motion_ref = digimon.char_info_data.get('motion_ref', '')
+        # Get audio_id (motion_id) - prefer wizard value, fallback to template
+        audio_id = ""
+        if hasattr(digimon, 'motion_id') and digimon.motion_id:
+            audio_id = digimon.motion_id
+        elif hasattr(digimon, 'char_info_data') and digimon.char_info_data:
+            audio_id = digimon.char_info_data.get('motion_ref', '')
+        
+        # Get model_id - prefer wizard value, fallback to template
+        model_id = ""
+        if hasattr(digimon, 'model_id') and digimon.model_id:
+            model_id = digimon.model_id
+        elif hasattr(digimon, 'char_info_data') and digimon.char_info_data:
+            model_id = digimon.char_info_data.get('model_ref', '')
         
         parts = [
-            f'"{self._escape_csv_value(digimon.char_key)}"',
-            '', '',  # empty columns
-            f'"{self._escape_csv_value(digimon.chr_id)}"',
-            f'"{str(digimon.id)}"',  # Simplified ID formula
-            '',  # empty
-            '0', '0',
-            f'"{motion_ref}"',  # Copy motion_ref from template
-            '0',
-            '""',  # empty string
-            '0',
-            '""',  # empty string
-            '0'
+            f'"{self._escape_csv_value(digimon.char_key)}"',  # 0: char_key
+            '', '',  # 1-2: empty columns
+            f'"{self._escape_csv_value(digimon.chr_id)}"',  # 3: chr_id
+            f'"{str(digimon.id)}"',  # 4: id
+            '',  # 5: empty
+            '0', '0',  # 6-7
+            f'"{audio_id}"',  # 8: audio_id (motion_id in our code)
+            '0',  # 9
+            f'"{model_id}"',  # 10: model_id
+            '0',  # 11
+            '""',  # 12: empty string
+            '0'  # 13
         ]
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
@@ -763,26 +774,39 @@ class DigimonCreationWizard(QWizard):
             f.write(','.join(parts) + '\n')
     
     def _write_evolution_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write evolution_to.ap.csv"""
+        """Write evolution_to.ap.csv
+        
+        This file contains ALL evolution relationships:
+        - Evolutions FROM this Digimon (what it evolves into)
+        - Pre-evolutions TO this Digimon (what evolves into it)
+        
+        Format: [evo_id], [source_id], "", [target_id], "", [type], -1, -1, -1, -1, -1
+        - type 0 = Normal evolution
+        - type 2 = Mode Change
+        
+        Note: Max 6 evolutions per source Digimon or game will crash!
+        """
         header = 'int32 0,int32 1,empty 2,int32 3,empty 4,int32 5,int32 6,int32 7,int32 8,int32 9,int32 10'
         
         with open(filepath, 'w', encoding='utf-8', newline='') as f:
             f.write(header + '\n')
             
-            # Deduplicate evolution paths by to_id
-            seen_to_ids = set()
-            
             # Use user's suggested formula: (digimon.id * 100) + counter
             # For ID 640: 64000, 64001, 64002, etc.
             counter = 0
             
+            # Track seen entries to avoid duplicates
+            seen_entries = set()  # (source_id, target_id)
+            
+            # 1. Write evolutions FROM this Digimon (what it evolves into)
             for evo in digimon.evolution_paths:
                 to_id = evo.get('to_id', 0)
                 
                 # Skip if to_id is 0 or already written
-                if to_id == 0 or to_id in seen_to_ids:
+                entry_key = (digimon.id, to_id)
+                if to_id == 0 or entry_key in seen_entries:
                     continue
-                seen_to_ids.add(to_id)
+                seen_entries.add(entry_key)
                 
                 # Get evolution type/mode (default to 0 for normal evolution)
                 evo_type = evo.get('evolution_type', 0)
@@ -793,11 +817,40 @@ class DigimonCreationWizard(QWizard):
                 
                 parts = [
                     str(evo_id),
-                    str(digimon.id),
+                    str(digimon.id),  # Source: this Digimon
                     '',  # empty column
-                    str(to_id),
+                    str(to_id),  # Target: what it evolves into
                     '',  # empty column
-                    str(evo_type),  # Evolution type: 0=Normal, 2=Mode Change, etc.
+                    str(evo_type),  # Evolution type: 0=Normal, 2=Mode Change
+                    '-1', '-1', '-1', '-1', '-1'
+                ]
+                f.write(','.join(parts) + '\n')
+            
+            # 2. Write pre-evolutions TO this Digimon (what evolves into it)
+            # These are stored as: [pre-evo ID] evolves TO [this Digimon's ID]
+            for deevo in digimon.deevolution_sources:
+                from_id = deevo.get('from_id', 0)
+                
+                # Skip if from_id is 0 or already written
+                entry_key = (from_id, digimon.id)
+                if from_id == 0 or entry_key in seen_entries:
+                    continue
+                seen_entries.add(entry_key)
+                
+                # Get evolution type (default to 0 for normal evolution)
+                evo_type = deevo.get('evolution_type', 0)
+                
+                # Calculate evolution ID using the PRE-evolution's ID as base
+                evo_id = (from_id * 100) + 50 + counter  # Offset by 50 to avoid collision
+                counter += 1
+                
+                parts = [
+                    str(evo_id),
+                    str(from_id),  # Source: the pre-evolution Digimon
+                    '',  # empty column
+                    str(digimon.id),  # Target: this Digimon (what it evolves into)
+                    '',  # empty column
+                    str(evo_type),  # Evolution type: 0=Normal, 2=Mode Change
                     '-1', '-1', '-1', '-1', '-1'
                 ]
                 f.write(','.join(parts) + '\n')
@@ -897,40 +950,6 @@ class DigimonCreationWizard(QWizard):
                 str(condition.get('jogressPersonalityB', 0))  # 29
             ]
             f.write(','.join(parts) + '\n')
-    
-    def _write_chronodevolution_ap_csv(self, filepath: Path, digimon: DigimonData):
-        """Write chronodevolution.ap.csv (de-digivolution targets)
-        
-        Structure: [Digimon ID],"",[\De-Digi target 1],[target 2],[target 3],[target 4],[target 5],[target 6]
-        This defines what this NEW Digimon can de-digivolve INTO (not what can de-digivolve into it)
-        """
-        header = 'int32 0,empty 1,int32 2,int32 3,int32 4,int32 5,int32 6,int32 7'
-        
-        with open(filepath, 'w', encoding='utf-8', newline='') as f:
-            f.write(header + '\n')
-            
-            # Collect all de-evolution target IDs (what this Digimon can de-digivolve into)
-            de_evo_targets = []
-            for de_evo in digimon.deevolution_sources:
-                from_id = de_evo.get('from_id', 0)
-                if from_id > 0:
-                    de_evo_targets.append(from_id)
-            
-            # Only write if there are de-evolution targets
-            if de_evo_targets:
-                # Pad to 6 targets with -1
-                while len(de_evo_targets) < 6:
-                    de_evo_targets.append(-1)
-                
-                # Only use first 6 targets
-                de_evo_targets = de_evo_targets[:6]
-                
-                parts = [
-                    str(digimon.id),  # This Digimon's ID
-                    '',  # empty
-                    *[str(target) for target in de_evo_targets]  # Up to 6 de-evolution targets
-                ]
-                f.write(','.join(parts) + '\n')
     
     def _write_belong_ap_csv(self, filepath: Path, digimon: DigimonData):
         """Write belong.ap.csv (tribe/species classification)"""
@@ -1690,8 +1709,16 @@ class EvolutionPage(QWizardPage):
         layout.addWidget(evo_group)
         
         # Pre-evolution section
-        deevo_group = QGroupBox("Pre-Evolutions (what evolves into this Digimon)")
+        deevo_group = QGroupBox("⬅️ Pre-Evolutions (Digimon that evolve INTO this one)")
         deevo_layout = QVBoxLayout()
+        
+        deevo_info = QLabel(
+            "💡 Adding a pre-evolution creates an evolution entry where THAT Digimon evolves into THIS one.\n"
+            "⚠️ Each Digimon can only have 6 evolution targets. If a Digimon is full, you cannot add it as a pre-evolution."
+        )
+        deevo_info.setStyleSheet("color: #666; font-size: 9pt; padding: 5px; background-color: #fff3cd; border-radius: 4px;")
+        deevo_info.setWordWrap(True)
+        deevo_layout.addWidget(deevo_info)
         
         deevo_buttons = QHBoxLayout()
         add_deevo_btn = QPushButton("➕ Add Pre-Evolution")
@@ -1993,14 +2020,53 @@ class EvolutionPage(QWizardPage):
             traceback.print_exc()
             QMessageBox.warning(self, "Error", f"Failed to open evolution dialog: {str(e)}")
     
+    def get_evolution_count_for_digimon(self, digimon_id: int) -> int:
+        """Count how many evolution targets a Digimon has in the base game + pending additions"""
+        count = 0
+        
+        # Check base game evolution_to.csv
+        try:
+            evolution_to_file = self.wizard.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            if evolution_to_file.exists():
+                rows = self.wizard.loader.load_csv(evolution_to_file)
+                for row in rows[1:]:  # Skip header
+                    if len(row) > 1 and row[1] == str(digimon_id):
+                        count += 1
+            
+            # Also check DLC files
+            dlc_path = self.wizard.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            if dlc_path.exists():
+                rows = self.wizard.loader.load_csv(dlc_path)
+                for row in rows[1:]:
+                    if len(row) > 1 and row[1] == str(digimon_id):
+                        count += 1
+        except Exception as e:
+            print(f"Error counting evolutions: {e}")
+        
+        # Also count pending pre-evolutions we've added that use this Digimon as source
+        for deevo in self.deevolution_sources:
+            if deevo.get('from_id') == digimon_id:
+                count += 1
+        
+        return count
+    
     def add_pre_evolution(self):
         """Show dialog to select a Digimon that evolves into this one"""
         try:
             dialog = QDialog(self)
             dialog.setWindowTitle("Select Pre-Evolution Source")
-            dialog.setMinimumSize(500, 450)
+            dialog.setMinimumSize(550, 550)
             
             layout = QVBoxLayout(dialog)
+            
+            # Info banner
+            info_banner = QLabel(
+                "⚠️ IMPORTANT: When you add a pre-evolution, that Digimon gains a new evolution target.\n"
+                "Each Digimon can only have 6 evolution targets maximum!"
+            )
+            info_banner.setStyleSheet("background-color: #fff3cd; padding: 10px; border-radius: 6px; color: #856404;")
+            info_banner.setWordWrap(True)
+            layout.addWidget(info_banner)
             
             # Search box
             search_label = QLabel("Search:")
@@ -2009,13 +2075,33 @@ class EvolutionPage(QWizardPage):
             layout.addWidget(search_label)
             layout.addWidget(search_edit)
             
+            # Evolution count display
+            self.evo_count_label = QLabel("Select a Digimon to see their evolution count")
+            self.evo_count_label.setStyleSheet("padding: 5px; font-style: italic; color: #666;")
+            layout.addWidget(self.evo_count_label)
+            
             # Digimon list
             digimon_list = QListWidget()
             layout.addWidget(QLabel("Available Digimon:"))
             layout.addWidget(digimon_list)
             
-            # Populate Digimon list
-            self.populate_digimon_list(digimon_list)
+            # Populate Digimon list with evolution counts
+            self.populate_digimon_list_with_evo_count(digimon_list)
+            
+            # Update count on selection
+            def update_evo_count():
+                current = digimon_list.currentItem()
+                if current:
+                    data = current.data(100)  # Qt.UserRole
+                    if data:
+                        from_id = data.get('id', 0)
+                        count = self.get_evolution_count_for_digimon(from_id)
+                        status = "✅ Can add" if count < 6 else "❌ FULL - Cannot add!"
+                        color = "#28a745" if count < 6 else "#dc3545"
+                        self.evo_count_label.setText(f"Evolution slots: {count}/6 — {status}")
+                        self.evo_count_label.setStyleSheet(f"padding: 5px; font-weight: bold; color: {color};")
+            
+            digimon_list.currentItemChanged.connect(lambda: update_evo_count())
             
             # Filter on search
             def filter_digimon(text):
@@ -2026,7 +2112,7 @@ class EvolutionPage(QWizardPage):
             search_edit.textChanged.connect(filter_digimon)
             
             # Custom ID option (for mod Digimon not in base game)
-            custom_id_group = QGroupBox("Or Enter Custom ID")
+            custom_id_group = QGroupBox("Or Enter Custom ID (for modded Digimon)")
             custom_id_layout = QHBoxLayout()
             custom_id_label = QLabel("Digimon ID:")
             custom_id_spin = QSpinBox()
@@ -2154,6 +2240,137 @@ class EvolutionPage(QWizardPage):
             digimon_list.clear()
             digimon_list.addItem(f"Error loading Digimon list: {str(e)}")
     
+    def populate_digimon_list_with_evo_count(self, digimon_list: QListWidget):
+        """Populate list with all available Digimon including evolution slot count"""
+        try:
+            # Show loading message
+            digimon_list.clear()
+            digimon_list.addItem("Loading Digimon list with evolution counts...")
+            QApplication.processEvents()
+            
+            chr_ids = self.wizard.loader.get_all_digimon_chr_ids()
+            
+            # Also get DLC Digimon
+            try:
+                dlc_chr_ids = self.wizard.loader.get_all_digimon_chr_ids(from_dlc=True)
+                chr_ids.extend(dlc_chr_ids)
+            except:
+                pass
+            
+            # Remove duplicates
+            chr_ids = list(dict.fromkeys(chr_ids))
+            
+            # Cache status file data
+            id_cache = {}
+            try:
+                status_file = self.wizard.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                if status_file.exists():
+                    rows = self.wizard.loader.load_csv(status_file)
+                    for row in rows[1:]:
+                        if len(row) > 3 and row[3]:
+                            chr_id = row[3].strip('"')
+                            if len(row) > 0 and row[0]:
+                                try:
+                                    digimon_id = int(row[0])
+                                    id_cache[chr_id] = digimon_id
+                                except:
+                                    pass
+                
+                # Load DLC IDs
+                dlc_exporter = DLCExporter(self.wizard.loader)
+                dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
+                dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+                if dlc_status_file.exists():
+                    rows = self.wizard.loader.load_csv(dlc_status_file)
+                    for row in rows[1:]:
+                        if len(row) > 3 and row[3]:
+                            chr_id = row[3].strip('"')
+                            if len(row) > 0 and row[0]:
+                                try:
+                                    digimon_id = int(row[0])
+                                    id_cache[chr_id] = digimon_id
+                                except:
+                                    pass
+            except Exception as e:
+                print(f"Error caching IDs: {e}")
+            
+            # Count evolutions for each Digimon
+            evo_counts = {}
+            try:
+                evolution_to_file = self.wizard.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+                if evolution_to_file.exists():
+                    rows = self.wizard.loader.load_csv(evolution_to_file)
+                    for row in rows[1:]:
+                        if len(row) > 1 and row[1]:
+                            try:
+                                source_id = int(row[1])
+                                evo_counts[source_id] = evo_counts.get(source_id, 0) + 1
+                            except:
+                                pass
+                
+                # Also count DLC evolutions
+                dlc_evo_file = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+                if dlc_evo_file.exists():
+                    rows = self.wizard.loader.load_csv(dlc_evo_file)
+                    for row in rows[1:]:
+                        if len(row) > 1 and row[1]:
+                            try:
+                                source_id = int(row[1])
+                                evo_counts[source_id] = evo_counts.get(source_id, 0) + 1
+                            except:
+                                pass
+            except Exception as e:
+                print(f"Error counting evolutions: {e}")
+            
+            digimon_list.clear()
+            
+            loaded_count = 0
+            for chr_id in chr_ids:
+                try:
+                    name = self.wizard.loader._get_digimon_name_by_chr_id(chr_id)
+                    if not name or name == chr_id:
+                        name = chr_id
+                    
+                    digimon_id = id_cache.get(chr_id, 0)
+                    evo_count = evo_counts.get(digimon_id, 0)
+                    
+                    # Show slot status
+                    if evo_count >= 6:
+                        status = "❌ FULL"
+                        style_hint = "full"
+                    elif evo_count >= 5:
+                        status = f"⚠️ {evo_count}/6"
+                        style_hint = "warning"
+                    else:
+                        status = f"✅ {evo_count}/6"
+                        style_hint = "ok"
+                    
+                    item = QListWidgetItem(f"{name} [{status}] (ID: {digimon_id})")
+                    item.setData(100, {'id': digimon_id, 'chr_id': chr_id, 'evo_count': evo_count})
+                    
+                    # Color code items
+                    if style_hint == "full":
+                        item.setForeground(Qt.GlobalColor.red)
+                    elif style_hint == "warning":
+                        item.setForeground(Qt.GlobalColor.darkYellow)
+                    
+                    digimon_list.addItem(item)
+                    loaded_count += 1
+                    
+                    if loaded_count % 50 == 0:
+                        QApplication.processEvents()
+                except Exception as e:
+                    continue
+            
+            if digimon_list.count() == 0:
+                digimon_list.addItem("(No Digimon found)")
+        except Exception as e:
+            print(f"Error loading Digimon list with evo counts: {e}")
+            import traceback
+            traceback.print_exc()
+            digimon_list.clear()
+            digimon_list.addItem(f"Error: {str(e)}")
+    
     def add_evolution_path(self, to_id: int, to_chr_id: str):
         """Add an evolution path (no longer needs per-path requirements)"""
         try:
@@ -2191,13 +2408,32 @@ class EvolutionPage(QWizardPage):
             QMessageBox.warning(self, "Error", f"Failed to add evolution path: {str(e)}")
     
     def add_pre_evolution_source(self, from_id: int, from_chr_id: str):
-        """Add a pre-evolution source"""
+        """Add a pre-evolution source (creates an evolution from that Digimon to this one)"""
         try:
             # Check if already exists
             for deevo in self.deevolution_sources:
                 if deevo.get('from_id') == from_id:
                     QMessageBox.information(self, "Already Added", f"This pre-evolution already exists.")
                     return
+            
+            # Check the 6-evolution limit for the source Digimon
+            evo_count = self.get_evolution_count_for_digimon(from_id)
+            if evo_count >= 6:
+                from_name = self.wizard.loader._get_digimon_name_by_chr_id(from_chr_id)
+                if not from_name or from_name == from_chr_id:
+                    from_name = f"Unknown (ID: {from_id})"
+                
+                QMessageBox.warning(
+                    self,
+                    "Evolution Limit Reached",
+                    f"❌ Cannot add pre-evolution!\n\n"
+                    f"{from_name} already has 6 evolution targets.\n\n"
+                    f"Each Digimon can only have 6 evolutions maximum.\n"
+                    f"Adding this pre-evolution would make {from_name} evolve into your Digimon, "
+                    f"but they have no available evolution slots.\n\n"
+                    f"Choose a different Digimon with available slots."
+                )
+                return
             
             # Get Digimon name
             from_name = self.wizard.loader._get_digimon_name_by_chr_id(from_chr_id)
@@ -2215,7 +2451,8 @@ class EvolutionPage(QWizardPage):
             if self.deevolution_list.count() == 1 and self.deevolution_list.item(0).text().startswith("(No pre-evolution"):
                 self.deevolution_list.clear()
             
-            self.deevolution_list.addItem(f"← {from_name} (ID: {from_id})")
+            remaining_slots = 5 - evo_count  # After adding this one
+            self.deevolution_list.addItem(f"← {from_name} (ID: {from_id}) [{evo_count + 1}/6 slots used]")
         except Exception as e:
             print(f"Error adding pre-evolution: {e}")
             import traceback
@@ -2268,6 +2505,8 @@ class EvolutionPage(QWizardPage):
         mode_combo.addItem("Rank 6", 6)
         mode_combo.addItem("Rank 7", 7)
         mode_combo.addItem("Rank 8", 8)
+        mode_combo.addItem("Rank 9", 9)
+        mode_combo.addItem("Rank 10", 10)
         mode_combo.setCurrentIndex(0)  # Default to Rank 1
         mode_layout.addWidget(mode_combo)
         mode_group.setLayout(mode_layout)
@@ -4492,9 +4731,36 @@ class DigimonEditor(QMainWindow):
         layout.addWidget(evo_group)
         
         # Pre-evolution section
-        deevo_group = QGroupBox("⬅️ Pre-Evolutions (What evolves into this Digimon)")
+        deevo_group = QGroupBox("⬅️ Pre-Evolutions (Digimon that evolve INTO this one)")
         deevo_group.setStyleSheet("QGroupBox { font-weight: bold; font-size: 11pt; }")
         deevo_layout = QVBoxLayout()
+        
+        deevo_info = QLabel(
+            "💡 Adding a pre-evolution creates an evolution entry where THAT Digimon evolves into THIS one.\n"
+            "⚠️ Each Digimon can only have 6 evolution targets maximum!"
+        )
+        deevo_info.setWordWrap(True)
+        deevo_info.setStyleSheet("""
+            color: #856404;
+            font-size: 9pt;
+            padding: 8px;
+            background-color: #fff3cd;
+            border-radius: 4px;
+        """)
+        deevo_layout.addWidget(deevo_info)
+        
+        # Buttons for adding/removing pre-evolutions
+        deevo_buttons = QHBoxLayout()
+        add_deevo_btn = QPushButton("➕ Add Pre-Evolution")
+        add_deevo_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        add_deevo_btn.clicked.connect(self.add_pre_evolution)
+        remove_deevo_btn = QPushButton("➖ Remove Selected")
+        remove_deevo_btn.setStyleSheet("padding: 8px; font-size: 11pt;")
+        remove_deevo_btn.clicked.connect(self.remove_pre_evolution)
+        deevo_buttons.addWidget(add_deevo_btn)
+        deevo_buttons.addWidget(remove_deevo_btn)
+        deevo_buttons.addStretch()
+        deevo_layout.addLayout(deevo_buttons)
         
         self.deevolution_list = QListWidget()
         self.deevolution_list.setMinimumHeight(120)
@@ -4510,24 +4776,15 @@ class DigimonEditor(QMainWindow):
                 border-radius: 4px;
                 margin: 2px;
             }
+            QListWidget::item:selected {
+                background-color: #e1bee7;
+                color: #1a1a1a;
+            }
             QListWidget::item:hover {
                 background-color: #f3e5f5;
             }
         """)
         deevo_layout.addWidget(self.deevolution_list)
-        
-        deevo_info = QLabel("ℹ️ Read-only - Automatically determined by other Digimon's evolution paths")
-        deevo_info.setWordWrap(True)
-        deevo_info.setStyleSheet("""
-            color: #666;
-            font-style: italic;
-            font-size: 9pt;
-            padding: 8px;
-            background-color: #fff9e6;
-            border-radius: 4px;
-            border-left: 3px solid #ffc107;
-        """)
-        deevo_layout.addWidget(deevo_info)
         
         deevo_group.setLayout(deevo_layout)
         layout.addWidget(deevo_group)
@@ -5948,9 +6205,9 @@ class DigimonEditor(QMainWindow):
                 evolution_file = base_path / "patch" / "data" / "evolution.mbe"
                 digimon.evolution_paths, digimon.evolution_conditions = self._load_evolution_from_csv(evolution_file, digimon.id)
                 
-                # Load de-evolution (chronodevolution) data
-                chronodev_file = base_path / "patch" / "data" / "evolution.mbe"
-                digimon.deevolution_sources = self._load_chronodevolution_from_csv(chronodev_file, digimon.id)
+                # Load pre-evolutions from evolution_to.csv (Digimon that evolve INTO this one)
+                evolution_file_path = base_path / "patch" / "data" / "evolution.mbe"
+                digimon.deevolution_sources = self._load_preevolutions_from_csv(evolution_file_path, digimon.id)
                 
                 # Load tribe/belong data
                 belong_file = base_path / "patch_text01" / "text" / "belong.mbe"
@@ -6127,31 +6384,42 @@ class DigimonEditor(QMainWindow):
         
         return evolution_paths, evolution_conditions
     
-    def _load_chronodevolution_from_csv(self, base_path: Path, digimon_id: int):
-        """Load de-evolution (chronodevolution) data from CSV"""
+    def _load_preevolutions_from_csv(self, base_path: Path, digimon_id: int):
+        """Load pre-evolutions from evolution_to.csv
+        
+        Pre-evolutions are Digimon that evolve INTO this Digimon.
+        In evolution_to.csv:
+        - Column 1 = source Digimon ID (the one that evolves)
+        - Column 3 = target Digimon ID (what it evolves into)
+        
+        So pre-evolutions are entries where column 3 == digimon_id
+        """
         import csv
         
-        deevolution_sources = []
+        preevolution_sources = []
         
-        chrono_file = base_path / "002_chronodevolution.ap.csv"
-        if chrono_file.exists():
+        evo_file = base_path / "001_evolution_to.ap.csv"
+        if evo_file.exists():
             try:
-                with open(chrono_file, 'r', encoding='utf-8') as f:
+                with open(evo_file, 'r', encoding='utf-8') as f:
                     reader = csv.reader(f)
                     next(reader)  # Skip header
                     for row in reader:
-                        if len(row) >= 3:
-                            from_id = int(row[0]) if row[0] else 0
-                            if from_id == digimon_id:
-                                # Columns 2-7 are de-evolution targets
-                                for i in range(2, min(8, len(row))):
-                                    target_id = int(row[i]) if row[i] and row[i] != '-1' else 0
-                                    if target_id > 0:
-                                        deevolution_sources.append({'from_id': target_id})
+                        if len(row) >= 4:
+                            source_id = int(row[1]) if row[1] else 0
+                            target_id = int(row[3]) if row[3] else 0
+                            evo_type = int(row[5]) if len(row) > 5 and row[5] else 0
+                            
+                            # If this Digimon is the TARGET, then source is a pre-evolution
+                            if target_id == digimon_id and source_id > 0:
+                                preevolution_sources.append({
+                                    'from_id': source_id,
+                                    'evolution_type': evo_type
+                                })
             except Exception as e:
-                print(f"Error loading chronodevolution: {e}")
+                print(f"Error loading pre-evolutions: {e}")
         
-        return deevolution_sources
+        return preevolution_sources
     
     def _load_tribe_from_csv(self, base_path: Path, digimon_id: int) -> str:
         """Load tribe/belong data from CSV"""
@@ -6777,6 +7045,8 @@ class DigimonEditor(QMainWindow):
         mode_combo.addItem("Rank 6", 6)
         mode_combo.addItem("Rank 7", 7)
         mode_combo.addItem("Rank 8", 8)
+        mode_combo.addItem("Rank 9", 9)
+        mode_combo.addItem("Rank 10", 10)
         # Set existing rank
         existing_mode = existing_conditions.get('mode', 1)
         mode_combo.setCurrentIndex(mode_combo.findData(existing_mode) if mode_combo.findData(existing_mode) >= 0 else 0)
@@ -7032,7 +7302,222 @@ class DigimonEditor(QMainWindow):
                 self.update_evolution_tab(self.current_digimon)
                 QMessageBox.information(self, "Success", "Evolution removed")
     
+    def get_evolution_count_for_digimon(self, digimon_id: int) -> int:
+        """Count how many evolution targets a Digimon has"""
+        count = 0
+        
+        try:
+            # Check base game evolution_to.csv
+            evolution_to_file = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            if evolution_to_file.exists():
+                rows = self.loader.load_csv(evolution_to_file)
+                for row in rows[1:]:
+                    if len(row) > 1 and row[1] == str(digimon_id):
+                        count += 1
+            
+            # Also check DLC files
+            dlc_path = self.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            if dlc_path.exists():
+                rows = self.loader.load_csv(dlc_path)
+                for row in rows[1:]:
+                    if len(row) > 1 and row[1] == str(digimon_id):
+                        count += 1
+        except Exception as e:
+            print(f"Error counting evolutions: {e}")
+        
+        # Also count pending pre-evolutions we've added that use this Digimon as source
+        if self.current_digimon:
+            for deevo in self.current_digimon.deevolution_sources:
+                if deevo.get('from_id') == digimon_id:
+                    count += 1
+        
+        return count
     
+    def add_pre_evolution(self):
+        """Add a pre-evolution (a Digimon that evolves INTO this one)"""
+        if not self.current_digimon:
+            QMessageBox.warning(self, "Warning", "Please select a Digimon first")
+            return
+        
+        # Create dialog to select source Digimon
+        dialog = QDialog(self)
+        dialog.setWindowTitle("Add Pre-Evolution")
+        dialog.setMinimumSize(550, 550)
+        layout = QVBoxLayout(dialog)
+        
+        # Info banner
+        info_banner = QLabel(
+            "⚠️ Adding a pre-evolution creates an evolution entry where THAT Digimon evolves into THIS one.\n"
+            "Each Digimon can only have 6 evolution targets maximum!"
+        )
+        info_banner.setStyleSheet("background-color: #fff3cd; padding: 10px; border-radius: 6px; color: #856404;")
+        info_banner.setWordWrap(True)
+        layout.addWidget(info_banner)
+        
+        # Search
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText("Search Digimon...")
+        layout.addWidget(search_edit)
+        
+        # Evolution count label
+        evo_count_label = QLabel("Select a Digimon to see their evolution slot count")
+        evo_count_label.setStyleSheet("padding: 5px; font-style: italic; color: #666;")
+        layout.addWidget(evo_count_label)
+        
+        layout.addWidget(QLabel("Select Digimon to add as pre-evolution:"))
+        source_list = QListWidget()
+        layout.addWidget(source_list)
+        
+        # Populate with all Digimon and their evolution counts
+        chr_ids = self.loader.get_all_digimon_chr_ids()
+        
+        # Build ID cache
+        id_cache = {}
+        try:
+            status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+            if status_file.exists():
+                rows = self.loader.load_csv(status_file)
+                for row in rows[1:]:
+                    if len(row) > 3 and row[3]:
+                        chr_id = row[3].strip('"')
+                        if len(row) > 0 and row[0]:
+                            try:
+                                id_cache[chr_id] = int(row[0])
+                            except:
+                                pass
+        except:
+            pass
+        
+        # Count evolutions for each Digimon
+        evo_counts = {}
+        try:
+            evolution_to_file = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            if evolution_to_file.exists():
+                rows = self.loader.load_csv(evolution_to_file)
+                for row in rows[1:]:
+                    if len(row) > 1 and row[1]:
+                        try:
+                            source_id = int(row[1])
+                            evo_counts[source_id] = evo_counts.get(source_id, 0) + 1
+                        except:
+                            pass
+        except:
+            pass
+        
+        for chr_id in chr_ids:
+            name = self.loader._get_digimon_name_by_chr_id(chr_id)
+            if not name:
+                name = chr_id
+            digimon_id = id_cache.get(chr_id, 0)
+            evo_count = evo_counts.get(digimon_id, 0)
+            
+            if evo_count >= 6:
+                status = "❌ FULL"
+            elif evo_count >= 5:
+                status = f"⚠️ {evo_count}/6"
+            else:
+                status = f"✅ {evo_count}/6"
+            
+            item = QListWidgetItem(f"{name} [{status}] (ID: {digimon_id})")
+            item.setData(100, {'id': digimon_id, 'chr_id': chr_id, 'evo_count': evo_count})
+            
+            if evo_count >= 6:
+                item.setForeground(Qt.GlobalColor.red)
+            elif evo_count >= 5:
+                item.setForeground(Qt.GlobalColor.darkYellow)
+            
+            source_list.addItem(item)
+        
+        # Update count on selection
+        def update_evo_count():
+            current = source_list.currentItem()
+            if current:
+                data = current.data(100)
+                if data:
+                    count = data.get('evo_count', 0)
+                    status = "✅ Can add" if count < 6 else "❌ FULL - Cannot add!"
+                    color = "#28a745" if count < 6 else "#dc3545"
+                    evo_count_label.setText(f"Evolution slots: {count}/6 — {status}")
+                    evo_count_label.setStyleSheet(f"padding: 5px; font-weight: bold; color: {color};")
+        
+        source_list.currentItemChanged.connect(lambda: update_evo_count())
+        
+        # Filter
+        def filter_list(text):
+            for i in range(source_list.count()):
+                item = source_list.item(i)
+                item.setHidden(text.lower() not in item.text().lower())
+        search_edit.textChanged.connect(filter_list)
+        
+        buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
+        buttons.accepted.connect(dialog.accept)
+        buttons.rejected.connect(dialog.reject)
+        layout.addWidget(buttons)
+        
+        if dialog.exec() == QDialog.DialogCode.Accepted:
+            current = source_list.currentItem()
+            if current:
+                data = current.data(100)
+                if data:
+                    from_id = data.get('id', 0)
+                    from_chr_id = data.get('chr_id', '')
+                    evo_count = data.get('evo_count', 0)
+                    
+                    # Check limit
+                    if evo_count >= 6:
+                        from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
+                        QMessageBox.warning(
+                            self,
+                            "Evolution Limit Reached",
+                            f"❌ Cannot add pre-evolution!\n\n"
+                            f"{from_name} already has 6 evolution targets.\n"
+                            f"Choose a different Digimon with available slots."
+                        )
+                        return
+                    
+                    # Check if already exists
+                    for deevo in self.current_digimon.deevolution_sources:
+                        if deevo.get('from_id') == from_id:
+                            QMessageBox.information(self, "Already Added", "This pre-evolution already exists.")
+                            return
+                    
+                    # Add pre-evolution
+                    self.current_digimon.deevolution_sources.append({
+                        'from_id': from_id,
+                        'from_chr_id': from_chr_id,
+                        'evolution_type': 0
+                    })
+                    
+                    self.update_evolution_tab(self.current_digimon)
+                    QMessageBox.information(self, "Success", f"Pre-evolution added! {from_chr_id} now evolves into {self.current_digimon.name}")
+    
+    def remove_pre_evolution(self):
+        """Remove selected pre-evolution"""
+        if not self.current_digimon:
+            return
+        
+        current_index = self.deevolution_list.currentRow()
+        if current_index < 0:
+            QMessageBox.warning(self, "Warning", "Please select a pre-evolution to remove")
+            return
+        
+        if current_index < len(self.current_digimon.deevolution_sources):
+            deevo = self.current_digimon.deevolution_sources[current_index]
+            from_id = deevo.get('from_id', 0)
+            from_name = self.loader._get_digimon_name_by_id(from_id) or f"ID {from_id}"
+            
+            reply = QMessageBox.question(
+                self, "Confirm", 
+                f"Remove pre-evolution from {from_name}?\n\n"
+                f"This means {from_name} will no longer evolve into {self.current_digimon.name}.",
+                QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No
+            )
+            if reply == QMessageBox.StandardButton.Yes:
+                self.current_digimon.deevolution_sources.pop(current_index)
+                self.update_evolution_tab(self.current_digimon)
+                QMessageBox.information(self, "Success", "Pre-evolution removed")
+
+
     def export_csv(self):
         """Export all CSV files with any changes made in the editor"""
         # Update current digimon with form data if one is loaded
