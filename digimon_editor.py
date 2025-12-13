@@ -5285,16 +5285,41 @@ class DigimonEditor(QMainWindow):
         # Populate evolution paths with detailed requirements
         for evo in digimon.evolution_paths:
             to_id = evo['to_id']
-            # Try looking up by numeric ID first
-            to_name = self.loader._get_digimon_name_by_id(to_id)
+            to_name = None
+            
+            # First check if we have a stored chr_id in the evolution path (for custom Digimon)
+            to_chr_id = evo.get('to_chr_id') or evo.get('chr_id')
+            
+            # Check imported Digimon first (custom Digimon from dsts-loader)
+            if hasattr(self.loader, 'imported_digimon') and self.loader.imported_digimon:
+                for imported_digimon in self.loader.imported_digimon:
+                    if imported_digimon.id == to_id:
+                        to_name = imported_digimon.name
+                        break
+                    # Also check by chr_id if we have it
+                    if to_chr_id and imported_digimon.chr_id == to_chr_id:
+                        to_name = imported_digimon.name
+                        break
+            
+            # If not found in imported, try standard lookup by numeric ID
             if not to_name:
-                # Fall back to chr_id lookup
-                to_chr_id = f"chr{to_id:03d}"
+                to_name = self.loader._get_digimon_name_by_id(to_id)
+            
+            # If still not found, try chr_id lookup
+            if not to_name:
+                if not to_chr_id:
+                    # Generate chr_id from numeric ID
+                    to_chr_id = f"chr{to_id:03d}"
                 to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
                 if not to_name or to_name == to_chr_id:
                     # Try without padding
-                    to_chr_id = f"chr{to_id}"
-                    to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id)
+                    to_chr_id_alt = f"chr{to_id}"
+                    if to_chr_id_alt != to_chr_id:
+                        to_name = self.loader._get_digimon_name_by_chr_id(to_chr_id_alt)
+                        if to_name and to_name != to_chr_id_alt:
+                            to_chr_id = to_chr_id_alt
+            
+            # Final fallback
             if not to_name:
                 to_name = f"Unknown (ID: {to_id})"
             
@@ -5316,10 +5341,41 @@ class DigimonEditor(QMainWindow):
         # Populate de-evolution sources
         for deevo in digimon.deevolution_sources:
             from_id = deevo['from_id']
-            # Get name by numeric ID
-            from_name = self.loader._get_digimon_name_by_id(from_id)
+            from_name = None
+            
+            # First check imported Digimon (custom Digimon from dsts-loader)
+            if hasattr(self.loader, 'imported_digimon') and self.loader.imported_digimon:
+                for imported_digimon in self.loader.imported_digimon:
+                    if imported_digimon.id == from_id:
+                        from_name = imported_digimon.name
+                        break
+                    # Also check by chr_id if we have it
+                    from_chr_id = deevo.get('from_chr_id')
+                    if from_chr_id and imported_digimon.chr_id == from_chr_id:
+                        from_name = imported_digimon.name
+                        break
+            
+            # If not found in imported, try standard lookup
+            if not from_name:
+                from_name = self.loader._get_digimon_name_by_id(from_id)
+            
+            # Try chr_id lookup as fallback
+            if not from_name:
+                from_chr_id = deevo.get('from_chr_id')
+                if from_chr_id:
+                    from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
+                else:
+                    # Try generating chr_id from ID
+                    from_chr_id = f"chr{from_id:03d}"
+                    from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
+                    if not from_name or from_name == from_chr_id:
+                        from_chr_id = f"chr{from_id}"
+                        from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
+            
+            # Final fallback
             if not from_name:
                 from_name = f"Unknown (ID: {from_id})"
+            
             self.deevolution_list.addItem(f"← {from_name} (ID: {from_id})")
     
     def edit_evolution_requirements(self):
@@ -7016,18 +7072,79 @@ class DigimonEditor(QMainWindow):
         # Create dialog to select target Digimon
         dialog = QDialog(self)
         dialog.setWindowTitle("Add Evolution")
+        dialog.setMinimumSize(550, 600)
         layout = QVBoxLayout(dialog)
         
-        layout.addWidget(QLabel("Select target Digimon:"))
-        target_combo = QComboBox()
+        # Instructions
+        info_label = QLabel("Select a Digimon from the list below, or enter a custom Digimon name/ID in the text field.")
+        info_label.setWordWrap(True)
+        info_label.setStyleSheet("color: #666; padding: 10px; background-color: #f8f9fa; border-radius: 6px;")
+        layout.addWidget(info_label)
+        
+        # Tab widget for list selection vs custom input
+        tab_widget = QTabWidget()
+        
+        # Tab 1: Select from list
+        list_tab = QWidget()
+        list_layout = QVBoxLayout(list_tab)
+        list_layout.addWidget(QLabel("Select target Digimon:"))
+        
+        # Search box
+        search_edit = QLineEdit()
+        search_edit.setPlaceholderText("Search Digimon...")
+        list_layout.addWidget(search_edit)
+        
+        target_list = QListWidget()
+        target_list.setMinimumHeight(300)
         
         # Populate with all Digimon
         chr_ids = self.loader.get_all_digimon_chr_ids()
         for chr_id in chr_ids:
             name = self.loader._get_digimon_name_by_chr_id(chr_id)
-            target_combo.addItem(f"{name} ({chr_id})", chr_id)
+            if not name:
+                name = chr_id
+            # Try to get ID
+            digimon_obj = self.loader.get_digimon_by_chr_id(chr_id)
+            digimon_id = digimon_obj.id if digimon_obj else 0
+            target_list.addItem(f"{name} ({chr_id}) - ID: {digimon_id}")
         
-        layout.addWidget(target_combo)
+        # Filter on search
+        def filter_digimon(text):
+            for i in range(target_list.count()):
+                item = target_list.item(i)
+                if item:
+                    item.setHidden(text.lower() not in item.text().lower())
+        search_edit.textChanged.connect(filter_digimon)
+        
+        list_layout.addWidget(target_list)
+        tab_widget.addTab(list_tab, "Select from List")
+        
+        # Tab 2: Custom input
+        custom_tab = QWidget()
+        custom_layout = QVBoxLayout(custom_tab)
+        
+        custom_info = QLabel("Enter a Digimon by name or ID.\nExamples:\n• Digimon Name: 'Agumon'\n• Chr ID: 'chr050'\n• Numeric ID: '50'")
+        custom_info.setWordWrap(True)
+        custom_info.setStyleSheet("color: #666; padding: 10px; background-color: #e7f5ff; border-radius: 6px;")
+        custom_layout.addWidget(custom_info)
+        
+        custom_input = QLineEdit()
+        custom_input.setPlaceholderText("Enter Digimon name, chr_id (e.g., chr050), or numeric ID")
+        custom_layout.addWidget(QLabel("Custom Digimon:"))
+        custom_layout.addWidget(custom_input)
+        
+        # Also allow custom ID directly
+        custom_id_label = QLabel("Or enter numeric ID directly:")
+        custom_id_spin = QSpinBox()
+        custom_id_spin.setRange(1, 999999)
+        custom_id_spin.setValue(1000)
+        custom_layout.addWidget(custom_id_label)
+        custom_layout.addWidget(custom_id_spin)
+        
+        custom_layout.addStretch()
+        tab_widget.addTab(custom_tab, "Custom Input")
+        
+        layout.addWidget(tab_widget)
         
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept)
@@ -7035,15 +7152,113 @@ class DigimonEditor(QMainWindow):
         layout.addWidget(buttons)
         
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            target_chr_id = target_combo.currentData()
-            # Get target ID from chr_id
-            target_digimon = self.loader.get_digimon_by_chr_id(target_chr_id)
-            if target_digimon:
+            target_digimon_id = None
+            target_chr_id = None
+            
+            if tab_widget.currentIndex() == 0:
+                # List tab selected
+                selected_item = target_list.currentItem()
+                if selected_item:
+                    # Extract chr_id from item text (format: "Name (chr_id) - ID: 123")
+                    item_text = selected_item.text()
+                    # Try to extract chr_id (e.g., "chr050")
+                    import re
+                    chr_match = re.search(r'\(chr\d+\)', item_text)
+                    if chr_match:
+                        target_chr_id = chr_match.group(0)[1:-1]  # Remove parentheses
+                        target_digimon = self.loader.get_digimon_by_chr_id(target_chr_id)
+                        if target_digimon:
+                            target_digimon_id = target_digimon.id
+            else:
+                # Custom tab selected
+                custom_text = custom_input.text().strip()
+                found = False
+                if custom_text:
+                    # First check imported Digimon (custom Digimon from dsts-loader)
+                    if hasattr(self.loader, 'imported_digimon') and self.loader.imported_digimon:
+                        for imported_digimon in self.loader.imported_digimon:
+                            # Check by name (case-insensitive partial match)
+                            if custom_text.lower() in imported_digimon.name.lower():
+                                target_chr_id = imported_digimon.chr_id
+                                target_digimon_id = imported_digimon.id
+                                found = True
+                                break
+                            # Check by chr_id (exact match)
+                            if imported_digimon.chr_id.lower() == custom_text.lower():
+                                target_chr_id = imported_digimon.chr_id
+                                target_digimon_id = imported_digimon.id
+                                found = True
+                                break
+                            # Check by numeric ID
+                            if str(imported_digimon.id) == custom_text:
+                                target_chr_id = imported_digimon.chr_id
+                                target_digimon_id = imported_digimon.id
+                                found = True
+                                break
+                    
+                    # If not found in imported, try standard lookup
+                    if not target_digimon_id:
+                        # Try to find by name first
+                        chr_ids_all = self.loader.get_all_digimon_chr_ids()
+                        found = False
+                        for chr_id in chr_ids_all:
+                            name = self.loader._get_digimon_name_by_chr_id(chr_id)
+                            if name and custom_text.lower() in name.lower():
+                                target_chr_id = chr_id
+                                target_digimon = self.loader.get_digimon_by_chr_id(chr_id)
+                                if target_digimon:
+                                    target_digimon_id = target_digimon.id
+                                    found = True
+                                    break
+                        
+                        # If not found by name, try as chr_id
+                        if not found and (custom_text.startswith('chr') or custom_text.startswith('CHR')):
+                            target_chr_id = custom_text.lower().replace('chr', 'chr')
+                            target_digimon = self.loader.get_digimon_by_chr_id(target_chr_id)
+                            if target_digimon:
+                                target_digimon_id = target_digimon.id
+                        
+                        # If still not found, try as numeric ID
+                        if not found and custom_text.isdigit():
+                            target_digimon_id = int(custom_text)
+                            # Try to find chr_id from ID
+                            try:
+                                status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                                if status_file.exists():
+                                    rows = self.loader.load_csv(status_file)
+                                    for row in rows[1:]:
+                                        if len(row) > 0 and row[0] == str(target_digimon_id):
+                                            if len(row) > 3:
+                                                target_chr_id = row[3].strip('"')
+                                                break
+                            except:
+                                pass
+                
+                # If custom input didn't work, use spinbox value
+                if not target_digimon_id:
+                    target_digimon_id = custom_id_spin.value()
+                    # Generate chr_id from numeric ID
+                    target_chr_id = f"chr{target_digimon_id:03d}"
+            
+            # Add evolution if we have an ID
+            if target_digimon_id:
+                # Check if evolution already exists
+                existing = False
+                for evo in self.current_digimon.evolution_paths:
+                    if evo.get('to_id') == target_digimon_id:
+                        existing = True
+                        break
+                
+                if existing:
+                    QMessageBox.warning(self, "Already Exists", f"Evolution to Digimon ID {target_digimon_id} already exists!")
+                    return
+                
                 # Add to evolution paths
                 new_evo = {
                     'evolution_id': 0,  # Will be assigned when saved
                     'from_id': self.current_digimon.id,
-                    'to_id': target_digimon.id,
+                    'to_id': target_digimon_id,
+                    'to_chr_id': target_chr_id,  # Store chr_id for reference
                     'condition_flags': ['0', '-1', '-1', '-1', '-1', '-1'],
                     'raw_data': []
                 }
@@ -7051,7 +7266,10 @@ class DigimonEditor(QMainWindow):
                 
                 # Refresh the evolution tab
                 self.update_evolution_tab(self.current_digimon)
-                QMessageBox.information(self, "Success", f"Added evolution to {target_digimon.name}")
+                display_name = target_chr_id if target_chr_id else f"ID {target_digimon_id}"
+                QMessageBox.information(self, "Success", f"Added evolution to {display_name}")
+            else:
+                QMessageBox.warning(self, "Invalid Input", "Could not find or parse the Digimon. Please check your input.")
     
     def _show_evolution_requirements_dialog(self, target_name: str, existing_conditions: dict = None):
         """Show comprehensive dialog to configure evolution requirements"""
@@ -7432,19 +7650,53 @@ class DigimonEditor(QMainWindow):
         info_banner.setWordWrap(True)
         layout.addWidget(info_banner)
         
+        # Tab widget for list selection vs custom input
+        tab_widget = QTabWidget()
+        
+        # Tab 1: Select from list
+        list_tab = QWidget()
+        list_layout = QVBoxLayout(list_tab)
+        
         # Search
         search_edit = QLineEdit()
         search_edit.setPlaceholderText("Search Digimon...")
-        layout.addWidget(search_edit)
+        list_layout.addWidget(search_edit)
         
         # Evolution count label
         evo_count_label = QLabel("Select a Digimon to see their evolution slot count")
         evo_count_label.setStyleSheet("padding: 5px; font-style: italic; color: #666;")
-        layout.addWidget(evo_count_label)
+        list_layout.addWidget(evo_count_label)
         
-        layout.addWidget(QLabel("Select Digimon to add as pre-evolution:"))
+        list_layout.addWidget(QLabel("Select Digimon to add as pre-evolution:"))
         source_list = QListWidget()
-        layout.addWidget(source_list)
+        source_list.setMinimumHeight(300)
+        list_layout.addWidget(source_list)
+        tab_widget.addTab(list_tab, "Select from List")
+        
+        # Tab 2: Custom input
+        custom_tab = QWidget()
+        custom_layout = QVBoxLayout(custom_tab)
+        
+        custom_info = QLabel("Enter a Digimon by name or ID.\nExamples:\n• Digimon Name: 'Agumon'\n• Chr ID: 'chr050'\n• Numeric ID: '50'")
+        custom_info.setWordWrap(True)
+        custom_info.setStyleSheet("color: #666; padding: 10px; background-color: #e7f5ff; border-radius: 6px;")
+        custom_layout.addWidget(custom_info)
+        
+        custom_input = QLineEdit()
+        custom_input.setPlaceholderText("Enter Digimon name, chr_id (e.g., chr050), or numeric ID")
+        custom_layout.addWidget(QLabel("Custom Digimon:"))
+        custom_layout.addWidget(custom_input)
+        
+        # Also allow custom ID directly
+        custom_id_label = QLabel("Or enter numeric ID directly:")
+        custom_id_spin = QSpinBox()
+        custom_id_spin.setRange(1, 999999)
+        custom_id_spin.setValue(1000)
+        custom_layout.addWidget(custom_id_label)
+        custom_layout.addWidget(custom_id_spin)
+        
+        custom_layout.addStretch()
+        tab_widget.addTab(custom_tab, "Custom Input")
         
         # Populate with all Digimon and their evolution counts
         chr_ids = self.loader.get_all_digimon_chr_ids()
@@ -7527,47 +7779,138 @@ class DigimonEditor(QMainWindow):
                 item.setHidden(text.lower() not in item.text().lower())
         search_edit.textChanged.connect(filter_list)
         
+        layout.addWidget(tab_widget)
+        
         buttons = QDialogButtonBox(QDialogButtonBox.StandardButton.Ok | QDialogButtonBox.StandardButton.Cancel)
         buttons.accepted.connect(dialog.accept)
         buttons.rejected.connect(dialog.reject)
         layout.addWidget(buttons)
         
         if dialog.exec() == QDialog.DialogCode.Accepted:
-            current = source_list.currentItem()
-            if current:
-                data = current.data(100)
-                if data:
-                    from_id = data.get('id', 0)
-                    from_chr_id = data.get('chr_id', '')
-                    evo_count = data.get('evo_count', 0)
+            from_id = None
+            from_chr_id = None
+            evo_count = 0
+            
+            if tab_widget.currentIndex() == 0:
+                # List tab selected
+                current = source_list.currentItem()
+                if current:
+                    data = current.data(100)
+                    if data:
+                        from_id = data.get('id', 0)
+                        from_chr_id = data.get('chr_id', '')
+                        evo_count = data.get('evo_count', 0)
+            else:
+                # Custom tab selected
+                custom_text = custom_input.text().strip()
+                found = False
+                if custom_text:
+                    # First check imported Digimon (custom Digimon from dsts-loader)
+                    if hasattr(self.loader, 'imported_digimon') and self.loader.imported_digimon:
+                        for imported_digimon in self.loader.imported_digimon:
+                            # Check by name (case-insensitive partial match)
+                            if custom_text.lower() in imported_digimon.name.lower():
+                                from_chr_id = imported_digimon.chr_id
+                                from_id = imported_digimon.id
+                                evo_count = self.get_evolution_count_for_digimon(from_id)
+                                found = True
+                                break
+                            # Check by chr_id (exact match)
+                            if imported_digimon.chr_id.lower() == custom_text.lower():
+                                from_chr_id = imported_digimon.chr_id
+                                from_id = imported_digimon.id
+                                evo_count = self.get_evolution_count_for_digimon(from_id)
+                                found = True
+                                break
+                            # Check by numeric ID
+                            if str(imported_digimon.id) == custom_text:
+                                from_chr_id = imported_digimon.chr_id
+                                from_id = imported_digimon.id
+                                evo_count = self.get_evolution_count_for_digimon(from_id)
+                                found = True
+                                break
                     
-                    # Check limit
-                    if evo_count >= 6:
-                        from_name = self.loader._get_digimon_name_by_chr_id(from_chr_id)
-                        QMessageBox.warning(
-                            self,
-                            "Evolution Limit Reached",
-                            f"❌ Cannot add pre-evolution!\n\n"
-                            f"{from_name} already has 6 evolution targets.\n"
-                            f"Choose a different Digimon with available slots."
-                        )
+                    # If not found in imported, try standard lookup
+                    if not from_id:
+                        # Try to find by name first
+                        chr_ids_all = self.loader.get_all_digimon_chr_ids()
+                        found = False
+                        for chr_id in chr_ids_all:
+                            name = self.loader._get_digimon_name_by_chr_id(chr_id)
+                            if name and custom_text.lower() in name.lower():
+                                from_chr_id = chr_id
+                                digimon_obj = self.loader.get_digimon_by_chr_id(chr_id)
+                                if digimon_obj:
+                                    from_id = digimon_obj.id
+                                    # Check evolution count
+                                    evo_count = self.get_evolution_count_for_digimon(from_id)
+                                    found = True
+                                    break
+                        
+                        # If not found by name, try as chr_id
+                        if not found and (custom_text.startswith('chr') or custom_text.startswith('CHR')):
+                            from_chr_id = custom_text.lower().replace('chr', 'chr')
+                            digimon_obj = self.loader.get_digimon_by_chr_id(from_chr_id)
+                            if digimon_obj:
+                                from_id = digimon_obj.id
+                                evo_count = self.get_evolution_count_for_digimon(from_id)
+                        
+                        # If still not found, try as numeric ID
+                        if not found and custom_text.isdigit():
+                            from_id = int(custom_text)
+                            # Try to find chr_id from ID
+                            try:
+                                status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                                if status_file.exists():
+                                    rows = self.loader.load_csv(status_file)
+                                    for row in rows[1:]:
+                                        if len(row) > 0 and row[0] == str(from_id):
+                                            if len(row) > 3:
+                                                from_chr_id = row[3].strip('"')
+                                                break
+                            except:
+                                pass
+                            if from_id:
+                                evo_count = self.get_evolution_count_for_digimon(from_id)
+                
+                # If custom input didn't work, use spinbox value
+                if not from_id:
+                    from_id = custom_id_spin.value()
+                    # Generate chr_id from numeric ID
+                    from_chr_id = f"chr{from_id:03d}"
+                    evo_count = self.get_evolution_count_for_digimon(from_id)
+            
+            if from_id:
+                # Check limit
+                if evo_count >= 6:
+                    from_name = self.loader._get_digimon_name_by_id(from_id) or f"ID {from_id}"
+                    QMessageBox.warning(
+                        self,
+                        "Evolution Limit Reached",
+                        f"❌ Cannot add pre-evolution!\n\n"
+                        f"{from_name} already has 6 evolution targets.\n"
+                        f"Choose a different Digimon with available slots."
+                    )
+                    return
+                
+                # Check if already exists
+                for deevo in self.current_digimon.deevolution_sources:
+                    if deevo.get('from_id') == from_id:
+                        QMessageBox.information(self, "Already Added", "This pre-evolution already exists.")
                         return
-                    
-                    # Check if already exists
-                    for deevo in self.current_digimon.deevolution_sources:
-                        if deevo.get('from_id') == from_id:
-                            QMessageBox.information(self, "Already Added", "This pre-evolution already exists.")
-                            return
-                    
-                    # Add pre-evolution
-                    self.current_digimon.deevolution_sources.append({
-                        'from_id': from_id,
-                        'from_chr_id': from_chr_id,
-                        'evolution_type': 0
-                    })
-                    
-                    self.update_evolution_tab(self.current_digimon)
-                    QMessageBox.information(self, "Success", f"Pre-evolution added! {from_chr_id} now evolves into {self.current_digimon.name}")
+                
+                # Add pre-evolution
+                self.current_digimon.deevolution_sources.append({
+                    'from_id': from_id,
+                    'from_chr_id': from_chr_id or f"chr{from_id:03d}",
+                    'evolution_type': 0
+                })
+                
+                self.update_evolution_tab(self.current_digimon)
+                display_name = from_chr_id if from_chr_id else f"ID {from_id}"
+                QMessageBox.information(self, "Success", f"Pre-evolution added! {display_name} now evolves into {self.current_digimon.name}")
+            else:
+                QMessageBox.warning(self, "Invalid Input", "Could not find or parse the Digimon. Please check your input.")
     
     def remove_pre_evolution(self):
         """Remove selected pre-evolution"""
