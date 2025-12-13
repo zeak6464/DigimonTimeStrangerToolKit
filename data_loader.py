@@ -62,6 +62,8 @@ class DigimonData:
     # Model and animation data
     model_id: str = ""
     motion_id: str = ""
+    model_type: int = 1  # Column 121: Model type (1-4)
+    animation_set: int = 1  # Column 122: Animation set (1-8)
     lod_data: Dict[str, Any] = field(default_factory=dict)
     
     # Field guide and script references
@@ -2026,8 +2028,9 @@ class MBELoader:
         for i, row in enumerate(rows[1:], 1):  # Skip header
             if len(row) > 0 and int(row[0]) == skill_id:
                 # Update the row with new data
-                if len(row) > 4: row[4] = str(skill_data.get("name_id", 0))
+                if len(row) > 4: row[4] = str(skill_data.get("name_id", skill_id))  # Use skill_id as name_id if not specified
                 if len(row) > 5: row[5] = str(skill_data.get("description_id", 0))
+                if len(row) > 33: row[33] = str(skill_data.get("target_type", 1))  # Save target_type (column 33)
                 if len(row) > 22: row[22] = str(skill_data.get("damage_type", 0))
                 if len(row) > 23: row[23] = str(skill_data.get("power", 0))
                 if len(row) > 26: row[26] = str(skill_data.get("additional_property_1", 0))
@@ -2057,9 +2060,71 @@ class MBELoader:
             with open(skill_file, 'w', encoding='utf-8') as f:
                 for row in rows:
                     f.write(','.join(row) + '\n')
+            
+            # Save skill name if provided
+            if "skill_name" in skill_data and skill_data["skill_name"]:
+                self.save_skill_name(skill_id, skill_data["skill_name"])
+            
+            # Save target_type if provided
+            if "target_type" in skill_data:
+                # Update target_type in the skill row (column 33)
+                for i, row in enumerate(rows[1:], 1):
+                    if len(row) > 0 and int(row[0]) == skill_id:
+                        if len(row) > 33:
+                            row[33] = str(skill_data.get("target_type", 1))
+                        # Write back again with target_type
+                        with open(skill_file, 'w', encoding='utf-8') as f:
+                            for write_row in rows:
+                                f.write(','.join(write_row) + '\n')
+                        break
+            
             return True
         except Exception as e:
             print(f"Error saving skill data: {e}")
+            return False
+    
+    def save_skill_name(self, skill_id: int, skill_name: str) -> bool:
+        """Save skill name to skill_name.mbe text file (English only for now)"""
+        if not skill_name or not skill_id:
+            return False
+        
+        try:
+            # Save to English text file (patch_text01)
+            skill_name_file = self.text_path / "skill_name.mbe" / "00_Sheet1.csv"
+            
+            # Create directory if it doesn't exist
+            skill_name_file.parent.mkdir(parents=True, exist_ok=True)
+            
+            # Load existing file or create new
+            rows = []
+            if skill_name_file.exists():
+                rows = self.load_csv(skill_name_file)
+            else:
+                # Create header
+                rows = [['string2 0', 'string 1']]
+            
+            # Find and update or add skill name
+            found = False
+            for i, row in enumerate(rows[1:], 1):
+                if len(row) > 0 and row[0].strip('"') == str(skill_id):
+                    rows[i] = [f'"{skill_id}"', f'"{skill_name}"']
+                    found = True
+                    break
+            
+            if not found:
+                rows.append([f'"{skill_id}"', f'"{skill_name}"'])
+            
+            # Write back to file
+            with open(skill_name_file, 'w', encoding='utf-8', newline='') as f:
+                for row in rows:
+                    f.write(','.join(row) + '\n')
+            
+            # Clear cache so new name is loaded
+            self._skill_names_cache = None
+            
+            return True
+        except Exception as e:
+            print(f"Error saving skill name: {e}")
             return False
     
     # Advanced Skill System Methods

@@ -618,8 +618,8 @@ class DigimonCreationWizard(QWizard):
         
         parts.extend([
             "2",  # 120 - Size category
-            "1",  # 121 - Model type
-            "1",  # 122 - Animation set
+            str(digimon.model_type) if hasattr(digimon, 'model_type') else "1",  # 121 - Model type
+            str(digimon.animation_set) if hasattr(digimon, 'animation_set') else "1",  # 122 - Animation set
             "0",  # 123 - Model scale override (float, 0 = normal)
             "true",  # 124 - Boolean flag
             "false",  # 125 - Boolean flag
@@ -628,9 +628,9 @@ class DigimonCreationWizard(QWizard):
             "0",  # 128 - Color/Palette ID (0 for new Digimon)
             "0",  # 129 - Texture/Material ID (0 for new Digimon)
             "0",  # 130 - Model Variant (0 for new Digimon)
-            "-1",  # 131 - Field Guide ID (-1 = not in guide)
-            str(digimon.id),  # 132 - Self-Reference ID (MUST match Column 0)
-            "-1",  # 133 - Reserved (always -1)
+            str(digimon.field_guide_id),  # 131 - Field Guide ID (-1 = none, 0+ = valid ID)
+            str(digimon.script_id),  # 132 - Script ID (internal ID for scripts, -1 = none, 0+ = valid ID)
+            "-1",  # 133 - Reserved (don't touch)
             "0",  # 134 - Reserved (always 0)
             "-1"  # 135 - Reserved (always -1)
         ])
@@ -3452,7 +3452,11 @@ class DigimonEditor(QMainWindow):
         
         self.export_button = QPushButton("📄 Export CSV")
         self.export_button.clicked.connect(self.export_csv)
-        self.export_button.setToolTip("Export the current Digimon to CSV format\nUseful for backup or manual editing")
+        self.export_button.setToolTip(
+            "Export CSV files\n"
+            "⚠️ WARNING: This will DELETE and replace all existing files in the destination directory!\n"
+            "Only data currently in your DLC folder will be exported."
+        )
         self.export_button.setStyleSheet(button_style.format(
             color1="#fa709a", color2="#fee140",
             hover1="#e85c89", hover2="#ecd32f"
@@ -4140,9 +4144,23 @@ class DigimonEditor(QMainWindow):
         skill_name_prefix.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
         skill_selection_layout.addWidget(skill_name_prefix)
         
-        self.advanced_skill_name_label = QLabel("(No skill selected)")
-        self.advanced_skill_name_label.setStyleSheet("font-weight: bold; color: #667eea; font-size: 11pt;")
-        skill_selection_layout.addWidget(self.advanced_skill_name_label)
+        self.advanced_skill_name_edit = QLineEdit()
+        self.advanced_skill_name_edit.setPlaceholderText("(No skill selected)")
+        self.advanced_skill_name_edit.setMinimumWidth(250)
+        self.advanced_skill_name_edit.setStyleSheet("""
+            QLineEdit {
+                font-weight: bold;
+                color: #667eea;
+                font-size: 11pt;
+                border: 2px solid #dee2e6;
+                border-radius: 6px;
+                padding: 6px;
+            }
+            QLineEdit:focus {
+                border-color: #667eea;
+            }
+        """)
+        skill_selection_layout.addWidget(self.advanced_skill_name_edit)
         
         skill_selection_layout.addStretch()
         layout.addWidget(skill_selection_group)
@@ -6176,6 +6194,40 @@ class DigimonEditor(QMainWindow):
                         if skill_id > 0:
                             digimon.generic_skills.append({'id': skill_id, 'level': level})
                 
+                # Parse model type and animation set (columns 121-122)
+                if len(row) > 122:
+                    digimon.model_type = int(row[121]) if row[121] else 1  # Column 121: Model type
+                    digimon.animation_set = int(row[122]) if row[122] else 1  # Column 122: Animation set
+                    print(f"DEBUG: Loaded model_type: {digimon.model_type}, animation_set: {digimon.animation_set}")
+                
+                # Parse field guide ID (column 131)
+                if len(row) > 131:
+                    field_guide_val = row[131].strip() if row[131] else ""
+                    if field_guide_val:
+                        try:
+                            digimon.field_guide_id = int(field_guide_val)
+                        except (ValueError, TypeError):
+                            digimon.field_guide_id = -1
+                    else:
+                        digimon.field_guide_id = -1
+                    print(f"DEBUG: Loaded field_guide_id: {digimon.field_guide_id} from column 131 (raw value: '{row[131] if len(row) > 131 else 'N/A'}')")
+                else:
+                    digimon.field_guide_id = -1
+                
+                # Parse script ID (column 132)
+                if len(row) > 132:
+                    script_val = row[132].strip() if row[132] else ""
+                    if script_val:
+                        try:
+                            digimon.script_id = int(script_val)
+                        except (ValueError, TypeError):
+                            digimon.script_id = -1
+                    else:
+                        digimon.script_id = -1
+                    print(f"DEBUG: Loaded script_id: {digimon.script_id} from column 132 (raw value: '{row[132] if len(row) > 132 else 'N/A'}')")
+                else:
+                    digimon.script_id = -1
+                
                 # Load name from char_name
                 name_file = base_path / "patch_text01" / "text" / "char_name.mbe"
                 digimon.name = self._load_name_from_csv(name_file, digimon.char_key)
@@ -6251,14 +6303,21 @@ class DigimonEditor(QMainWindow):
                     reader = csv.reader(f)
                     next(reader)  # Skip header
                     for row in reader:
-                        if len(row) >= 1 and row[0] == char_key:
-                            # Extract relevant fields
+                        if len(row) >= 1 and row[0].strip('"') == char_key:
+                            # Extract relevant fields and strip quotes
+                            # Column 3: Model ID (model_ref)
+                            # Column 8: Audio ID (motion_ref)
+                            model_ref = row[3].strip('"') if len(row) > 3 and row[3] else ""
+                            motion_ref = row[8].strip('"') if len(row) > 8 and row[8] else ""
+                            print(f"DEBUG: Found char_info for {char_key} - motion_ref (col8): '{motion_ref}', model_ref (col3): '{model_ref}'")
                             return {
-                                'motion_ref': row[8] if len(row) > 8 else "",  # Column 8: motion_ref
-                                'model_ref': row[10] if len(row) > 10 else ""  # Column 10: model_ref
+                                'motion_ref': motion_ref,  # Column 8: Audio ID (motion_ref)
+                                'model_ref': model_ref  # Column 3: Model ID (model_ref)
                             }
-            except:
+            except Exception as e:
+                print(f"DEBUG: Error loading char_info from {csv_file}: {e}")
                 continue
+        print(f"DEBUG: No char_info found for char_key: {char_key}")
         return {}
     
     def _load_profile_from_csv(self, base_path: Path, digimon_id: int) -> str:
@@ -6792,7 +6851,7 @@ class DigimonEditor(QMainWindow):
             QMessageBox.warning(self, "Error", "Failed to export to DLC")
     
     def save_to_dsts_loader(self, digimon: DigimonData):
-        """Save Digimon back to dsts-loader format"""
+        """Save Digimon back to dsts-loader format (merges with existing data)"""
         from pathlib import Path
         
         # Ask user to select dsts-loader directory
@@ -6808,19 +6867,38 @@ class DigimonEditor(QMainWindow):
         if not loader_dir:
             return
         
-        # Use the wizard's export methods
-        wizard = DigimonCreationWizard(self, self.loader)
-        animation_ref = self.animation_ref_edit.text().strip() if self.animation_ref_edit.text().strip() else digimon.chr_id
+        # Update form data before saving
+        self.update_digimon_from_form()
         
-        if wizard._export_to_dsts_loader(Path(loader_dir), digimon, animation_ref):
+        output_path = Path(loader_dir)
+        
+        # Check if destination already has files
+        patch_data_dir = output_path / "patch" / "data"
+        has_existing = False
+        if patch_data_dir.exists():
+            status_file = patch_data_dir / "digimon_status.mbe" / "000_digimon_status_data.ap.csv"
+            if status_file.exists():
+                has_existing = True
+        
+        # Always use merge mode to preserve other Digimon data
+        if self._merge_digimon_to_dsts_loader(output_path, digimon):
             self.clear_modified_flag()
-            QMessageBox.information(
-                self,
-                "Success! ✅",
-                f"✅ {digimon.name} has been saved to dsts-loader format!\n\n"
-                f"Location: {loader_dir}\n\n"
-                "All .ap.csv files have been updated."
-            )
+            if has_existing:
+                QMessageBox.information(
+                    self,
+                    "Success! ✅",
+                    f"✅ {digimon.name} has been updated in dsts-loader!\n\n"
+                    f"Location: {loader_dir}\n\n"
+                    "Other Digimon data was preserved."
+                )
+            else:
+                QMessageBox.information(
+                    self,
+                    "Success! ✅",
+                    f"✅ {digimon.name} has been saved to dsts-loader format!\n\n"
+                    f"Location: {loader_dir}\n\n"
+                    "All .ap.csv files have been created."
+                )
         else:
             QMessageBox.warning(self, "Error", "Failed to save to dsts-loader format")
     
@@ -7554,6 +7632,91 @@ class DigimonEditor(QMainWindow):
                 if clicked == dsts_button:
                     use_dsts_format = True
             
+            # If we have a current Digimon and dsts-loader format, offer merge option
+            if use_dsts_format and self.current_digimon:
+                # Check if destination already has files
+                patch_data_dir = output_path / "patch" / "data"
+                has_existing = False
+                if patch_data_dir.exists():
+                    status_file = patch_data_dir / "digimon_status.mbe" / "000_digimon_status_data.ap.csv"
+                    if status_file.exists():
+                        has_existing = True
+                
+                if has_existing:
+                    # Offer merge vs overwrite
+                    merge_dialog = QMessageBox(self)
+                    merge_dialog.setWindowTitle("Export to dsts-loader")
+                    merge_dialog.setText(
+                        f"Found existing Digimon data in {directory}.\n\n"
+                        "How would you like to export?"
+                    )
+                    merge_dialog.setIcon(QMessageBox.Icon.Question)
+                    merge_button = merge_dialog.addButton("Merge (Update Current Digimon Only)", QMessageBox.ButtonRole.AcceptRole)
+                    overwrite_button = merge_dialog.addButton("Overwrite All (Replace Everything)", QMessageBox.ButtonRole.DestructiveRole)
+                    cancel_button = merge_dialog.addButton(QMessageBox.StandardButton.Cancel)
+                    merge_dialog.setDefaultButton(merge_button)
+                    merge_dialog.exec()
+                    
+                    clicked = merge_dialog.clickedButton()
+                    if clicked == cancel_button:
+                        return
+                    
+                    if clicked == merge_button:
+                        # Merge: Update only the current Digimon, preserve others
+                        if self._merge_digimon_to_dsts_loader(output_path, self.current_digimon):
+                            QMessageBox.information(
+                                self,
+                                "Success",
+                                f"✅ {self.current_digimon.name} has been updated in dsts-loader!\n\n"
+                                "Other Digimon data was preserved."
+                            )
+                        else:
+                            QMessageBox.warning(self, "Error", "Failed to merge Digimon data")
+                        return
+                    # else continue with overwrite (below)
+                else:
+                    # No existing data, just export single Digimon (this creates new files with just this Digimon)
+                    if self._merge_digimon_to_dsts_loader(output_path, self.current_digimon):
+                        QMessageBox.information(
+                            self,
+                            "Success",
+                            f"✅ {self.current_digimon.name} has been exported to dsts-loader!"
+                        )
+                    else:
+                        QMessageBox.warning(self, "Error", "Failed to export Digimon data")
+                    return
+            
+            # Show warning about overwriting existing data (only for full export)
+            warning_text = ""
+            if use_dsts_format:
+                warning_text = (
+                    "⚠️ WARNING: Exporting to dsts-loader format will:\n\n"
+                    "• DELETE all existing files in the destination directory\n"
+                    "• REPLACE them with only the DLC data currently in your DLC folder\n"
+                    "• This means if you have other Digimon data in dsts-loader that isn't in your DLC folder, it will be LOST\n\n"
+                    "Only the Digimon data currently in your DLC folder will be exported.\n\n"
+                    "Do you want to continue?"
+                )
+            else:
+                warning_text = (
+                    "⚠️ WARNING: Exporting all CSV files will:\n\n"
+                    "• DELETE all existing files in the destination directory\n"
+                    "• REPLACE them with copies of all files from your Base/data and Base/text folders\n"
+                    "• Any files in the destination that don't exist in the source will be LOST\n\n"
+                    "Do you want to continue?"
+                )
+            
+            warning_dialog = QMessageBox(self)
+            warning_dialog.setWindowTitle("⚠️ Confirm Export")
+            warning_dialog.setText(warning_text)
+            warning_dialog.setIcon(QMessageBox.Icon.Warning)
+            warning_dialog.addButton(QMessageBox.StandardButton.Yes)
+            warning_dialog.addButton(QMessageBox.StandardButton.No)
+            warning_dialog.setDefaultButton(QMessageBox.StandardButton.No)
+            
+            if warning_dialog.exec() != QMessageBox.StandardButton.Yes:
+                return
+            
             if use_dsts_format:
                 if self.exporter.export_for_dsts_loader(output_path):
                     QMessageBox.information(
@@ -7576,6 +7739,262 @@ class DigimonEditor(QMainWindow):
             else:
                 QMessageBox.warning(self, "Error", "Failed to export CSV files")
 
+    def _merge_digimon_to_dsts_loader(self, base_path: Path, digimon: DigimonData) -> bool:
+        """Merge a single Digimon into existing dsts-loader files, preserving other entries"""
+        try:
+            from pathlib import Path
+            import csv
+            
+            # Create directory structure
+            patch_data = base_path / "patch" / "data"
+            patch_text = base_path / "patch_text01" / "text"
+            app_data = base_path / "app_0" / "data"
+            
+            # Create directories if they don't exist
+            (patch_data / "digimon_status.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "char_info.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "model_setting.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "lod_chara.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "evolution.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_data / "anim_setting.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "char_name.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "digimon_profile.mbe").mkdir(parents=True, exist_ok=True)
+            (patch_text / "belong.mbe").mkdir(parents=True, exist_ok=True)
+            (app_data / "model_outline.mbe").mkdir(parents=True, exist_ok=True)
+            
+            # Update form data before saving
+            if hasattr(self, 'update_digimon_from_form'):
+                self.update_digimon_from_form()
+            
+            # Use wizard's write methods to create the data row for this Digimon
+            wizard = DigimonCreationWizard(parent=None, loader=self.loader)
+            
+            # Debug: Print values before writing
+            print(f"DEBUG: Writing digimon - field_guide_id={digimon.field_guide_id}, script_id={digimon.script_id}")
+            
+            # Merge digimon_status_data
+            status_file = patch_data / "digimon_status.mbe" / "000_digimon_status_data.ap.csv"
+            self._merge_csv_row(status_file, digimon, wizard._write_digimon_status_ap_csv, lambda r: len(r) > 3 and r[3].strip('"') == digimon.chr_id)
+            
+            # Merge char_info
+            char_info_file = patch_data / "char_info.mbe" / "000_char_info.ap.csv"
+            self._merge_csv_row(char_info_file, digimon, wizard._write_char_info_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.char_key)
+            
+            # Merge model_setting (if we have the data)
+            if digimon.model_setting_data:
+                model_file = patch_data / "model_setting.mbe" / "000_model_setting.ap.csv"
+                self._merge_csv_row(model_file, digimon, wizard._write_model_setting_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.chr_id)
+            
+            # Merge lod files
+            lod_file = patch_data / "lod_chara.mbe" / "000_lod.ap.csv"
+            self._merge_csv_row(lod_file, digimon, wizard._write_lod_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.chr_id)
+            
+            lod_model_file = patch_data / "lod_chara.mbe" / "001_lod_model.ap.csv"
+            self._merge_csv_row(lod_model_file, digimon, wizard._write_lod_model_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.chr_id)
+            
+            # Merge evolution files
+            evolution_file = patch_data / "evolution.mbe" / "001_evolution_to.ap.csv"
+            self._merge_evolution_file(evolution_file, digimon, wizard._write_evolution_ap_csv)
+            
+            evolution_cond_file = patch_data / "evolution.mbe" / "000_evolution_condition.ap.csv"
+            self._merge_csv_row(evolution_cond_file, digimon, wizard._write_evolution_condition_ap_csv, lambda r: len(r) > 0 and r[0] == str(digimon.id))
+            
+            # Merge anim_setting - need to handle special signature
+            anim_ref = digimon.chr_id  # Use chr_id as animation reference by default
+            anim_file = patch_data / "anim_setting.mbe" / "001_same_animation_data.ap.csv"
+            import tempfile
+            temp_anim = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv', encoding='utf-8')
+            temp_anim.close()
+            try:
+                wizard._write_anim_setting_ap_csv(Path(temp_anim.name), digimon.chr_id, anim_ref)
+                with open(temp_anim.name, 'r', encoding='utf-8') as f:
+                    reader = csv.reader(f)
+                    anim_header = next(reader)
+                    anim_new_rows = list(reader)
+                Path(temp_anim.name).unlink()
+                
+                # Merge anim file
+                anim_existing_rows = []
+                if anim_file.exists():
+                    with open(anim_file, 'r', encoding='utf-8') as f:
+                        reader = csv.reader(f)
+                        anim_existing_header = next(reader, None)
+                        if anim_existing_header:
+                            anim_header = anim_existing_header
+                            anim_existing_rows = list(reader)
+                
+                found_anim = False
+                for i, row in enumerate(anim_existing_rows):
+                    if len(row) > 0 and row[0].strip('"') == digimon.chr_id:
+                        anim_existing_rows[i] = anim_new_rows[0] if anim_new_rows else row
+                        found_anim = True
+                        break
+                
+                if not found_anim and anim_new_rows:
+                    anim_existing_rows.extend(anim_new_rows)
+                
+                with open(anim_file, 'w', encoding='utf-8', newline='') as f:
+                    writer = csv.writer(f)
+                    writer.writerow(anim_header)
+                    for row in anim_existing_rows:
+                        writer.writerow(row)
+            except Exception as e:
+                print(f"Error merging anim_setting: {e}")
+                if Path(temp_anim.name).exists():
+                    Path(temp_anim.name).unlink()
+            
+            # Merge text files
+            char_name_file = patch_text / "char_name.mbe" / "000_Sheet1.ap.csv"
+            self._merge_csv_row(char_name_file, digimon, wizard._write_char_name_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.char_key)
+            
+            profile_file = patch_text / "digimon_profile.mbe" / "000_Sheet1.ap.csv"
+            profile_key = f"digimon_{digimon.id}_profile"
+            self._merge_csv_row(profile_file, digimon, wizard._write_profile_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == profile_key)
+            
+            belong_file = patch_text / "belong.mbe" / "000_Sheet1.ap.csv"
+            self._merge_csv_row(belong_file, digimon, wizard._write_belong_ap_csv, lambda r: len(r) > 0 and r[0] == str(digimon.id))
+            
+            # Merge model_outline
+            outline_file = app_data / "model_outline.mbe" / "000_model_outline_battle.ap.csv"
+            self._merge_csv_row(outline_file, digimon, wizard._write_model_outline_ap_csv, lambda r: len(r) > 0 and r[0].strip('"') == digimon.chr_id)
+            
+            return True
+            
+        except Exception as e:
+            print(f"Error merging Digimon to dsts-loader: {e}")
+            import traceback
+            traceback.print_exc()
+            return False
+    
+    def _merge_csv_row(self, filepath: Path, digimon_or_data, write_func, find_row_func):
+        """Merge a single row into a CSV file, preserving other rows"""
+        import csv
+        import tempfile
+        
+        # Generate new row data by writing to temp file
+        temp_file = filepath.parent / f"_temp_{filepath.name}"
+        header_str = None
+        new_rows = []
+        try:
+            # Call write_func with appropriate arguments
+            if isinstance(digimon_or_data, tuple):
+                write_func(temp_file, *digimon_or_data)
+            else:
+                write_func(temp_file, digimon_or_data)
+            
+            # Read the new row from temp file (header is a string, data rows use csv.reader)
+            if temp_file.exists():
+                with open(temp_file, 'r', encoding='utf-8') as f:
+                    header_str = f.readline().rstrip('\n\r')  # Read header as raw string
+                    for line in f:
+                        reader = csv.reader([line])
+                        new_rows.extend(reader)
+                temp_file.unlink()  # Delete temp file
+            else:
+                print(f"Warning: Temp file {temp_file} was not created")
+                return
+            
+            if not new_rows:
+                return  # No data to merge
+            
+            # Read existing file if it exists
+            existing_rows = []
+            header_to_use = header_str if header_str else ""
+            if filepath.exists():
+                with open(filepath, 'r', encoding='utf-8') as f:
+                    existing_header = f.readline().rstrip('\n\r')
+                    if existing_header:
+                        header_to_use = existing_header  # Use existing header if file exists
+                    for line in f:
+                        reader = csv.reader([line])
+                        existing_rows.extend(reader)
+            
+            # Find and replace existing row or add new
+            found = False
+            for i, row in enumerate(existing_rows):
+                if find_row_func(row):
+                    existing_rows[i] = new_rows[0]  # Replace with new data
+                    found = True
+                    break
+            
+            if not found:
+                existing_rows.extend(new_rows)  # Add new rows
+            
+            # Write back preserving dsts-loader format
+            if header_to_use:
+                with open(filepath, 'w', encoding='utf-8', newline='') as f:
+                    # Write header (as raw string to preserve format)
+                    f.write(header_to_use + '\n')
+                    # Write rows - csv.writer handles proper quoting/escaping
+                    writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
+                    for row in existing_rows:
+                        writer.writerow(row)
+            else:
+                print(f"Warning: No header available for {filepath.name}, skipping write")
+                    
+        except Exception as e:
+            print(f"Error merging {filepath.name}: {e}")
+            import traceback
+            traceback.print_exc()
+            if temp_file.exists():
+                temp_file.unlink()
+    
+    def _merge_evolution_file(self, filepath: Path, digimon, write_func):
+        """Merge evolution data, removing old entries for this digimon first"""
+        import csv
+        
+        # Generate new evolution rows
+        temp_file = filepath.parent / f"_temp_{filepath.name}"
+        try:
+            write_func(temp_file, digimon)
+            
+            # Read new rows
+            with open(temp_file, 'r', encoding='utf-8') as f:
+                header_str = f.readline().rstrip('\n\r')
+                new_rows = []
+                for line in f:
+                    reader = csv.reader([line])
+                    new_rows.extend(reader)
+            temp_file.unlink()
+            
+            # Read existing file
+            existing_rows = []
+            header_to_use = header_str
+            if filepath.exists():
+                    with open(filepath, 'r', encoding='utf-8') as f:
+                        existing_header = f.readline().rstrip('\n\r')
+                        if existing_header:
+                            header_to_use = existing_header
+                        for line in f:
+                            reader = csv.reader([line])
+                            existing_rows.extend(reader)
+            
+            # Remove existing entries for this digimon (both as source and target)
+            filtered_rows = []
+            for row in existing_rows:
+                if len(row) > 1:
+                    source_id = row[1] if row[1] else None
+                    target_id = row[3] if len(row) > 3 and row[3] else None
+                    if source_id != str(digimon.id) and target_id != str(digimon.id):
+                        filtered_rows.append(row)
+            
+            # Add new rows
+            filtered_rows.extend(new_rows)
+            
+            # Write back preserving format
+            with open(filepath, 'w', encoding='utf-8', newline='') as f:
+                # Write header (as raw string to preserve format)
+                f.write(header_to_use + '\n')
+                # Write rows
+                writer = csv.writer(f, quoting=csv.QUOTE_MINIMAL)
+                for row in filtered_rows:
+                    writer.writerow(row)
+                    
+        except Exception as e:
+            print(f"Error merging evolution file {filepath.name}: {e}")
+            if temp_file.exists():
+                temp_file.unlink()
+    
     def _is_dsts_loader_directory(self, path: Path) -> bool:
         """Check if the selected export path appears to be a dsts-loader directory."""
         try:
@@ -7793,7 +8212,7 @@ class DigimonEditor(QMainWindow):
                 # Update skill name
                 skill_name = self.loader.get_skill_name(skill_id)
                 clean_name = self.loader.clean_ui_text(skill_name)
-                self.advanced_skill_name_label.setText(f"Skill: {clean_name}")
+                self.advanced_skill_name_edit.setText(clean_name if clean_name else "")
                 
                 # Update all form fields with loaded data
                 self.skill_power_edit.setValue(skill_data.get("power", 0))
@@ -7847,9 +8266,9 @@ class DigimonEditor(QMainWindow):
                 self.skill_recoil_edit.setValue(skill_data.get("recoil", 0))
                 self.skill_always_hits_check.setChecked(skill_data.get("always_hits", False))
             else:
-                self.advanced_skill_name_label.setText("Skill not found")
+                self.advanced_skill_name_edit.setText("Skill not found")
         else:
-            self.advanced_skill_name_label.setText("")
+            self.advanced_skill_name_edit.setText("")
     
     def save_advanced_skill(self):
         """Save the current skill data"""
@@ -7884,11 +8303,24 @@ class DigimonEditor(QMainWindow):
         for i, widget in enumerate(self.buff_set_widgets):
             skill_data[f"buff_set_{i}"] = widget.value()
         
-        # Save to file
-        if self.loader.save_skill_data(skill_data):
-            QMessageBox.information(self, "Success", f"Skill {skill_id} saved successfully!")
+        # Save skill data
+        skill_saved = self.loader.save_skill_data(skill_data)
+        
+        # Save skill name if it was edited
+        skill_name = self.advanced_skill_name_edit.text().strip()
+        name_saved = True
+        if skill_name and skill_name != "Skill not found":
+            name_saved = self.loader.save_skill_name(skill_id, skill_name)
+        
+        # Show result message
+        if skill_saved and name_saved:
+            QMessageBox.information(self, "Success", f"Skill {skill_id} and name saved successfully!")
+        elif skill_saved:
+            QMessageBox.warning(self, "Partial Success", f"Skill {skill_id} saved, but skill name could not be saved.")
+        elif name_saved:
+            QMessageBox.warning(self, "Partial Success", f"Skill name saved, but skill data could not be saved.")
         else:
-            QMessageBox.critical(self, "Error", "Failed to save skill data")
+            QMessageBox.critical(self, "Error", "Failed to save skill data and name")
 
 
 def main():
