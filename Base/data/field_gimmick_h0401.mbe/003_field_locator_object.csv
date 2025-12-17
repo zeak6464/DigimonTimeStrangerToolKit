@@ -1,0 +1,5 @@
+int32 0,string3 1,int32 2,string2 3,bool 4,string2 5,int32 6,int32 7,string2 8,string2 9,string2 10,string2 11,string2 12,float 13,float 14,string2 15,float 16,float 17,float 18,float 19,float 20
+20401300,"",-1,"ride_fly_0001",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+20401301,"",-1,"ride_fly_0002",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+20401400,"",-1,"change_0001",true,"ef_f_mov_100_ga",1,0,"","","","","",0,0,"",0,0,0,0,0
+20401999,"",-1,"obj_9999",true,"ef_f_enc_100_sy",1,0,"","","","","",0,0,"",0,0,0,0,0

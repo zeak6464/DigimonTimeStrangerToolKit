@@ -131,6 +131,16 @@ class MVGLToolsGUI:
         
         self.compress_label = options_frame.winfo_children()[0]
         self.compress_combo = compress_combo
+
+        # Batch processing for MVGL files
+        self.batch_var = tk.BooleanVar(value=False)
+        self.batch_check = ttk.Checkbutton(
+            options_frame,
+            text="Batch process MVGL folder (unpack each .mvgl to target)",
+            variable=self.batch_var,
+            command=self.on_mode_change
+        )
+        self.batch_check.grid(row=1, column=0, columnspan=2, sticky=tk.W, pady=(5, 0))
         
         # Execute Button
         row += 1
@@ -206,9 +216,18 @@ class MVGLToolsGUI:
         else:
             self.compress_label.grid_remove()
             self.compress_combo.grid_remove()
+
+        # Batch option only makes sense for unpack-mvgl
+        batch_supported = mode == "unpack-mvgl"
+        if not batch_supported:
+            self.batch_var.set(False)
+            self.batch_check.state(['disabled'])
+        else:
+            self.batch_check.state(['!disabled'])
+        batch_mode = self.batch_var.get() and batch_supported
         
         # Update button labels based on mode
-        if mode.endswith('-dir'):
+        if mode.endswith('-dir') or batch_mode:
             self.source_btn.config(state='disabled')
             self.target_btn.config(state='disabled')
         else:
@@ -299,6 +318,51 @@ class MVGLToolsGUI:
         mode = self.mode_var.get()
         source = self.source_var.get()
         target = self.target_var.get()
+
+        # Batch mode (only for unpack-mvgl)
+        if self.batch_var.get():
+            if mode != "unpack-mvgl":
+                messagebox.showerror("Error", "Batch processing is available only for 'unpack-mvgl'.")
+                return
+            
+            source_path = Path(source)
+            target_path = Path(target)
+            
+            if not source_path.is_dir():
+                messagebox.showerror("Error", "Batch mode requires the source to be a folder containing .mvgl files.")
+                return
+            
+            if target_path.exists() and not target_path.is_dir():
+                messagebox.showerror("Error", "Batch mode requires the target to be a folder.")
+                return
+            
+            target_path.mkdir(parents=True, exist_ok=True)
+            mvgl_files = sorted(source_path.glob("*.mvgl"))
+            
+            if not mvgl_files:
+                messagebox.showerror("Error", f"No .mvgl files found in:\n{source_path}")
+                return
+            
+            commands = []
+            for mvgl_file in mvgl_files:
+                output_folder = target_path / mvgl_file.stem
+                commands.append([
+                    self.cli_path,
+                    f"--game={game}",
+                    f"--mode={mode}",
+                    str(mvgl_file),
+                    str(output_folder)
+                ])
+            
+            self.log_output("\n" + "=" * 80 + "\n")
+            self.log_output(f"Batch: preparing to unpack {len(commands)} MVGL files from {source_path} to {target_path}\n")
+            self.log_output("=" * 80 + "\n\n")
+            
+            self.execute_btn.config(state='disabled', text='Running...')
+            thread = threading.Thread(target=self.run_batch_commands, args=(commands,))
+            thread.daemon = True
+            thread.start()
+            return
         
         cmd = [self.cli_path, f"--game={game}", f"--mode={mode}", source, target]
         
@@ -320,37 +384,62 @@ class MVGLToolsGUI:
         thread.daemon = True
         thread.start()
     
+    def _run_cli_command(self, cmd):
+        """Run a CLI command and stream output; returns the return code"""
+        process = subprocess.Popen(
+            cmd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            bufsize=1,
+            universal_newlines=True,
+            creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
+        )
+        
+        for line in process.stdout:
+            self.root.after(0, self.log_output, line)
+        
+        process.wait()
+        return process.returncode
+
     def run_command(self, cmd):
         """Run the command in a separate thread"""
         try:
-            # Run the command
-            process = subprocess.Popen(
-                cmd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-                creationflags=subprocess.CREATE_NO_WINDOW if os.name == 'nt' else 0
-            )
+            returncode = self._run_cli_command(cmd)
             
-            # Read output line by line
-            for line in process.stdout:
-                self.root.after(0, self.log_output, line)
-            
-            process.wait()
-            
-            # Log completion
-            if process.returncode == 0:
+            if returncode == 0:
                 self.root.after(0, self.log_output, "\n✓ Operation completed successfully!\n")
             else:
-                self.root.after(0, self.log_output, f"\n✗ Operation failed with return code {process.returncode}\n")
+                self.root.after(0, self.log_output, f"\n✗ Operation failed with return code {returncode}\n")
         
         except Exception as e:
             self.root.after(0, self.log_output, f"\n✗ Error: {str(e)}\n")
         
         finally:
             # Re-enable execute button
+            self.root.after(0, self.execute_btn.config, {'state': 'normal', 'text': 'Execute'})
+
+    def run_batch_commands(self, commands):
+        """Run multiple CLI commands sequentially for batch MVGL processing"""
+        try:
+            total = len(commands)
+            for idx, cmd in enumerate(commands, start=1):
+                source_label = Path(cmd[3]).name if len(cmd) > 3 else Path(cmd[-2]).name
+                target_label = cmd[4] if len(cmd) > 4 else cmd[-1]
+                self.root.after(0, self.log_output, f"\n[{idx}/{total}] {source_label} -> {target_label}\n")
+                
+                returncode = self._run_cli_command(cmd)
+                if returncode == 0:
+                    self.root.after(0, self.log_output, "✓ Completed\n")
+                else:
+                    self.root.after(0, self.log_output, f"✗ Failed with return code {returncode}\n")
+            
+            self.root.after(0, self.log_output, "\nBatch processing finished.\n")
+        
+        except Exception as e:
+            self.root.after(0, self.log_output, f"\n✗ Error: {str(e)}\n")
+        
+        finally:
             self.root.after(0, self.execute_btn.config, {'state': 'normal', 'text': 'Execute'})
 
 

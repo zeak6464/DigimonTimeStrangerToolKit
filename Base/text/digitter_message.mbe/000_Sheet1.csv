@@ -1,0 +1,1327 @@
+string2 0,string 1
+"main_010_010_010","Can you see this message? This is a communication system
+called ""Digiline."""
+"main_010_010_020","You can view the messages on your Digivice. We'll make
+good use of Digiline going forward."
+"main_010_010_030","Document: ""Digiline""
+
+View {decision}"
+"main_010_020_010","Document: ""Navigation System""
+
+View {decision}"
+"main_010_080_010","Good work. As you can see, coming into contact with Digimon
+triggers a battle."
+"main_010_080_011","Battles like this are unavoidable, I'm afraid. Authorizing
+use of DigiAttack {r2}."
+"main_010_080_012","Document: ""DigiAttacks""
+
+View {decision}"
+"main_010_080_020","Elimination of target object confirmed. Continue heading
+for the target coordinates."
+"main_010_120_010","That girl said that something was going to happen on the
+roof."
+"main_010_120_011","She seems to have more information than we do. It might
+be a good idea to stay with her."
+"main_020_030_010","Why not take a rest? Your Digivice comes with a recovery
+feature."
+"main_020_030_020","Just stay still and don't move. Your Digimon should be healed."
+"main_020_030_030","Document: ""Regeneration Mode""
+
+View {decision}"
+"main_020_070_010","What happened here? Is this what the Wall was built to hide?"
+"main_020_070_011","Cast aside common sense here. Anomalies always go in
+unexpected directions."
+"main_020_070_020","Document: ""Conversion & Scan Rate""
+
+View {decision}"
+"main_020_090_010","Looks like the underground elevator is operational again.
+Head for the marker on the map."
+"main_020_070_030","With progressive enhancement, eventually the preemptive
+strike of your DigiAttack {r2} will at times be enough to end
+the battle before it even begins."
+"main_020_070_031","That will help you complete your mission more efficiently,
+so I hope you put it to good use."
+"main_020_120_010","I'm going to continue upward. I'm worried about our little
+friend!"
+"main_020_120_011","Let's meet up later on the roof!"
+"main_020_160_010","Interactions with an unknown phase electron lifeform...
+Should be a valuable sample."
+"main_020_160_011","We'll have the analysis department examine the data.
+Continue your investigation."
+"main_050_020_010","We need to calibrate your Digivice, so please head to these
+three specific points."
+"main_050_020_011","I've sent the coordinates to your map. It's essential we confirm
+the accuracy of the location data system, so I appreciate your
+cooperation."
+"main_050_030_010","Were you able to talk to Dad? He didn't say anything weird to
+you, did he?"
+"main_050_030_011","You can always shut him down if he gets pushy with the
+questions! I'll be sure to give him an earful!"
+"main_050_030_012","Just drop me a line if you need anything!"
+"main_050_030_020","Inori Misono... When you first met her, your Digivice read her
+as an existing contact."
+"main_050_030_021","The Digiline messages just now might be why. At the very least,
+a log of those messages must have already been on her device."
+"main_050_030_022","Maybe your Digivice was able to detect that..."
+"main_050_030_023","Maybe your Digivice was able to detect that..."
+"main_050_035_005","Good. You're in position. Now stand by. I'm going to start
+making adjustments."
+"main_050_035_010","Your coordinates have been received without any problem.
+Please proceed to the next point."
+"main_050_038_005","Good. You're in position. Now stand by. I'm going to start
+making adjustments."
+"main_050_038_010","Calibration is progressing nicely. Please proceed to the final
+point."
+"main_060_080_010","Did that girl just mention ""phase electron lifeform""?"
+"main_060_080_011","There's something's fishy about her. You'd better keep a nice,
+close eye on her."
+"main_060_080_012","I want every piece of intel on her, no matter how insignificant.
+This world... It's... running out of time, and fast."
+"main_060_090_010","It seems that a number of Digimon specimens recognize
+anything they've never seen before as an enemy, no questions
+asked."
+"main_060_090_020","These hostile Digimon are harmful to humans, but Digimon
+born through Conversion do not exhibit such traits."
+"main_060_090_030","The Shinjuku underground is a den of hostile Digimon, yet
+the one you're tracking is behaving differently. Maybe we
+can get some valid data."
+"main_060_090_040","All of these hostile Digimon have been in the Shinjuku
+underground since eight years ago."
+"main_060_090_050","These Digimon are likely connected to the Shinjuku Inferno as
+well. Report any findings, Agent {player}."
+"main_060_090_060","About the OcculTokyo TV you mentioned... I looked into it, and
+I saw that, after eight years, its subscribers have grown to two
+million."
+"main_060_090_070","It looks like it started growing... yes, just around eight years
+ago. It's possible that the filming taking place now is what
+triggered the growth."
+"main_070_010_010","You awake? Rise and shine!"
+"main_070_010_011","I have school today, so I headed out early. Breakfast is on
+the table. Help yourself!"
+"main_070_010_012","And please look after Aegiomon while I'm gone, okay?"
+"main_070_020_010","You're the one who's on the ground in that world, so I'll have
+to leave all of the on-site decisions to you."
+"main_070_020_011","Just don't forget what's important, though. In eight years time,
+everything you see there now will be in ruins."
+"main_070_020_012","Any clue that could prevent the future from going up in flames,
+we'll take it—no matter how small."
+"main_070_020_013","I'm counting on you, Agent {player}."
+"main_070_040_010","Might not be a bad idea to tag along on public safety
+experiments. We want more information on Digimon as well."
+"main_070_040_011","Digimon are somehow involved with the coming of the
+Shinjuku Inferno, after all."
+"main_070_040_012","That abhorrent anomaly that brings about the apocalypse...
+Investigating Digimon is our only path to the truth, here."
+"main_070_090_010","The house was empty when I got back from school. Where did
+everyone go? And without telling me?!"
+"main_070_090_011","Hmph! Then I'll eat all these snacks by myself, I guess."
+"main_080_060_010","Well! Talk about a shock."
+"main_080_060_011","The ADAMAS database is certainly getting some fresh updates
+now!"
+"main_080_060_012","The key is clearly those class-A anomalies... Don't let
+Aegiomon or Inori Misono out of your sight."
+"main_080_060_013","Wherever they're headed, you can bet there'll be new
+anomalies popping up."
+"main_080_060_014","Could there be some connection to the Shinjuku Inferno? Keep
+investigating."
+"main_090_060_010","That Digimon mentioned ""our world,"" didn't it?"
+"main_090_060_011","Just think of the significance of those words...!"
+"main_090_060_012","Good grief. Everything we ever thought we knew is getting
+broken down piece by piece."
+"main_090_080_010","Were you watching TV just now?! What the heck was that?
+There was something pretty freaky in that broadcast for a
+second...!"
+"main_090_080_011","And now they're just trying to pretend it never happened?!
+Whoa! This is huge..."
+"main_090_080_012","My scoop sense is tingling!"
+"main_090_080_013","I'm gonna go capture some footage for the next update. Look
+forward to it!"
+"main_100_050_010","The Outer Dungeons? The anomalous phenomena just keep on
+coming... No time for gawking, though. This is a great chance to
+collect intel..."
+"main_100_050_011","Continue investigating. We need to get closer to the truth
+behind the anomaly that spells the end of everything—the
+Shinjuku Inferno."
+"main_100_050_012","...Intel that can get us closer to the truth behind the anomaly
+that spells the end of everything—the Shinjuku Inferno."
+"main_03_351_0","Our only lead is that Digimon just now. Pursue it and capture
+it."
+"main_110_030_010","A dark shadow, hm? Sound familiar? We saw one on the roof of
+the Tokyo Metropolitan Government Building just before the
+Shinjuku Inferno."
+"main_110_030_011","It could be related to the anomalies that bring it all about."
+"main_110_030_012","Give me a detailed sitrep."
+"main_120_090_010","Judging by the reactions of the Digimon... it seems they
+already knew about the existence of humans."
+"main_120_090_011","Like you, other humans must've slipped into that world by
+chance in the past. This fact alone would explain several
+anomalies...!"
+"main_130_030_010","Are you all right? We got cut off for a moment, there."
+"main_130_030_011","What happened? I'll expect a detailed report later."
+"main_150_010_010","The Factorial Area... Some kind of industrial zone for the
+Digital World, is it?"
+"main_150_010_011","And I see the conflict between the Digimon there has grown
+pretty severe. Could it be similar to the situation eight
+years down the road?"
+"main_170_010_010","The Digital World has a sea of its own, does it? I imagine some
+of the mermaid sightings throughout the ages were actually
+Digimon..."
+"main_170_010_011","Dr. Yuki would've loved this place had he known about it. Your
+adoptive father dedicated his life to unravelling anomalous
+phenomena."
+"main_170_010_012","And in the end... the doctor himself went missing because of 
+such an anomaly. You almost have to admire the full-circle
+nature of his life."
+"main_170_010_013","Wouldn't it be ironic if he got sent to the Digital World and
+simply settled down to continue his research there..."
+"main_180_010_010","From what I've heard, Inori Misono and her father had family
+members taken from them by an anomaly. That must've been
+pretty rough."
+"main_180_010_011","I bet you remember your own adoptive father's mysterious
+disappearance. There's a distinct possibility Dr. Yuki ended
+up there in that world."
+"main_180_010_012","It's only a faint hope. Still, it's probably a good idea to keep
+it in the back of your mind."
+"main_200_030_010","Enemy readings are through the roof. There are apparently
+Titans all over the surface."
+"main_200_030_011","I will send you an underground route where there are no
+enemies. From there, you can go up at the Overbridge
+Intersection and gather information."
+"main_210_010_010","In order to head for the government building where the
+treasure fell, you'll need to deal with the Titans on the surface."
+"main_210_010_011","Dr. Simmons seems to have a clever idea... It may be better to
+work together."
+"main_210_010_020","Numerous enemy readings... They must be Titans. You'd
+better be well prepared before moving forward."
+"main_210_020_010","I've updated your map. Looks like you can head underground
+through a manhole close by."
+"main_210_020_020","I'm picking up communication signals up ahead... It could be
+the public safety people."
+"main_210_020_030","That certainly sounded like a battle is going on. The public
+safety officers might be under attack."
+"main_210_020_040","It looks like the surface has been specially barricaded to
+prevent invasion by Titans."
+"main_210_020_041","Our analysis shows that it appears to be very much like a
+labyrinth. Therefore, the most efficient way to go is most
+likely through the underground instead."
+"main_210_020_050","She mentioned a base at Higashi-Shinjuku station, didn't she?
+It's probably in the subway yard. I've sent the spot to your map."
+"main_210_020_060","Data readings in the surrounding area are changing
+significantly. Could it be Digimon? Something must be up."
+"main_210_020_070","These readings appear to be significant underground activity
+of hostile Digimon. They seem to be moving, but where to?"
+"main_210_020_080","The Digimon readings are approaching the electromagnetic
+net generator."
+"main_210_020_081","Everyone there is in danger! You have to hurry!"
+"main_210_020_090","Massive numbers of hostile Digimon detected! Deal with the
+threat before it's too late."
+"main_210_020_100","The electromagnetic net generators have slowed down the
+movement of enemy readings."
+"main_210_020_101","The generators apparently emit electromagnetic waves that
+interfere with phase electrons... Dr. Simmons' brain sure is
+something else."
+"main_210_020_110","Digimon are spreading into the surface areas and humans are
+taking refuge underground."
+"main_210_020_111","The exact opposite of the situation when you first came here.
+Talk about irony!"
+"main_210_020_120","The sky is an odd color..."
+"main_210_020_121","Could it be an effect of the gate being opened? Or maybe it's
+because of the massive influx of Digimon?"
+"main_210_020_122","Maybe that's why Junomon was so hesitant to open the gate."
+"main_210_020_130","I wonder how people viewed the sight of Digimon falling from
+the sky..."
+"main_210_020_131","Perhaps this is how myths and folklore were born."
+"main_210_020_132","Humans in the past may have imagined up deities or creatures
+from folklore if they witnessed a scene like that."
+"main_210_020_140","I'm analyzing the data you're sending over."
+"main_210_020_141","Some of the data is showing anomalous values... as if space-
+time were being disturbed."
+"main_210_020_142","It's times like these that anomalies occur..."
+"main_210_020_150","The treasure fell down toward the Tokyo Metropolitan
+Government Building in Nishi-Shinjuku."
+"main_210_020_151","I've updated your map. Head for the government building."
+"main_210_030_010","The change toward the hostility in these Digimon... 
+I didn't think such atransformation was possible."
+"main_210_030_020","The Digimon's hostile nature could be coming
+from an intense defensive instinct."
+"main_210_030_030","Perhaps it's like an overreactive immune
+system. If Digimon are the antibodies, could
+it be that we are..."
+"main_210_030_040","...the foreign substance wreaking havoc on the world...? That
+might be closer to the truth than we'd like... Go outside and
+look up."
+"main_210_030_050",">Operator We're observing a strange
+alteration of the sky. Could it be due to the
+effect of traveling back and forth through
+space-time?"
+"main_230_010_010","That story ""Rip Van Winkle"" mentioned just now may have in
+fact originated from an anomaly."
+"main_230_010_011","When you came back to the real world after visiting the
+Digital World..."
+"main_230_010_012","...a large span of time had passed, just like in that story.
+That can't be a coincidence."
+"main_235_040_010","As for Dr. Yuki... Well, only now can we explain his
+disappearance. After all, now we, too, have experienced
+a disturbance in space and time."
+"main_235_040_011","All the dots are starting to connect, no denying that. Maybe
+there's even a way to find the doctor..."
+"main_235_040_012","You'd like to see your adoptive father again, wouldn't you?
+I'd hoped to help make that a reality if I could..."
+"main_235_040_013","...but I'm afraid the world on this end is running out of
+time."
+"main_250_040_010","Those defeated in the conflict will lose everything."
+"main_250_040_011","It gives that much more weight to Merukimon saying that they
+have no choice but to resist."
+"main_250_040_012","That sentiment... will undoubtedly make this conflict all the
+more intense."
+"main_250_050_010","Lanamon... The Titan moderates..."
+"main_250_050_011","Not everyone wants to fight. The same could be said of any war."
+"main_250_050_012","But the fact that wars occur all the same means the tragedy...
+will most likely repeat."
+"main_260_050_010","So I suppose this is like returning from the realm of sleep
+in the ""Rip Van Winkle"" story. You could probably even write
+a sequel after all the things you've experienced."
+"main_260_050_011","The human world and the Digital World seem to have reciprocal
+effects on each other. Our statistics show that times of social
+unrest see a rise in anomalies."
+"main_260_050_012","But if anomalies are in fact related to Digimon, the
+association starts to grow hazy. If we could only grasp
+the principles behind it all, we could blow the whole
+thing open."
+"main_260_050_013","Take for example how even in the post-Inferno world, strife
+over resources is still a thing. Meanwhile, in the Digital
+World, they're fighting over the Current."
+"main_260_080_010","Did you receive this message all right? There's been some
+movement on our end, so I thought I'd reach out."
+"main_260_080_011","There are a certain number of ""warmongers"" in Merukimon's
+ranks as well, and these Digimon are now gearing up for battle."
+"main_260_080_012","Most of these bellicose Digimon lost dear friends to the Titans.
+So... it's safe to say this conflict isn't one based on logic."
+"main_260_080_013","Merukimon is keeping them in line for now... but I think it's
+only a matter of time before this pot boils over."
+"main_280_005_010","What happened over there? We lost connection with you for a
+while. Is everything okay?"
+"main_280_005_011","We can analyze any changes in the situation on our end, too.
+But we need you to collect as much up-to-date info as possible."
+"main_280_010_010","From the look of things... I'd say that time has been wound
+back."
+"main_280_010_011","I'll need more data to be sure, though."
+"main_285_070_010","Oh, Inori... Where are you?"
+"main_285_070_011","Message me if you see this. Please! I can't take much more
+of this worrying."
+"main_285_070_012","There are things I haven't told you yet. Like... how a dream
+I've had ever since I was little finally came true."
+"main_285_070_013","I want you to see it with me."
+"main_290_020_010","[The First Ride's Free!]
+Thank you for your patronage. :D"
+"main_290_020_011","Safety and peace of mind at 100 YEN a ride!
+Thanks for using Palmon Ride Company XD"
+"main_290_020_020","Safety and peace of mind at 100 YEN a ride!
+Thanks for using Palmon Ride Company XD"
+"main_290_030_010","Something seems wrong. Based on previous data, I've decided
+to set your objective as the village. You should head over there."
+"main_290_040_010","I'm afraid the data we're being sent from there doesn't look
+encouraging, either... Can you find some way to proceed?"
+"main_290_050_010","Asking for money, at a time like this. Talk about cutthroat."
+"main_290_060_010","According to the data I'm receiving, something seems off in
+the village. You should proceed with caution."
+"main_290_070_010","I'm getting a massive reading in the vicinity of 
+the sanctuary. It might be Bacchusmon. 
+Please go have a look."
+"main_290_080_010","At this point... you're a representative working to stop a war
+in another world. An agent in the truest sense of the word."
+"main_290_080_011","Your actions may even save the world. Just like the hero
+Agent Alpha!"
+"main_300_000_010","[The First Ride's Free!]
+Thank you for your patronage. :D"
+"main_300_000_011","Safety and peace of mind at 100 YEN a ride!
+Thanks for using Palmon Ride Company XD"
+"main_300_000_020","Safety and peace of mind at 100 YEN a ride!
+Thanks for using Palmon Ride Company XD"
+"main_300_070_010","I think you should keep that ""grudge"" the Titan spoke of just
+now in mind."
+"main_300_070_011","Both sides have reasons why they can't back down, and it's
+when different ideas of justice butt up against one another
+that conflict can take a truly nasty turn."
+"main_300_070_012","It'll be too late once we're in the thick of it. There'll be
+no way to stop the Shinjuku Inferno then."
+"main_310_010_010","Merukimon seems to have overtaxed himself. The poor fellow
+has been laid up ever since you left."
+"main_310_010_020","If Merukimon does expire... who's going to keep the
+negotiations going? There won't be anyone to keep the
+warmongers here in check."
+"main_310_015_010","Digimon warmongers... That does sound like something that
+could fan the flames of the conflict."
+"main_310_015_020","It seems Merukimon has been forced to navigate a difficult
+course as leader."
+"main_310_018_010","I bear dire news about Merukimon's poisoning... Without
+treatment, I am afraid he is not long for this world!"
+"main_310_018_020","We will need the fruit of Karpos Hulē after all... although I had
+heard that previously, you were unable to obtain any..."
+"main_310_018_030","I will go and have a look for it myself. With Merukimon's
+condition, every moment counts."
+"main_310_020_010","There was this anime I was obsessed with when I was a student
+called ""Agent Alpha."""
+"main_310_020_011","It's what inspired me to make my own anime."
+"main_310_020_020","I saved up enough money through video streaming... and made
+that dream come true."
+"main_310_020_021","But the point had changed. It was to call out to you after
+you disappeared eight years ago."
+"main_320_010_010","Traveling through time again... and it seems to be happening
+more easily than before."
+"main_320_010_011","Repeat this often enough, and space-time will begin to warp—"
+"main_320_010_012","This could result in a severe space-time disturbance. We have
+to make a decision before it's too late..."
+"main_330_000_010","My first work..."
+"main_330_000_011","I planned it to be an homage to ""Agent Alpha""—outwardly,
+anyway."
+"main_330_000_012","I used my own streaming money, and got some sponsors on
+board."
+"main_330_000_013","It'll be released any day now, so look forward to that, okay,
+Inori?"
+"main_330_010_010","I found a way to rid Merukimon of that poison! I will prepare
+the ingredients and venture to Rebellion Village."
+"main_330_010_020","I have located the fruit of Karpos Hulē. I am heading that way
+now."
+"main_340_000_010","Once everyone sees what I've created, they'll be on the edge
+of their seats for sure."
+"main_340_000_011","I made the protagonist look like you, {player}, to recruit
+more eyewitnesses."
+"main_340_000_012","...To help find you all, after you had disappeared."
+"main_340_000_013","And it was a bonus that your look resembled Agent Alpha's
+outfit so closely."
+"main_340_000_014","If you go to Higashi-Shinjuku, just look up. There's a promo
+video playing there now."
+"main_340_010_010","No good. You're surrounded by countless huge readings. Find
+another route. Where'd these Digimon come from, anyway?"
+"main_340_010_011","The world you time traveled to is decidedly full of more hostile
+Digimon than the world I know."
+"main_340_010_012","Is time traveling the cause? Could the deviation from the rules
+of time and space be bringing in new Digimon?"
+"main_340_010_013","If the research team's hypothesis is
+correct, and their aggression is akin to an
+overreacting immune system, it would make
+sense, wouldn't it?"
+"main_340_010_014","After all, a being that has traveled through time is nothing more
+than a foreign substance to that world...!"
+"main_340_020_010","When hostile Digimon gathered in the Shinjuku underground,
+I thought it was because of the egg that ended up there..."
+"main_340_020_011","But what if the Digimon appeared there to get rid of the egg...
+...like antibodies eliminating a foreign substance—a time
+traveler?"
+"main_340_020_012","I don't have any evidence, but if I'm right, it would make sense 
+that hostile Digimon increase with each time travel."
+"main_340_020_013","Are you curious as to why I have such a wild theory?"
+"main_340_020_014","It's because ADAMAS once tried to eliminate Digimon with time
+traveling abilities the exact same way—like a foreign substance."
+"main_340_020_015","There are numerous readings of hostile Digimon ahead. Find
+another route!"
+"main_350_010_020","We have arrived, and all is ready. We wait for you to join us!"
+"main_390_010_010","Looks like they're using captured Digimon for their security
+system. No beauty in that... No beauty at all..."
+"main_390_010_020","How have they managed to capture and control all of these
+Digimon? It's not like the Digimon can't fight back..."
+"main_390_010_030","What kind of unique ability has public safety obtained?
+Is someone providing them with some kind of special
+technology?"
+"main_390_130_010","I've got something to tell you. Come see me in Rebellion
+Village."
+"main_400_000_010","I heard about the weapon from Kuga after we captured him.
+It seems that they incorporated whatever parts they could
+from Digimon."
+"main_400_000_020","They claim it's meant to ""control,"" but it's really just a killing
+machine. Disable the limiter, and it'll apparently eradicate
+every bio-signature in the vicinity."
+"main_400_000_030","I know Kuga used to work under me and all, but he's truly
+pathetic. His ambition robbed him of all self-respect as a
+scientist..."
+"main_440_070_010","...Ple...se ans...er! The connection is..."
+"main_440_070_015","...I rep...t... Pl...se resp...nd... You are in... unstable...
+spac...!"
+"main_440_070_020","...Time is...! If you could... answe... immedi... would be
+grat...ul..."
+"main_440_070_025","Just give me... coordin... I can handle... rest! ...Damn this
+connecti..."
+"main_440_070_030","...hope these words reach you! I will go on believing that
+you can see this."
+"main_440_070_035","You are in an extremely unstable space. If you do not get out
+of there quickly, there will be no coming back!"
+"main_440_070_040","However, I believe there is a way I can rescue you!
+I simply need a means of narrowing down your location."
+"main_440_070_045","That world was forcibly connected to ours. There has to be a
+""point of distortion"" somewhere."
+"main_440_070_050","If there is some manner of large energy source nearby, I can
+use it as a reference as to your location..."
+"main_440_070_055","Has anything changed within that scenery you have seen so
+many times before?"
+"main_440_070_060","Listen! Search for any discrepancies!"
+"main_440_070_065","Places that have changed... times you... been there... There
+should be... large ...nergy source...!"
+"sub_010_001_1","T-shirts are going missing! Is this an anomalous phenomenon?
+Come to Inori's pop's office, and I'll fill you in!
+
+View Mission Details {decision}"
+"sub_010_002_1","I received a mysterious message, and I'm trying to figure it out.
+Come to Inori's pop's office to help me!
+
+View Mission Details {decision}"
+"sub_010_002_2","I hear that monster went back to be with the client kid, and
+made a real friend!"
+"sub_010_003_1","There's information about a mysterious phenomenon in
+Shinjuku Park! Let's meet up at the Waterfall Plaza in the park!
+
+View Mission Details {decision}"
+"sub_010_003_2","Not all the footage I shot in Shinjuku Park turned out great, but
+I'm happy with the results. I feel like monetization is in sight!"
+"sub_020_011_1",""
+"sub_020_012_1","Unused"
+"sub_020_013_1","I still have some Blue Chrondigizoit Metal left over, and there
+is a favor I would like to ask of you. Could you come to the
+throne?
+View Mission Details {decision}"
+"sub_020_014_1",""
+"sub_020_015_1",""
+"sub_020_016_1",""
+"sub_020_018_1","I'm the only one left here now, and I'm having trouble with
+something. Can you come to Abyss Beach to help?
+
+View Mission Details {decision}"
+"sub_020_019_1","Help! Me trapped in Abyss Sanctuary prison! Me hope
+somebody gets this!
+
+View Mission Details {decision}"
+"sub_030_024_1","Ouch... I've been attacked by bees... What a day! I'll be
+waiting for you at Shade Tree Pier. Can you come talk?
+
+View Mission Details {decision}"
+"sub_030_026_1",""
+"sub_030_027_1",""
+"sub_030_028_1",""
+"sub_030_029_1","Having a band would make the party more lively. I need your
+help. I'll be waiting for you in Gear Forest Village.
+
+View Mission Details {decision}"
+"sub_030_030_1","Oh, no! Remember that secret base I told you about? Please
+just come to the village!
+
+View Mission Details {decision}"
+"sub_030_031_1","There seems to be a lot of fun hustle and bustle in Gear Forest
+Village these days, but I cannot leave the sanctuary... so I am
+missing out...
+View Mission Details {decision}"
+"sub_040_032_1","We're protectin' the peace of the forest! We're gonna start our
+patrol from the Floating Island Plains!
+
+View Mission Details {decision}"
+"sub_040_033_1","Us brothers are gonna make the forest peaceful again! Those
+leftover Titans are as good as gone from the Floating Rock
+Islands!
+View Mission Details {decision}"
+"sub_050_038_1","I've got a big favor to ask you. Could you stop by the shop when
+you're in Central Town?
+
+View Mission Details {decision}"
+"sub_050_039_1","My precious hammer is in trouble... My hammer is my life!
+Come to the shop in Central Town. I'm begging you!
+
+View Mission Details {decision}"
+"sub_050_040_1","Unused"
+"sub_050_041_1","My fellow Central Tower security teammate hasn't come back
+from work yet. We were supposed to link up downtown. Are
+they slacking off or something?
+View Mission Details {decision}"
+"sub_050_042_1","I can't get a Parrotmon plume because the Titans are in the way!
+Maybe I should go downtown and rethink the plan.
+
+View Mission Details {decision}"
+"sub_050_043_1","We're gonna get PlatinumNumemon's jewelry this time fer sure!
+If anybody wants to come with us, meet us downtown in Central
+Town!
+View Mission Details {decision}"
+"sub_050_044_1","Unused"
+"sub_050_045_1",""
+"sub_050_046_1",""
+"sub_050_047_1",""
+"sub_050_048_1",""
+"sub_050_049_1",""
+"sub_050_050_1",""
+"sub_060_052_1",""
+"sub_060_053_1",""
+"sub_070_055_1","Hmm... Can love really change a person, I wonder...?
+Hey, can you come and talk for a bit? I'll be at my place
+in downtown Central Town.
+View Mission Details {decision}"
+"sub_070_056_1","Hmm... I still don't get it... I wanna talk about it some more, so
+come to Rebellion Village.
+
+View Mission Details {decision}"
+"sub_070_056_2","I... think I may be going crazy. I feel strange somehow. I guess
+I'll go try to clear my head."
+"sub_070_057_1","This feeling... I have to do something about it. Come meet me in
+Rebellion Village.
+
+View Mission Details {decision}"
+"sub_080_059_1","I want to go on a trip with Blimpmon. I can't stay in Central
+Town forever!
+
+View Mission Details {decision}"
+"sub_080_060_1","I can't go on like this...! I think I need your advice. I'll be waiting
+in Central Town.
+
+View Mission Details {decision}"
+"sub_080_061_1",""
+"sub_080_062_1",""
+"sub_080_063_1",""
+"sub_080_063_2",""
+"sub_090_070_1","Unused"
+"sub_090_071_1","Unused"
+"sub_090_071_2",""
+"sub_090_072_1","I was able to get a reservation with that famous fortune teller.
+Let's go together! Hurry to the coffee shop at the Koshu-Kaido
+Intersection!
+View Mission Details {decision}"
+"sub_090_073_1","Unused"
+"sub_090_074_1","Unused"
+"sub_095_077_1","Factorial Town's production line is inoperative... We're short
+of materials and Chrondigizoit...
+
+View Mission Details {decision}"
+"sub_095_078_1","BLIMPMON CRASHED IN FACTORIAL TOWN AND NEEDS REPAIR.
+
+View Mission Details {decision}"
+"sub_095_082_1","I obtained a part from a most excellent action figure, and I've
+got some questions about it. Come see me in the Factorial Core.
+
+View Mission Details {decision}"
+"sub_095_083_1",""
+"sub_095_084_1",""
+"sub_095_084_2",""
+"sub_095_084_3",""
+"sub_095_168_1","Unused"
+"sub_100_087_1","I know they're not used to this world, but to think we'd need
+the help of humans... Ah, well. Please come to the theater
+VIP room.
+View Mission Details {decision}"
+"sub_100_087_2","I can confirm that all the Royal Knights have returned.
+I want you to come and pick up your reward."
+"sub_100_088_1","Can you stop by the VIP room? I need to ask you a favor. It
+shouldn't be a bad deal for you, either.
+
+View Mission Details {decision}"
+"sub_100_089_1","The helpers I brought are in the Paradise Colosseum. You
+should go see them and remind them of their role.
+
+View Mission Details {decision}"
+"sub_110_090_1","I've confirmed an anomalous phenomenon! But I have a
+feeling it's a little complicated. I'm in the back alleys of
+Akihabara. Come find me!
+View Mission Details {decision}"
+"sub_110_091_1","We were running away from something scary, but my friend
+didn't make it! I'm in Central Town. Please help!
+
+View Mission Details {decision}"
+"sub_110_092_1","I managed to arrive at Central Tower on time... but everyone
+in this world is so strong that I'm feeling a bit unsure of myself.
+
+View Mission Details {decision}"
+"sub_110_093_1","I'll defeat the immortal steed of the Dark Garden, and in so
+doing reclaim my confidence as a knight!
+
+View Mission Details {decision}"
+"sub_110_094_1","Something strange is going on in Lord Plutomon's castle, but
+I'm too scared to investigate... Someone, please help!
+
+View Mission Details {decision}"
+"sub_110_095_1","Unused"
+"sub_110_098_1","Hey, come to Central Tower! I wanna show you all the Royal
+Knights gathered here.
+
+View Mission Details {decision}"
+"sub_110_099_1","I, Gallantmon, came to Factorial Town to fix my equipment,
+but I did not expect to be stopped here... Hmm.
+
+View Mission Details {decision}"
+"sub_110_100_1","I'm with WereGarurumon in the sanctuary of the Gear Forest.
+I wonder why he hates humans so much...
+
+View Mission Details {decision}"
+"sub_110_101_1","I have come all this way to Factorial Town, but I cannot get my
+armor fixed. I need your help!
+
+View Mission Details {decision}"
+"sub_110_102_1","I came to the Abyss Sanctuary to repair my armor, but how do
+I get a meeting with Neptunemon?
+
+View Mission Details {decision}"
+"sub_110_103_1","I got a tip about something sus going on! Something about
+phase electron lifeform sightings... The tip sounds kinda sus,
+too. I'll give you the deets at the office!
+View Mission Details {decision}"
+"sub_110_104_1","We've encountered an unidentified flying object in Akihabara.
+Can you lend me a hand? I'll be waiting at the Electric Town
+South Exit.
+View Mission Details {decision}"
+"sub_110_104_2","Like Dr. Simmons said, it's quite interesting."
+"sub_110_105_1","Here I am at Central Tower, yet LordKnightmon is nowhere to
+be found. Most worrisome...
+
+View Mission Details {decision}"
+"sub_110_106_1","Dynasmon and LordKnightmon are having an argument in
+Central Tower and the noise is driving me mad. Would you try
+speaking to them?
+View Mission Details {decision}"
+"sub_110_108_1","To think that not a single one of them could notice me... This
+is a first. And here I have come all this way to Central Tower!
+
+View Mission Details {decision}"
+"sub_110_109_1","I was just relaxing in the Shaded Woods, and then this really
+strong-looking guy showed up!
+
+View Mission Details {decision}"
+"sub_110_111_1","Ugh, how boring. Where the heck has Jesmon wandered off
+to? Didn't I say to meet at the Paradise Colosseum?
+
+View Mission Details {decision}"
+"sub_110_112_1","I am in line at Yaro-kei Ramen in Akihabara, but no matter
+what I say, I always end up with the wrong order....
+
+View Mission Details {decision}"
+"sub_110_113_1","A friend of mine seems to be involved in some kind of trouble.
+I need you to come to the back alleys of Akihabara.
+
+View Mission Details {decision}"
+"sub_110_208_1","Even Susanomon has become enamored of this world.
+Please defeat him in the Paradise Colosseum and remind
+him of his true task.
+View Mission Details {decision}"
+"sub_110_211_1","We've recovered most of our strength. Head on over to
+Central Tower as soon as you can. We'll be waiting for you!
+
+View Mission Details {decision}"
+"sub_900_114_1","Unused"
+"sub_900_116_1","Unused"
+"sub_900_117_1","Unused"
+"sub_200_146_1","Another person has taken leave. We're severely lacking
+manpower. The next site is the Electric Town South Exit...
+Can someone give me an energy drink?
+View Mission Details {decision}"
+"sub_200_147_1","I heard a cosplayer went missing in Shinjuku Park. I wanna
+investigate, so let's meet up at the Waterfall Plaza.
+
+View Mission Details {decision}"
+"sub_200_148_1","There are a few Digimon that are really afraid of humans. I'll go
+to your house in Central Town to tell you all about it.
+
+View Mission Details {decision}"
+"sub_200_149_1","Can you come here quick? I got a super creepy Digiline.
+Let's meet up at Vision Square in Higashi-Shinjuku!
+
+View Mission Details {decision}"
+"sub_200_150_1","I came all the way to Abyss Beach and no one is here...
+I wanna have fun with everyone in the ocean.
+
+View Mission Details {decision}"
+"sub_050_151_1","Unused"
+"sub_050_152_1","There's something I want to do and I need your help. I'll be
+waiting for you in downtown Central Town.
+
+View Mission Details {decision}"
+"sub_090_153_1",""
+"sub_900_154_1",""
+"sub_900_154_2",""
+"sub_080_155_1",""
+"sub_010_156_1","This strange letter arrived at Inori's pop's office and I'm not
+sure what to do. Anyone got any advice?
+
+View Mission Details {decision}"
+"sub_010_157_1",""
+"sub_010_158_1",""
+"sub_010_158_2",""
+"sub_010_158_3",""
+"sub_010_158_4",""
+"sub_010_159_1","What does ""the Twentiest"" even mean...? I'm so lost right now,
+so I'm just standing in a back alley in Shinjuku...
+
+View Mission Details {decision}"
+"sub_040_160_1","Sure, I've gotten stronger. But now that Big Bro is... What
+should we do with the Paradise Colosseum?
+
+View Mission Details {decision}"
+"sub_090_161_1",""
+"sub_900_162_1","The time has come to see which is the true Card King. I await
+you at the Electric Town South Exit of Akihabara Station.
+
+View Mission Details {decision}"
+"sub_900_162_2","Looks like you beat the Card King. You've earned the right to
+see me. I'll be waiting for you in Shinjuku."
+"sub_900_163_1",""
+"sub_900_163_2",""
+"sub_900_164_1",""
+"sub_900_164_2",""
+"sub_900_165_1",""
+"sub_900_165_2",""
+"sub_900_166_1",""
+"sub_900_166_2",""
+"sub_900_217_1","I need to talk to you. I'll be waiting for you in a back alley of
+Akihabara.
+
+View Mission Details {decision}"
+"sub_070_167_1","I need to tell you about something that's been bothering me... I
+can only share it with you. I'll be waiting at my house downtown!
+
+View Mission Details {decision}"
+"sub_910_169_1","I got a tip about a missing person case. Could you come by
+the office and give me a hand? 
+
+View Mission Details {decision}"
+"sub_910_170_1","There's someone I want you to meet. We're meeting at the
+office, so I want you to come, too.
+
+View Mission Details {decision}"
+"sub_910_171_1","I found a picture of me back in high school. Come join me for
+a reminiscing sesh! I'll be waiting for you at the office.
+
+View Mission Details {decision}"
+"sub_020_172_1","It's strange that Sharkmon backed down so easily. Why don't
+we investigate the ocean floor? I'll be waiting for you in the
+Abyss Depths.
+View Mission Details {decision}"
+"sub_020_173_1","Not a single customer here can appreciate my cuteness.
+Someone come and heal my weary spirit at the Warrior's
+Watering Hole!
+View Mission Details {decision}"
+"sub_050_176_1","I have a somewhat troublesome matter on my hands. I would
+like you to stop by the tavern when you are in Central Town.
+
+View Mission Details {decision}"
+"sub_080_177_1",""
+"sub_100_178_1","The three hosts have something they'd like to convey to you.
+Please come to the VIP room of the In-Between Theater.
+
+View Mission Details {decision}"
+"sub_010_179_1","Man, what a fix. Somebody's holed up in the restroom and they
+won't come out. They keep muttering about some captain and
+a weapon of some kind, too...
+View Mission Details {decision}"
+"sub_010_180_1","Spread the word! There's not only one but TWO unbelievably 
+high-quality cosplayers! Come see them at the Electric Town
+South Exit!
+View Mission Details {decision}"
+"sub_900_181_1",""
+"sub_900_182_1",""
+"sub_030_183_1","The fog is so bad, I can't get any deeper into the forest. I got
+scared and came back to the village...
+
+View Mission Details {decision}"
+"sub_030_184_1",""
+"sub_900_215_1","I've found another occurrence of abnormal space. I'd like you
+to investigate. I'll be waiting at the In-Between Theater.
+
+View Mission Details {decision}"
+"sub_900_216_1","I've picked up a reading unlike anything I've ever seen before.
+Come to the In-Between Theater.
+
+View Mission Details {decision}"
+"sub_seekhiroko_010_010","Lately I've been having these weird dreams... But they're super
+real, like I'm actually there. This could be my next big scoop!
+
+View Mission Details {decision}"
+"sub_seekhiroko_010_011",""
+"sub_seekhiroko_020_010","What gives? I'm not having weird dreams anymore! And here I
+was, SOOOOO close to having a killer story! Oh, well. Guess
+I just gotta keep hunting!"
+"sub_seekhiroko_020_011",""
+"sub_seekhiroko_030_010","I dreamed I was in a place with the most AMAZING scenery!
+It was so strange, like some far-away world! Wish I could've
+taken Inori there!"
+"sub_seekhiroko_030_011",""
+"sub_seekhiroko_040_010","I had a dream I was swimming and swimming in this gorgeous
+ocean! And I never ran out of air, no matter how long I stayed
+underwater! It was SOOOOO fun!"
+"sub_seekhiroko_040_011",""
+"sub_seekhiroko_050_010","I had a dream about a great party beneath a huge tree!
+Everyone seemed like they were having a ton of fun!
+I wonder if dreams do reruns..."
+"sub_seekhiroko_050_011",""
+"sub_seekhiroko_060_010","I dreamed about an awesome city full of machines chugging
+away! Wish Inori could've seen it, too! The scenery was
+just that cool!"
+"sub_seekhiroko_060_011",""
+"sub_seekhiroko_070_010","I dreamed about a place with a bunch of angelic people.
+And there was a hallway where the floor moved with you as
+you walked. No way to make sense of any of that!"
+"sub_seekhiroko_070_011",""
+"sub_seekhiroko_080_010","In my dream, I visited this world where it was FREEZING!
+Nothing but ice and snow as far as the eye could see.
+Oh, but I did get to play with penguins and snowmen!"
+"sub_seekhiroko_080_011",""
+"sub_seekhiroko_090_010","I had a dream about going down underneath a lively city. I kept
+going down and down through all these twists and turns... Like,
+miss me with that humidity, though! Whew!"
+"sub_seekhiroko_090_011",""
+"sub_seekhiroko_100_010","So, get this! In my dream, I was exploring the deep sea!
+Like, I'm talking the very bottom, down by these huge bones.
+And, best of all, there were talking fish down there!"
+"sub_seekhiroko_100_011",""
+"sub_seekhiroko_110_010","So there was this train station in the middle of the woods,
+and there were these talking flowers and plants that said
+they keep the forest safe. That's what was in my dream."
+"sub_seekhiroko_110_011",""
+"sub_seekhiroko_120_010","I went to a museum that had a ginormous robot! Pretty sure it
+was made by some genius inventor... Oh, that was a dream,
+by the way."
+"sub_seekhiroko_120_011",""
+"sub_seekhiroko_130_010","I visited this sparkly room in a dream. There was what I think
+was a chair way up high with a really big face on it. Sorry. I
+know that's hard to imagine!"
+"sub_seekhiroko_130_011",""
+"sub_seekhiroko_140_010","I had this dream I was lost in a run-down castle. I couldn't
+seem to get where I wanted to go... But when I did finally
+arrive... it turned out to be a dark, gloomy castle keep."
+"sub_seekhiroko_140_011",""
+"sub_seekhiroko_150_010","I dreamed about a hidden village. It seemed abandoned,
+except there was this person in a white robe who kept smiling
+and saying, ""Now let's try this..."" with dogged determination."
+"sub_seekhiroko_150_011",""
+"sub_seekhiroko_160_010","Feels like I've had so many weird dreams! About all kinds of
+stuff, like beautiful scenery and the ocean floor! They should
+make great video topics! I gotta compile 'em all!"
+"sub_seekhiroko_160_011",""
+"sub_seeketemon_010_010","My souls have gone missing, yo! At this rate, I'm afraid they're
+gonna freeze... My man! Help a Digimon out! Find all my souls
+for me, would ya?!
+View Mission Details {decision}"
+"sub_seeketemon_010_011",""
+"sub_seeketemon_020_010","Dude! These souls are flawless! And now the King of Digimon
+can keep on shining! Thanks, fam! I sent ya a little something
+for yer trouble!"
+"sub_seeketemon_020_011",""
+"sub_seeketemon_030_010","This is my soul, no doubt! You always remember your Number 1!"
+"sub_seeketemon_040_010","Is my soul shining? Number 2, thanks to you!"
+"sub_seeketemon_050_010","Was my soul lit? Number 3, in the place to be!"
+"sub_seeketemon_060_010","Was my soul jamming? Number 4, on the floor!"
+"sub_seeketemon_070_010","Did my soul have the answer? Number 5, looking alive!"
+"sub_seeketemon_080_010","My soul wanted a crew! Number 6, in the mix!"
+"sub_seeketemon_090_010","My soul wants to cypher! Lucky Number 7!"
+"sub_seeketemon_100_010","Wack chumps make my soul seethe! Number 8 and life is great!"
+"sub_seeketemon_110_010","My soul digs tight grooves! Number 9 and feeling fine!"
+"sub_seeketemon_120_010","My soul is a young gun! Number 10, back again!"
+"sub_seeketemon_130_010","My soul keeps the vibes good! Number 11, straight from
+heaven!"
+"sub_seeketemon_140_010","This is my soul, baby! Know what I mean?
+Gimme a dozen of that Number 12!"
+"sub_seeketemon_150_010","My soul is super regal! Ain't nothing unlucky about this
+Number 13!"
+"sub_seeketemon_160_010","Did my soul have what you need? Number 14, looking clean
+and lean!"
+"sub_seeketemon_170_010","My soul is a homie for life! Number 15 is a real machine!"
+"sub_seeketemon_180_010","My soul is awesome! Number 16 has never been so sweet!"
+"sub_seeketemon_190_010","My soul is wavy, believe that! Number 17 was the last to be
+seen!"
+"sub_seeketemon_200_010","My man! You found all my souls! Sit tight while I make sure
+everything's in order! I'll hit ya up later!"
+"sub_seeketemon_200_011",""
+"sub_seekkuga_010_010","The Kuramon cleanup is in your capable hands. They could
+be hiding anywhere in the city. But your skills are more than
+up to the task, no? Hee hee.
+View Mission Details {decision}"
+"sub_seekkuga_010_011",""
+"sub_seekkuga_020_010","You exterminated all of the Kuramon! I have to say, I had no
+idea Kuga was such an envious guy. This will make for some
+excellent research data. Thank you!"
+"sub_seekkuga_020_011",""
+"sub_seekkuga_030_010","[Dr. Kuga's Dump]
+Out of the way! Don't bother me! Just leave me alone!"
+"sub_seekkuga_040_010","[Dr. Kuga's Dump]
+Again?! She's back again?! Why?!"
+"sub_seekkuga_050_010","[Dr. Kuga's Dump]
+Don't leave me! Don't leave me here all alone!"
+"sub_seekkuga_060_010","[Dr. Kuga's Dump]
+Dammit! Everyone keeps getting in my way!"
+"sub_seekkuga_070_010","[Dr. Kuga's Dump]
+Where is she?! Where's Simmons?!"
+"sub_seekkuga_080_010","[Dr. Kuga's Dump]
+Hehehe... This will be the end of Simmons..."
+"sub_seekkuga_090_010","[Dr. Kuga's Dump]
+It has to be me...! Me! Not anyone else!"
+"sub_seekkuga_100_010","[Dr. Kuga's Dump]
+Why won't it WORK?! How does Simmons do it?!"
+"sub_seekkuga_110_010","[Dr. Kuga's Dump]
+I see it now... What I lack is the hunger!"
+"sub_seekkuga_120_010","[Dr. Kuga's Dump]
+I'm the only one who can use Digimon!"
+"sub_seekkuga_130_010","[Dr. Kuga's Dump]
+Simmons! Simmons! Simmons!
+It's always Simmons... Just shut up already!"
+"sub_seekkuga_140_010","[Dr. Kuga's Dump]
+I'll be the one to save the world! Not her!"
+"sub_seekkuga_150_010","[Dr. Kuga's Dump]
+No, no, this can't be happening! This has to be a dream!"
+"sub_seekkuga_160_010","That should be the final Kuramon. Sit tight. I'll need a bit of
+time to confirm."
+"sub_clear_010_010","All side missions have been completed for now.
+Your contributions will be used for ADAMAS's data analysis."
+"sub_clear_010_020","As expected of someone of your caliber.
+Proceed with your main mission."
+"sub_clear_010_030","All side missions have been completed for now.
+The ADAMAS database will be continually updated."
+"sub_clear_010_040","Your invaluable contributions have been noted.
+Proceed with your main mission."
+"sub_clear_010_050","Document: ""Side Missions""
+
+View {decision}"
+"dlc_000_010_1","The maintenance on the elevator at the back of the In-Between
+Theater is now complete. Could I trouble you to come take a
+look? I'd like to show you around.
+View Mission Details {decision}"
+"dlc_000_020_1","Behind each door, a new tale about the truth of the world
+awaits..."
+"dlc_010_010_1","A problem concerning the natural laws of the world has arisen.
+I'd like you to investigate it.
+
+View Mission Details {decision}"
+"dlc_020_010_1","There's something I'd like you to investigate. Someone is
+distorting the very precepts of our world.
+
+View Mission Details {decision}"
+"dlc_030_010_1","There's something I'd like you to investigate. Someone is
+altering the flow of time itself.
+
+View Mission Details {decision}"
+"field_14_020_1","Unknown phase electron lifeform detected. It may know
+something. Try and make contact."
+"field_14_040_0","No going back now. You just have to find an elevator and
+press onward."
+"field_14_040_1","Analyze {l2} should help you find any weak spots in the wall.
+View the document if you want to know how to use it."
+"field_14_040_2","Document: ""Analyze Mode""
+
+View {decision}"
+"field_02_140_0","Lightning seems to be drawn to Digimon with mechanical
+bodies. You may be able to use that to your advantage
+during battle."
+"field_03_160_0","Don't forget that Divermon is a Titan... I'm not sure how much
+we can trust him."
+"field_03_160_1","He may not even come back as promised. And here we are, at
+the bottom of the ocean..."
+"field_03_160_2","In other words, this could be a trap. Stay alert."
+"field_06_190_10","Head to the front of the car! Save Locomon!"
+"field_06_190_20","There are numerous readings of what seems to be Titans.
+Run into them to knock them off of Locomon!"
+"field_06_190_21","Use DigiAttacks to defeat enemies quickly and move on!"
+"field_06_190_30","Detecting large numbers of Digimon ahead! Proceed with
+caution!"
+"field_06_190_40","Enormous Digimon detected just ahead! It must be quite
+strong. Keep your wits about you!"
+"field_06_190_50","Use DigiAttacks to defeat the enemy! Save Locomon!"
+"timejump_010_010","You have returned to The Absolute Timeline - The Real World."
+"timejump_020_010","You have returned to The Absolute Timeline - Shinjuku (8 Years
+Ago)."
+"timejump_030_010","You have returned to The Absolute Timeline - The Digital World
+(8 Years Ago)."
+"timejump_040_010","You have returned to The Absolute Timeline - Shinjuku (Present
+Day)."
+"timejump_050_010","You have returned to The Absolute Timeline - The Digital World
+(Present Day)."
+"timejump_060_010","You have returned to The Absolute Timeline - Rebellion Village
+(Present Day)."
+"arena_010_050","Your next bout's been finalized! Apparently, nobody on this
+team lies. Talk about weird..."
+"arena_010_060","Your next bout's been finalized! This team's a circus crew
+so famous they've even gotten the champ's attention!"
+"arena_010_070","Your next bout's been finalized! The opposing team this
+time is shrouded in mystery, having won all their previous
+matches by default!"
+"arena_010_080","Your next bout's been finalized! I hear this time you're facing
+some kind of covert special forces unit!"
+"arena_010_090","Your next bout's been finalized! Apparently, you're up
+against a crazy-strong, silent type..."
+"arena_010_100","Your next bout's been finalized! You're up against a pair
+of gatekeepers from worlds of fire and ice."
+"arena_010_110","Your next bout's been finalized! But... 
+this next fighter's just unbelievable!"
+"arena_010_120","Your next bout's been finalized! Your opponents were saying
+something about a true king having been born at last!"
+"arena_010_130","Your next bout's been finalized, but... all the opposing
+team seems to care about is Lucemon."
+"arena_010_140","Your next bout's been finalized! Seems like the other team
+is always arguing about something..."
+"arena_010_150","Your next bout's been finalized. Apparently, they're coworkers
+who have a score to settle with you, and they sound pretty
+steamed."
+"arena_010_160","Your next bout's been finalized! It's the Terrier Twins
+themselves, and they're stronger than ever!"
+"arena_010_170","Hey! You can't go bringing a table into the arena just to
+flip it! Look. Let me take care of that thing. You go shut
+the guy up!"
+"arena_010_180","You're finally facing off against Marsmon! It's the
+long-awaited final bout! I'll be on the edge of my seat
+for this one!"
+"arena_010_190","A trio that's been making a name for themselves in the
+arena lately have issued you a challenge. I'm expecting
+a good match!"
+"arena_010_200","Whoa! This is a big one! The hero of Shambala has agreed to
+fight you!"
+"arena_010_210","LordKnightmon has challenged you to face its Legion of
+Beauty. Though, apparently, LordKnightmon is the only
+member..."
+"arena_010_220","The great Twentiest has agreed to fight you! I just have one
+question... Who or what is ""the Twentiest""?"
+"arena_010_230","Some bright duo muscled their way in and strong-armed me
+into signing them up. What was that about?"
+"hazama_00_000_0","{fc2Unauthorized access detected.
+Command: Play Message}"
+"hazama_00_000_1","{fc2Unauthorized access detected.
+Command: Play Digiline}"
+"hazama_00_010_1","Document: ""Outer Dungeons""
+
+View {decision}"
+"hazama_00_020_1","The Outer Dungeons from Ages Past... Word has it that
+harrowing trials await within."
+"hazama_00_020_2","I've registered this Outer Dungeon, so please speak to me
+when you want to attempt a trial."
+"hazama_00_020_3","Document: ""Outer Dungeons""
+
+View {decision}"
+"hazama_00_020_4","I've registered this new Outer Dungeon, so please come to the
+In-Between Theater if you wish to challenge it later."
+"hazama_00_030_1","The fact that you received this message means that another
+human besides me has visited here."
+"hazama_00_030_2","The Digimon call this place ""the Outer Dungeons."""
+"hazama_00_030_3","I stumbled into this world, too, but now I can't leave."
+"hazama_00_030_4","I've had nothing but time on my hands, so I created some
+games. Pretty impressive, if I do say so myself."
+"hazama_00_030_5","I tried getting some of my Digimon friends to give them a
+whirl... but not even that old fogey Barbamon can beat them."
+"hazama_00_030_6","For creatures with artificial intelligence, they absolutely
+stink at games. I'd love it if you or anyone else gave mine
+a shot."
+"hazama_00_030_7","Beat a game and I'll give you something special I have set
+aside."
+"hazama_00_040_1","Congrats on beating one of the games! I wish I could have
+seen you do it in person."
+"hazama_00_040_2","But I still have plenty of masterpieces waiting for you.
+Feel free to take them on as well!"
+"hazama_00_050_1","{fc2Unauthorized access detected.
+Certain Digivice functionality has been disabled.}"
+"hazama_00_050_2","Digivice functionality has been fully restored."
+"hazama_00_050_3","Document: ""Digivice Usage Restrictions""
+
+View {decision}"
+"hazama_00_060_1","Document: ""Peckmon Race Rules""
+
+View {decision}"
+"hazama_00_100_1","I don't believe it! You really gave it all you had, and completed
+your first series. Congrats!"
+"hazama_00_100_2","Please accept this reward as my way of saying thanks. I hope
+you like it!"
+"hazama_00_100_3","I've created five types of games in all. I recommend you give
+the other four varieties a shot, too!"
+"hazama_00_110_1","Whoa... Did you really just complete series two? You're
+something else! I salute you."
+"hazama_00_110_2","I've created five types of games in all! That means you still
+have three more varieties to try."
+"hazama_00_120_1","Three series complete? I'd say you've got what it takes to
+be a Digimon Tamer."
+"hazama_00_120_2","I've created five types of games in all! That means you
+still have two more varieties to try."
+"hazama_00_130_1","Look at you, beating four of my series! You and your Digimon
+must have a really tight bond."
+"hazama_00_130_2","This is the final series! Beat this one and you'll have
+finished them all!"
+"hazama_00_140_1",""
+"hazama_00_140_2",""
+"hazama_00_140_3",""
+"hazama_00_140_4",""
+"hazama_00_140_5",""
+"hazama_00_140_6",""
+"hazama_00_140_7",""
+"hazama_00_140_8",""
+"hazama_99_010_1","Day 1 since arriving here.
+I encountered some lifeforms called ""Digimon."""
+"hazama_99_010_2","Seems like they can understand human speech. I had them tell
+me all about this world."
+"hazama_99_010_3","I know I ought to be cautious around these intelligent beings
+but, the Botamon that's grown attached to me is just way too
+adorable for words."
+"hazama_99_020_1","Day 2 since arriving here.
+I stumbled upon an odd device."
+"hazama_99_020_2","It appears to be programmable using assembly language.
+I barely remember how to do that, but I'll see what I can
+manage when I get some spare time."
+"hazama_99_020_3","Right now, I need to focus on finding food."
+"hazama_99_030_1","Day 3 since arriving here.
+A Digimon shared something called ""Digimeat"" with me."
+"hazama_99_030_2","It felt like electrons were firing off in my mouth.
+What a strange sensation."
+"hazama_99_040_1","Day 4 since arriving here.
+Botamon's appearance changed after I fed them some
+Digimeat."
+"hazama_99_040_2","When I analyzed them, I discovered they seem to have...
+evolved. Or ""Digivolved,"" as it were. Apparently, now their
+name is ""Koromon."""
+"hazama_99_040_3","Seems like Digimon grow and develop by rewriting their own
+programming as they consume various kinds of data."
+"hazama_99_050_1","Day 5 since arriving here.
+I still haven't found a way to return to my world."
+"hazama_99_050_2","However, while I was messing with that device I managed to
+open a gate to the Digital World."
+"hazama_99_050_3","It seems pretty dangerous out there... so maybe I'll prepare a
+little more before I try venturing out."
+"hazama_99_060_1","Day 6 since arriving here.
+Koromon Digivolved yet again."
+"hazama_99_060_2","Now they go by ""Agumon."" They also learned a skill called
+""Pepper Breath."""
+"hazama_99_060_3","I think it's about time I had them fight other Digimon. But, as
+usual, I can't get over how cute they are when their cheeks are
+stuffed with Digimeat."
+"hazama_99_070_1","Day 7 since arriving here.
+I'm ready to try going outside."
+"hazama_99_070_2","My first order of business will be surveying the area... I think
+I'll explore the Digital World a little at a time."
+"hazama_99_080_1","Agumon was on the verge of death in battle, but they
+somehow mustered their strength and dramatically boosted
+their attack power and intelligence."
+"hazama_99_080_2","They even turned the tables and took the enemy out with a
+critical hit! I couldn't ask for a better partner."
+"hazama_99_090_1","Conversing with the Digimon has taught me that even
+individuals with the same appearance each have different
+personalities. It's fascinating."
+"hazama_99_090_2","I've observed a tendency for brave Digimon to grow more
+easily in attack power, whereas caring Digimon boast higher
+defense."
+"hazama_99_090_3","Other personalities seem to learn special skills like
+""First in Line"" and ""Counter."""
+"hazama_99_100_1","My Agumon Digivolved into Greymon and learned Mega Flame."
+"hazama_99_100_2","Being able to launch a fire-element physical attack that
+hits all enemies is extremely good. It ought to make up for
+the Digimon's low defense."
+"hazama_99_100_3","Next, maybe I'll try having a Digimon with low Spirit learn
+something effective like Magma Fall."
+"hazama_99_100_4","Still, it's annoying not being able to gauge an opponent's stats
+without fighting it first. If only there were some way to learn
+their stats beforehand..."
+"hazama_99_110_1","Day 72... no, 73, since arriving here.
+My sense of time is getting more and more uncertain."
+"hazama_99_110_2","I've explored a fair bit of the Digital World, but still have yet to
+find a means of getting home."
+"hazama_99_110_3","However, I remain astonished by the polymorphism of Digimon.
+They all Digivolve to forms best suited to their environment."
+"hazama_99_110_4","What's more, for all that they're supposed to be just programs,
+at times I find myself thinking of them as sapient creatures like
+human beings."
+"hazama_99_120_1","I encountered some Digimon capable of DNA Digivolution.
+Let's see if I can remember the combination..."
+"hazama_99_120_2","Oh, yes... Angewomon and LadyDevimon. There must be others
+like this... I'll just have to look around for more."
+"hazama_99_130_1","That ""Thor's Hammer"" of Zudomon's is apparently made of an
+extremely valuable metal called ""Chrondigizoit Metal."""
+"hazama_99_130_2","Seems you'll need the help of LoaderLeomon to mine the
+Chrondigizoit ore needed to make it."
+"hazama_99_140_1","They were severely injured while mining, but fully recovered
+with Venusmon's care in no time."
+"hazama_99_140_2","According to Venusmon, the higher one's SPI, the greater
+their power to heal wounds."
+"hazama_99_150_1","I found an odd item... a Digi-Egg."
+"hazama_99_150_2","According to Wizardmon, it's used for Digivolving into Armor
+forms."
+"hazama_99_160_1","I came across a mysterious item... Spirit."
+"hazama_99_160_2","According to Wizardmon, it's used for Digivolving into Hybrid
+forms."
+"hazama_99_170_1","Some Digimon will let people ride them. Birdramon and
+Garurumon are particularly great to ride."
+"hazama_99_170_2","But my favorite of all is cruising around on Beelzemon's
+prized motorcycle, Behemoth."
+"hazama_99_180_1","Digimon can move at astounding speeds. Out of the ones I've
+seen, Wingdramon was blindingly fast."
+"hazama_99_180_2","I'm pretty sure they hit... yeah, around Mach 20. The Blaze
+Sonic Breath they unleash while moving at that speed is also
+a terror."
+"hazama_99_190_1","Today I found a Digimon that's even faster than Wingdramon."
+"hazama_99_190_2","I only saw them for the briefest second, but I hear their name
+is MagnaGarurumon."
+"hazama_99_200_1","I hear the Digital World is home to a group of Digimon known
+as ""the Seven Great Demon Lords""..."
+"hazama_99_200_2","Supposedly, they're in a region called the Dark Area. I'll
+pay it a visit if I get the chance."
+"hazama_02_210_10","Gloop-bloop-bloop... Glippity, gloppity, goo... ♪ Me like...
+singing... You sing... together...?"
+"hazama_02_211_10","All right, now let's go get some booze! Long as I got my
+drinkie-drink, I can do anythin'!"
+"hazama_02_212_10","Whale, whale! Hop on my back and let's sail the high seas!
+Yohoho! Fun awaits!"
+"hazama_02_213_10","I shall entrust you with choosing where to direct my might.
+No doubt you will put it to good use."
+"hazama_03_300_10","———Your entry in the Peckmon Race has been accepted.
+——— Please use your device to access the sign-up desk!"
+"hazama_03_300_20","———Your entry in the Peckmon Race has been withdrawn.
+———We hope you can participate next time!"
+"hazama_03_310_10","Hoho! ♪ Whether it's singing or racing, I just know
+everything will be more fun with you!"
+"hazama_03_311_10","Eee hee hee! The pact is signed! Now I will draw out the
+magic talent slumbering within you!"
+"hazama_03_312_10","I shall take you anywhere you want to go! Just as long as
+it gives you a good taste of my speed!"
+"hazama_03_313_10","I perform regular maintenance on my equipment, so call on
+me whenever you need.
+Thanks!"
+"hazama_04_415_10","Now I can finally share my material with the outside world!
+Let's sweep everyone away with a big wave of comedy!"
+"hazama_04_416_10","Please let me join your party. I'll show you my astounding
+tactical prowess."
+"hazama_04_417_10","I don't need a reason to fight. If anybody gives you trouble,
+just let me at 'em."
+"hazama_04_418_10","I will work to the best of my ability for you from now on.
+Just pay me back with sweet nectar!"
+"hazama_05_510_10","I'll commence your education in the mystic arts forthwith!
+A very special mystic art... the art of befriending me!"
+"hazama_05_511_10","Been a while since I had a good scrap... and I'm itching to
+go! Just watch my back!"
+"hazama_05_515_10","Hehe... That was a fine drink. Looking forward to sharing
+more with you..."
+"hazama_05_513_10","When times are hard, call upon me right away. 
+You have too great a burden on your shoulders."
+"hazama_08_810_10","Thanks for takin' me along! Googoo! Now I get to do fun
+stuff! Gaga!"
+"hazama_08_811_10","APPLYING LATEST PATCH... 
+99%. BEEP, BEEP... 100%... 
+PATCH SUCCESSFULLY APPLIED. HELLO! 
+I AM ANDROMON! I AM PLEASED TO BE IN YOUR SERVICE!"
+"hazama_08_818_10","Thanks for getting me out of there! I'll carry you wherever
+you need to go!"
+"hazama_08_813_10","I sense that you are locked in a struggle against many
+fierce foes... Thus I swear upon my blade that I shall
+safeguard your life."
+"hazama_02_220_10","Welcome! This is The Hall of EXP.
+Fight according to your current abilities and earn lots of EXP!"
+"hazama_02_220_20","Welcome! This is The Hall of Gold.
+Fight according to your current abilities and earn lots of YEN!"
+"hazama_02_220_30","Welcome! This is The Hall of Materials.
+Fight according to your current abilities and earn lots of
+materials!"
+"hazama_02_220_40","When you're tired and want to quit, just walk out the door!
+Do as much as you want, whenever you want. Knock
+yourselves out!"
+"common_world_0001",""
+"flag_1000",""
+"world_d0201_0001",""
+"fire_0001",""
+"mirei_0001",""
+"mirei_0002",""
+"mirei_0003",""
+"recovery_start","Regeneration Mode activated. Digimon HP/SP will be fully
+recovered in {n0} seconds..."
+"recovery_end","Regeneration Mode terminated. Digimon HP/SP fully recovered."
+"full_recovery","Digimon medical check complete.
+Digimon HP/SP fully recovered."
+"evolution_possible","A Digimon is {fc9now eligible for Digivolution}. View its details via
+{fc15Digivice > Digimon > Digivolution}."
+"kizuna_possible","New {fc9Agent Skills} are now available to learn. View them under
+{fc15Digivice > Agent > Agent Skills}."
+"digifarm_training_01","{fc9{d0}} has completed their training.
+If you would like it to continue training, just say the word."
+"digifarm_training_02","Very well. It will continue with the same training. Be sure to
+check in on the Digifarm from time to time."
+"tut_2006","Document: ""Attachment Skills""
+
+View {decision}"

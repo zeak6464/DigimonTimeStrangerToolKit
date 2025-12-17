@@ -1,0 +1,9 @@
+int32 0,string3 1
+0,"default_move_animation"
+1,"npc%03d"
+2,"chr%03d"
+3,"TP01"
+4,"digimon_chat_message"
+5,"instance"
+6,"act"
+7,"CP01"

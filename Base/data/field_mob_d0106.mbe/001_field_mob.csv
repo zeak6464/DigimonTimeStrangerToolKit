@@ -1,0 +1,4 @@
+int32 0,int32 1,string3 2,string3 3,int32 4,int32 5,int32 6,string3 7,string3 8,string3 9,string2 10,float 11,float 12,string2 13,int32 14,int32 15,float 16,float 17,float 18,float 19,float 20,float 21,float 22,int32 23,int32 24,float 25,float 26,float 27,float 28,int32 29,int32 30,string3 31,string3 32,string3 33,int32 34,float 35,bool 36,float 37,string2 38,string2 39,string2 40,string2 41,string2 42,string2 43
+20212001,99,"","chr588",0,0,0,"","","bd03","chr_588damaged",0,0,"F01",2,0,32.758,0.863,38.888,-251.539,0,0,1,1,0,0,0,0,-1,0,0,"","デジモンデフォルト","",1,0,true,-1,"","","","","",""
+20212002,1,"rumor_001","chr218",0,0,0,"","","bd03","chr_218damaged",0,0,"F01",2,0,1.106,3.677,28.408,-239.967,0,0,1,1,2,0,-2,0,-1,0,0,"","デジモンデフォルト","",1,0,true,-1,"","","","","",""
+20212003,99,"rumor_002","chr370",0,0,0,"","","bd03","chr_370damaged",0,0,"F01",2,0,-28.358,7.913,12.445,-361.076,0,0,1,1,2,0,-1,0,-1,0,0,"","デジモンデフォルト","",1,0,true,-1,"","","","","",""

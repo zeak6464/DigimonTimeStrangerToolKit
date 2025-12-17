@@ -1,0 +1,13 @@
+int32 0,string2 1,string3 2,string3 3,string3 4,string3 5,string3 6,float 7,float 8,float 9,float 10,float 11,int32 12,int32 13,float 14,float 15,float 16,float 17,int32 18,float 19
+10107001,"1","d01elv20down","d01elv20up","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107002,"2","d01elv20up","d01elv20down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107003,"3","d01elv20down","d01elv20up","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,0,2,0,1,0,-1,-1,0
+10107004,"4","d01elv20up","d01elv20down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107005,"5","d01elv20up","d01elv20down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107006,"6","d01elv20up","d01elv20down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107007,"7","d01elv20up","d01elv20down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107008,"8","d01elv40up","d01elv40down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107009,"9","d01elv40up","d01elv40down","coloff_d01elv01","coloff_d01elv01","",3,360,360,1,1,16,2,0,1,0,-1,-1,0
+10107013,"13","d0107elv450go","d0107elv450go","dummy","dummy","",0,0,0,1,1,0,2,0,1,0,-1,-1,0
+10107014,"14","d0107elv320go","d0107elv320go","dummy","dummy","",0,0,0,1,1,0,2,0,1,0,-1,-1,0
+10107015,"15","d0107elv250go","d0107elv250go","dummy","dummy","",0,0,0,1,1,0,2,0,1,0,-1,-1,0

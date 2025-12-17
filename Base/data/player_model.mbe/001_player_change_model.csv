@@ -1,0 +1,6 @@
+int32 0,string2 1,string2 2,empty 3,int32 4,bool 5,bool 6,bool 7,bool 8,bool 9,bool 10,bool 11,bool 12,bool 13,bool 14,bool 15,string2 16
+11831,"char_AEGIOMON","*Aegiomon",,1,false,false,false,true,false,false,false,false,false,true,false,""
+11832,"char_AEGIOMON","chr183ba010101",,1,false,false,false,true,false,false,false,false,false,true,false,""
+11841,"char_AEGIOCHUSMON","chr184aa010101",,2,false,false,false,true,false,false,false,false,false,true,false,"fg07_u01 fg07_u02 fg07_m01 fg07_m02 fg07_m03
+fg07_d01 fg07_d02 fg07_d03
+e200"

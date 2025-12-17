@@ -1,0 +1,326 @@
+string2 0,string 1
+"1000","Overwrite save data?"
+"1001","Load this save data?"
+"1002","Delete this save data?
+
+{fc2Note: This action cannot be undone.}"
+"1003",""
+"1004","Return to the title screen?
+
+{fc2Note: Any unsaved progress will be lost.}"
+"1005",""
+"1100",""
+"1101",""
+"1200",""
+"1201","{fc7Digivolve} to {d0}?"
+"1202","Fuse with {d0} and perform DNA Digivolution?"
+"1203","{fc2De-Digivolve} to {d0}?
+
+{fc15Tip: This Digimon will become weaker and cannot immediately be
+restored to its previous state. Use caution when performing this action.}"
+"1204","Perform Mode Change on {d0}?"
+"1205",""
+"1206","Convert {fc9{d0}}?
+
+{fc15Tip: The closer the Scan Rate is to 200%, the higher
+this Digimon's Max HP and Talent will be.}"
+"1207",""
+"1208",""
+"1209",""
+"1210","Proceed with DNA De-Digivolution?
+
+Cumulative stats will be divided evenly between Primary and
+Secondary Digimon. Equipment, Personality and certain stats
+will be inherited only by the main Digimon."
+"1211","Perform Mode Change on {d0}?"
+"1300","Learn the following skill?
+
+{fc9 {d0}} "
+"1400",""
+"1501",""
+"1502",""
+"1700",""
+"1900","Return to base?"
+"2200",""
+"2201",""
+"2300",""
+"2400",""
+"2401",""
+"2600",""
+"2601",""
+"2602",""
+"2603",""
+"2604",""
+"2700",""
+"2701",""
+"2702",""
+"2900",""
+"2901",""
+"2902",""
+"2903",""
+"2904",""
+"2950",""
+"2951",""
+"2952",""
+"2953",""
+"3000",""
+"3001","Leave the Digifarm?"
+"3002",""
+"3003",""
+"3004",""
+"3500",""
+"3501",""
+"3502",""
+"3503",""
+"3504",""
+"5001",""
+"5055","Do you want to save?"
+"5071","Board Blimpmon and take off?"
+"7000","Hand over the Ghost Coral Powder to Shellmon?"
+"10000","Yes"
+"10001","No"
+"10004",""
+"10005",""
+"20001",""
+"20002",""
+"20003",""
+"20004",""
+"20005","Discard name change and return to the previous screen?"
+"20010",""
+"20100","Restore default settings for{fc9 {d0}}?"
+"20101","This setting is duplicated by other controls.
+Apply this setting to the selected button?"
+"20102","Graphics settings have been applied. Save these settings?
+
+Reverting to previous settings in {d0} second(s) if confirmation is not made.
+
+{fc9Note: Changes to certain settings will be applied after relaunching the game.}"
+"yesno_quest_0010","{fc9 {d0} }
+
+Would you like to view the mission details?"
+"yesno_reinforcement_0010","This action will consume the selected Digimon
+as materials to enhance the base Digimon.
+{fc9The material Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_reinforcement_0020","{fc2CAUTION!
+There are battle/reserve members among the selected Digimon.}
+
+This action will consume the selected Digimon
+as materials to enhance the base Digimon.
+{fc9The material Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_reinforcement_0030","The equipment currently equipped to the material Digimon
+will exceed your maximum inventory capacity.
+
+{fc2This equipment will be lost} if you proceed with synthesis.
+
+Do you want to proceed?"
+"yesno_conversion_0010","This action will convert the selected Digimon into:
+{is28}{image(ui_icon_item_075)}{fc9 {d0}}
+{fc9The converted Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_conversion_0020","{fc2CAUTION!
+There are battle/reserve members among the selected Digimon.}
+
+This action will convert the selected Digimon into:
+{is28}{image(ui_icon_item_075)}{fc9 {d0}}
+{fc9The converted Digimon will be lost} and cannot be restored.
+
+Do you want to proceed?"
+"yesno_conversion_0030","The equipment currently equipped to the selected Digimon
+will exceed your maximum inventory capacity.
+
+{fc2This equipment will be lost} if you proceed with conversion.
+
+Do you want to proceed?"
+"yesno_shop_0010","Buy {fc9{d0} x{d1}}?"
+"yesno_shop_0020","Sell {fc9{d0} x{d1}}?"
+"yesno_shop_0030","Create {fc9{d0} x{d1}}?"
+"yesno_shop_0040","Take apart {fc9{d0} x{d1}}?"
+"yesno_shop_0050","The materials below will exceed your maximum inventory capacity.
+{{fc2The portion exceeding the maximum capacity will be lost}.
+
+Do you want to proceed?"
+"yesno_hazamagate_0010","Return to the real world?
+This will take you to the world where your
+Main Mission takes place."
+"yesno_hazamagate_0020","Warp to the In-Between Theater door nearest to
+your current mission objective?"
+"yesno_digimoncard_battle_0010","Do you want to {fc9forfeit} the match?
+
+{fc15Tip: Win at least one round to obtain a card even if you lose the match.
+Note: If you forfeit, you will not earn any cards.}"
+"yesno_digimoncard_battle_0020","Confirm your selection?"
+"yesno_digimoncard_battle_0030","You can still receive{fc9 {n0}} more card(s).
+Confirm your selection?"
+"yesno_gameover_0010","Lower the difficulty to {fc9{d0}} and retry the battle?
+
+{fc8*Retry with HP and SP fully recovered.
+*The game will remain at the lowered difficulty after the battle ends.
+You can return to the previous difficulty setting via the Options screen.}"
+"yesno_gameover_0020","Retry the battle in Invincible Mode?
+
+{fc9*Enemies will no longer inflict damage, and you will no longer consume SP.
+*Retry with HP and SP fully recovered.
+*Invincible Mode applies only to this battle.}"
+"yesno_gameover_0030","This will reset your additional episode progress
+and return you to the lobby.
+
+Do you want to proceed?"
+"yesno_gameover_0040","Any unsaved progress will be lost.
+Return to the title screen?"
+"yesno_hazama_d_0010","Quit this challenge?
+All progress within this Outer Dungeon will be lost."
+"yesno_hazama_dl_0010","Go to Outer Dungeon
+{fc9{d0}}?"
+"yesno_arena_0010","Battle {fc9Team {d0}}?"
+"yesno_arena_0020","Battle {fc9Team {d0}}?
+
+Note: You have already defeated this challenger,
+so you will receive fewer rewards."
+"yesno_digifarm_0010","Return {fc9{d0}} to your box?"
+"yesno_digifarm_0020","Move this Digimon to the Digifarm?"
+"yesno_digifarm_0030",""
+"yesno_digifarm_0040","This Digimon is still in training.
+Consume YEN for a Quick Complete?"
+"yesno_digifarm_0050","This Digimon is still training.
+Do you want to cancel their training?"
+"yesno_digifarm_0060",""
+"yesno_kizunaskill_0010","Unlock {fc9{d0}}?"
+"yesno_title_0010","Exit the game?"
+"yesno_title_0020","Inherit the following data and start the game from the beginning?
+
+{fc9Digimon Scan Rates
+Agent Skills
+Anomaly Points
+Items (excluding key items)
+Money
+Cards}"
+"yesno_title_0030","Start the game with this name and appearance?
+
+{fc9Note: You can change your name and appearance later.}"
+"yesno_systemmenu_0010","Do you want to exit the game?
+
+{fc2Note: Any unsaved progress will be lost.}"
+"yesno_dlc_0010","{pf(You must {fc9purchase an add-on} in order to
+play this Outer Dungeon.
+
+Go to PlayStation®Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/You must {fc9purchase an add-on} in order to
+play this Outer Dungeon.
+
+Go to Microsoft Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/{fc9Downloadable content} is required to play this Outer Dungeon.
+
+Go to Nintendo eShop?
+
+{fc9Note: Purchased downloadable content is not activated
+until you return to the title screen.}/You must {fc9purchase downloadable content} in order to
+play this Outer Dungeon.
+
+Go to the Online Store?
+
+{fc9Note: Purchased downloadable content will not be activated
+until you return to the title screen.})}"
+"yesno_dlc_0020","{pf(You must {fc9purchase an add-on} in order to
+wear this costume.
+
+Go to PlayStation®Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/You must {fc9purchase an add-on} in order to
+wear this costume.
+
+Go to Microsoft Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/{fc9Downloadable content} is required to wear this costume.
+
+Go to Nintendo eShop?
+
+{fc9Note: Purchased downloadable content is not activated
+until you return to the title screen.}/You must {fc9purchase downloadable content} in order to
+wear this costume.
+
+Go to the Online Store?
+
+{fc9Note: Purchased downloadable content will not be activated
+until you return to the title screen.})}"
+"yesno_dlc_0030","{pf(You must {fc9purchase an add-on} in order to
+select this music.
+
+Go to PlayStation®Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/You must {fc9purchase an add-on} in order to
+select this music.
+
+Go to Microsoft Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/{fc9Downloadable content} is required to select this music.
+
+Go to Nintendo eShop?
+
+{fc9Note: Purchased downloadable content is not activated
+until you return to the title screen.}/You must {fc9purchase downloadable content} in order to
+select this music.
+
+Go to the Online Store?
+
+{fc9Note: Purchased downloadable content will not be activated
+until you return to the title screen.})}"
+"yesno_dlc_0040","{pf(Go to PlayStation®Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/Go to Microsoft Store?
+
+{fc9Note: Purchased add-ons will not be activated
+until you return to the title screen.}/Go to Nintendo eShop?
+
+{fc9Note: Purchased downloadable content is not activated
+until you return to the title screen.}/Go to the Online Store?
+
+{fc9Note: Purchased downloadable content will not be activated
+until you return to the title screen.})}"
+"yesno_digimonselect_0010","Select {fc9{d0}} as your partner Digimon?"
+"yesno_unequip_0010","Remove all Skill Discs and equipment
+from the Digimon in your box and farm?
+
+{fc9Note: Protected Digimon will not have
+their Skill Discs and equipment removed.}"
+"yesno_language_0010","In order to change the game's display language, your game progress
+will be saved and you will be returned to the title screen.
+Do you want to proceed?
+
+{fc9The names of the protagonist and Digimon will remain in the
+previous language. Additionally, since the font data will be
+changed, the names of the protagonist and Digimon may
+not display correctly. (You can change these names later.)}"
+"yesno_language_0020","In order to change the game's display language, your game progress
+will be saved and you will be returned to the title screen.
+Do you want to proceed?
+
+{fc9The names of the protagonist and Digimon will remain in the
+previous language. (You can change these names later.)}"
+"yesno_language_0030","In order to change the game's display language,
+your settings will be saved and the game will relaunch.
+Do you want to proceed?"
+"yesno_giveup_0010","Give up on this battle?"
+"yesno_taransfer_0010","Demo version save data found.
+Import this save data and start a new game?
+
+{fc9Saved data already present in the retail 
+version will be overwritten.}"
+"yesno_demo_0010","This will end the demo version without saving your data.
+Do you want to proceed?
+
+Note: Save data from the demo version can be imported
+into the retail version of the game."

@@ -1,0 +1,8 @@
+int32 0,string3 1,int32 2,string2 3,bool 4,string2 5,int32 6,int32 7,string2 8,string2 9,string2 10,string2 11,string2 12,float 13,float 14,string2 15,float 16,float 17,float 18,float 19,float 20
+109200,"",-1,"start_50",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+109400,"",10,"map_0001",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+109403,"",11,"change_0002",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+109405,"",10,"gim_0010",false,"f00iconobj00",1,0,"","","","","",0,0,"wall_cl",2.5,4,5.5,0,0
+109406,"",10,"obj_0003",false,"f00taxi01",1,0,"","","","","",0,0,"",0,0,0,0,0
+109500,"",1,"theater_0001",false,"f00theaterdoor00",1,0,"","","","","",0,0,"",0,0,0,0,0
+109800,"",-1,"gim_8000",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0

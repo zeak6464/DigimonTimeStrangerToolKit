@@ -1,0 +1,6 @@
+int32 0,int32 1,int32 2,int32 3,float 4,float 5,float 6,float 7,float 8,string2 9,bool 10,empty 11
+1,2,1,0,0,0,0,0,0,"ech01",false,
+2,2,1,0,0,0,0,0,0,"ech03",true,
+3,2,1,0,0,0,0,0,0,"ech02",true,
+4,2,1,0,0,0,0,0,0,"ech05",true,
+5,2,1,0,0,0,0,0,0,"ech04",true,

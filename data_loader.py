@@ -216,8 +216,11 @@ class MBELoader:
     
     def load_csv(self, file_path: Path) -> List[List[str]]:
         """Load CSV file and return rows preserving original format"""
+        # Allow flexible numeric prefixes before the first underscore (e.g., 000_, 01_, 1_)
+        file_path = self._resolve_prefixed_file(file_path)
+        suffix_name = file_path.name.split('_', 1)[-1] if '_' in file_path.name else file_path.name
         # Check if this is the digimon status file and use cache
-        if file_path.name == "00_digimon_status_data.csv" and "digimon_status.mbe" in str(file_path):
+        if suffix_name == "digimon_status_data.csv" and "digimon_status.mbe" in str(file_path):
             return self._get_digimon_status_data()
         
         try:
@@ -236,7 +239,7 @@ class MBELoader:
     
     def _get_digimon_status_data(self) -> List[List[str]]:
         """Get digimon status data with caching"""
-        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         
         # Check if cache is valid
         if (self._digimon_status_cache is not None and 
@@ -278,6 +281,22 @@ class MBELoader:
             print(f"Error loading digimon status CSV {status_file}: {e}")
             return []
     
+    def _resolve_prefixed_file(self, file_path: Path) -> Path:
+        """
+        If the expected file doesn't exist, try to find a file in the same
+        directory whose name matches the part after the first underscore.
+        This supports variations like 000_, 01_, 1_, 0000_ prefixes.
+        """
+        if file_path.exists():
+            return file_path
+        name = file_path.name
+        if '_' in name:
+            suffix = name.split('_', 1)[1]
+            for candidate in file_path.parent.glob(f"*_{suffix}"):
+                if candidate.is_file():
+                    return candidate
+        return file_path
+    
     def _invalidate_digimon_status_cache(self):
         """Invalidate the digimon status cache (call after saving)"""
         self._digimon_status_cache = None
@@ -297,7 +316,7 @@ class MBELoader:
     def get_digimon_by_chr_id(self, chr_id: str) -> Optional[DigimonData]:
         """Load a specific Digimon by its chr_id (e.g., 'chr805')"""
         # Try loading from base game first
-        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         status_rows = None
         
         if status_file.exists():
@@ -319,7 +338,7 @@ class MBELoader:
         if not digimon_row:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            dlc_status_file = self._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             
             if dlc_status_file.exists():
                 status_rows = self.load_csv(dlc_status_file)
@@ -443,7 +462,7 @@ class MBELoader:
         normalized_key = char_key.strip('"')
         
         # Check base game first
-        name_file = self.text_path / "char_name.mbe" / "00_Sheet1.csv"
+        name_file = self._resolve_prefixed_file(self.text_path / "char_name.mbe" / "000_Sheet1.csv")
         if name_file.exists():
             name_rows = self.load_csv(name_file)
             for row in name_rows[1:]:  # Skip header
@@ -456,7 +475,7 @@ class MBELoader:
         if check_dlc:
             dlc_exporter = DLCExporter(self)
             dlc_text = dlc_exporter.get_dlc_text_path("addcont_17_text01") / "text" / "mbe"
-            dlc_name_file = dlc_text / "char_name_dlc17.mbe" / "00_Sheet1.csv"
+            dlc_name_file = self._resolve_prefixed_file(dlc_text / "char_name_dlc17.mbe" / "000_Sheet1.csv")
             
             if dlc_name_file.exists():
                 dlc_name_rows = self.load_csv(dlc_name_file)
@@ -477,7 +496,7 @@ class MBELoader:
             check_dlc: If True, also check DLC files
         """
         # First check base game
-        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         if status_file.exists():
             status_rows = self.load_csv(status_file)
             for row in status_rows[1:]:  # Skip header
@@ -494,7 +513,7 @@ class MBELoader:
         if check_dlc:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            dlc_status_file = self._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             
             if dlc_status_file.exists():
                 dlc_status_rows = self.load_csv(dlc_status_file)
@@ -521,7 +540,7 @@ class MBELoader:
         char_key = None
         
         # First check base game
-        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         if status_file.exists():
             status_rows = self.load_csv(status_file)
             for row in status_rows[1:]:  # Skip header
@@ -534,7 +553,7 @@ class MBELoader:
         if not char_key and check_dlc:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            dlc_status_file = self._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             
             if dlc_status_file.exists():
                 dlc_status_rows = self.load_csv(dlc_status_file)
@@ -575,7 +594,7 @@ class MBELoader:
     def _load_char_info_data(self, digimon: DigimonData):
         """Load character info data - checks both base game and DLC"""
         # Check base game first
-        char_file = self.data_path / "char_info.mbe" / "00_char_info.csv"
+        char_file = self._resolve_prefixed_file(self.data_path / "char_info.mbe" / "000_char_info.csv")
         if char_file.exists():
             char_rows = self.load_csv(char_file)
             for row in char_rows[1:]:  # Skip header
@@ -604,7 +623,7 @@ class MBELoader:
         # Check DLC files if not found in base game
         dlc_exporter = DLCExporter(self)
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-        dlc_char_file = dlc_data / "char_info_dlc17.mbe" / "00_char_info.csv"
+        dlc_char_file = self._resolve_prefixed_file(dlc_data / "char_info_dlc17.mbe" / "000_char_info.csv")
         if dlc_char_file.exists():
             char_rows = self.load_csv(dlc_char_file)
             for row in char_rows[1:]:  # Skip header
@@ -633,7 +652,7 @@ class MBELoader:
     def _load_model_setting_data(self, digimon: DigimonData):
         """Load model setting data - checks both base game and DLC"""
         # Check base game first
-        model_file = self.data_path / "model_setting.mbe" / "00_model_setting.csv"
+        model_file = self._resolve_prefixed_file(self.data_path / "model_setting.mbe" / "000_model_setting.csv")
         if model_file.exists():
             model_rows = self.load_csv(model_file)
             for row in model_rows[1:]:  # Skip header
@@ -649,7 +668,7 @@ class MBELoader:
         # Check DLC files if not found in base game
         dlc_exporter = DLCExporter(self)
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-        dlc_model_file = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+        dlc_model_file = self._resolve_prefixed_file(dlc_data / "model_setting_dlc17.mbe" / "000_model_setting.csv")
         if dlc_model_file.exists():
             model_rows = self.load_csv(dlc_model_file)
             for row in model_rows[1:]:  # Skip header
@@ -666,7 +685,7 @@ class MBELoader:
         chr_id_clean = digimon.chr_id.strip('"')
         
         # Check base game first
-        locator_file = self.data_path / "model_locator.mbe" / "00_model_locator.csv"
+        locator_file = self._resolve_prefixed_file(self.data_path / "model_locator.mbe" / "000_model_locator.csv")
         if locator_file.exists():
             locator_rows = self.load_csv(locator_file)
             for row in locator_rows[1:]:  # Skip header
@@ -681,7 +700,7 @@ class MBELoader:
         if not digimon.model_locator_data:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_locator_file = dlc_data / "model_locator_dlc17.mbe" / "00_model_locator.csv"
+            dlc_locator_file = self._resolve_prefixed_file(dlc_data / "model_locator_dlc17.mbe" / "000_model_locator.csv")
             if dlc_locator_file.exists():
                 locator_rows = self.load_csv(dlc_locator_file)
                 for row in locator_rows[1:]:  # Skip header
@@ -693,7 +712,7 @@ class MBELoader:
                         break
         
         # Load 01_model_locator_motion.csv - check base game first
-        motion_file = self.data_path / "model_locator.mbe" / "01_model_locator_motion.csv"
+        motion_file = self._resolve_prefixed_file(self.data_path / "model_locator.mbe" / "001_model_locator_motion.csv")
         if motion_file.exists():
             motion_rows = self.load_csv(motion_file)
             digimon.model_locator_motion_data = []
@@ -711,7 +730,7 @@ class MBELoader:
         # Check DLC files for motion data if not found or to append
         dlc_exporter = DLCExporter(self)
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-        dlc_motion_file = dlc_data / "model_locator_dlc17.mbe" / "01_model_locator_motion.csv"
+        dlc_motion_file = self._resolve_prefixed_file(dlc_data / "model_locator_dlc17.mbe" / "001_model_locator_motion.csv")
         if dlc_motion_file.exists():
             motion_rows = self.load_csv(dlc_motion_file)
             chr_prefix = f"{chr_id_clean}_"
@@ -732,8 +751,8 @@ class MBELoader:
         """Load LOD (Level of Detail) data - checks both base game and DLC"""
         chr_id_clean = digimon.chr_id.strip('"')
         
-        # Load 00_lod.csv - check base game first
-        lod_file = self.data_path / "lod_chara.mbe" / "00_lod.csv"
+        # Load 000_lod.csv - check base game first
+        lod_file = self._resolve_prefixed_file(self.data_path / "lod_chara.mbe" / "000_lod.csv")
         if lod_file.exists():
             lod_rows = self.load_csv(lod_file)
             for row in lod_rows[1:]:  # Skip header
@@ -750,7 +769,7 @@ class MBELoader:
         if not digimon.lod_data:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_lod_file = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+            dlc_lod_file = self._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "000_lod.csv")
             if dlc_lod_file.exists():
                 lod_rows = self.load_csv(dlc_lod_file)
                 for row in lod_rows[1:]:  # Skip header
@@ -764,7 +783,7 @@ class MBELoader:
                         break
         
         # Load 01_lod_model.csv - check base game first
-        lod_model_file = self.data_path / "lod_chara.mbe" / "01_lod_model.csv"
+        lod_model_file = self._resolve_prefixed_file(self.data_path / "lod_chara.mbe" / "001_lod_model.csv")
         if lod_model_file.exists():
             lod_model_rows = self.load_csv(lod_model_file)
             for row in lod_model_rows[1:]:  # Skip header
@@ -780,7 +799,7 @@ class MBELoader:
         if not digimon.lod_model_data:
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_lod_model_file = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+            dlc_lod_model_file = self._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "001_lod_model.csv")
             if dlc_lod_model_file.exists():
                 lod_model_rows = self.load_csv(dlc_lod_model_file)
                 for row in lod_model_rows[1:]:  # Skip header
@@ -798,7 +817,7 @@ class MBELoader:
         chr_id_clean = digimon.chr_id.strip('"')
         
         # Check base game first
-        move_file = self.data_path / "field_anime.mbe" / "00_field_move_animation.csv"
+        move_file = self._resolve_prefixed_file(self.data_path / "field_anime.mbe" / "000_field_move_animation.csv")
         if move_file.exists():
             move_rows = self.load_csv(move_file)
             digimon.field_move_animation_data = []
@@ -818,7 +837,7 @@ class MBELoader:
         # Check DLC files and append any additional entries
         dlc_exporter = DLCExporter(self)
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-        dlc_move_file = dlc_data / "field_anime_dlc17.mbe" / "00_field_move_animation.csv"
+        dlc_move_file = self._resolve_prefixed_file(dlc_data / "field_anime_dlc17.mbe" / "000_field_move_animation.csv")
         if dlc_move_file.exists():
             move_rows = self.load_csv(dlc_move_file)
             
@@ -855,7 +874,7 @@ class MBELoader:
         
         # Load evolution targets (what this Digimon can evolve into)
         # Check base game first
-        evolution_to_file = self.data_path / "evolution.mbe" / "01_evolution_to.csv"
+        evolution_to_file = self._resolve_prefixed_file(self.data_path / "evolution.mbe" / "001_evolution_to.csv")
         if evolution_to_file.exists():
             rows = self.load_csv(evolution_to_file)
             for row in rows[1:]:  # Skip header
@@ -869,7 +888,7 @@ class MBELoader:
                     })
         
         # Check DLC files
-        dlc_evolution_to_file = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+        dlc_evolution_to_file = self._resolve_prefixed_file(dlc_data / "evolution_dlc17.mbe" / "001_evolution_to.csv")
         if dlc_evolution_to_file.exists():
             rows = self.load_csv(dlc_evolution_to_file)
             for row in rows[1:]:  # Skip header
@@ -915,7 +934,7 @@ class MBELoader:
             }
         
         # Check base game first
-        evolution_cond_file = self.data_path / "evolution.mbe" / "00_evolution_condition.csv"
+        evolution_cond_file = self._resolve_prefixed_file(self.data_path / "evolution.mbe" / "000_evolution_condition.csv")
         if evolution_cond_file.exists():
             rows = self.load_csv(evolution_cond_file)
             for row in rows[1:]:  # Skip header
@@ -932,7 +951,7 @@ class MBELoader:
                             digimon.evolution_conditions.append(conditions)
         
         # Check DLC files
-        dlc_evolution_cond_file = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+        dlc_evolution_cond_file = self._resolve_prefixed_file(dlc_data / "evolution_dlc17.mbe" / "000_evolution_condition.csv")
         if dlc_evolution_cond_file.exists():
             rows = self.load_csv(dlc_evolution_cond_file)
             for row in rows[1:]:  # Skip header
@@ -980,7 +999,7 @@ class MBELoader:
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
         
         # Check base game first
-        enemy_file = self.data_path / "battle_enemy.mbe" / "00_enemy_parameter.csv"
+        enemy_file = self._resolve_prefixed_file(self.data_path / "battle_enemy.mbe" / "000_enemy_parameter.csv")
         if enemy_file.exists():
             rows = self.load_csv(enemy_file)
             for row in rows[1:]:  # Skip header
@@ -1002,7 +1021,7 @@ class MBELoader:
         
         # Check DLC files if not found in base game
         if not digimon.battle_enemy_data:
-            dlc_enemy_file = dlc_data / "battle_enemy_dlc17.mbe" / "00_enemy_parameter.csv"
+            dlc_enemy_file = self._resolve_prefixed_file(dlc_data / "battle_enemy_dlc17.mbe" / "000_enemy_parameter.csv")
             if dlc_enemy_file.exists():
                 rows = self.load_csv(dlc_enemy_file)
                 for row in rows[1:]:  # Skip header
@@ -1071,13 +1090,13 @@ class MBELoader:
                             break
         
         # Check base game first
-        encounter_file = self.data_path / "battle_enemy.mbe" / "01_encount_group.csv"
+        encounter_file = self._resolve_prefixed_file(self.data_path / "battle_enemy.mbe" / "001_encount_group.csv")
         if encounter_file.exists():
             rows = self.load_csv(encounter_file)
             process_encounter_rows(rows)
         
         # Check DLC files
-        dlc_encounter_file = dlc_data / "battle_enemy_dlc17.mbe" / "01_encount_group.csv"
+        dlc_encounter_file = self._resolve_prefixed_file(dlc_data / "battle_enemy_dlc17.mbe" / "001_encount_group.csv")
         if dlc_encounter_file.exists():
             rows = self.load_csv(dlc_encounter_file)
             process_encounter_rows(rows)
@@ -1112,7 +1131,7 @@ class MBELoader:
         dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
         
         # Check base game first
-        formation_file = self.data_path / "battle_formation.mbe" / "00_battle_formation.csv"
+        formation_file = self._resolve_prefixed_file(self.data_path / "battle_formation.mbe" / "000_battle_formation.csv")
         if formation_file.exists():
             rows = self.load_csv(formation_file)
             for row in rows[1:]:  # Skip header
@@ -1126,7 +1145,7 @@ class MBELoader:
         
         # Check DLC files if not found in base game
         if not digimon.battle_formation_data:
-            dlc_formation_file = dlc_data / "battle_formation_dlc17.mbe" / "00_battle_formation.csv"
+            dlc_formation_file = self._resolve_prefixed_file(dlc_data / "battle_formation_dlc17.mbe" / "000_battle_formation.csv")
             if dlc_formation_file.exists():
                 rows = self.load_csv(dlc_formation_file)
                 for row in rows[1:]:  # Skip header
@@ -1152,7 +1171,7 @@ class MBELoader:
         """Load tribe/belong classification from belong.mbe"""
         try:
             # Check base game first
-            belong_file = self.text_path / "belong.mbe" / "00_Sheet1.csv"
+            belong_file = self._resolve_prefixed_file(self.text_path / "belong.mbe" / "000_Sheet1.csv")
             if belong_file.exists():
                 rows = self.load_csv(belong_file)
                 for row in rows[1:]:  # Skip header
@@ -1167,7 +1186,7 @@ class MBELoader:
             # Check DLC if not found in base game
             dlc_exporter = DLCExporter(self)
             dlc_text = dlc_exporter.get_dlc_text_path("addcont_17_text01") / "text" / "mbe"
-            dlc_belong_file = dlc_text / "belong_dlc17.mbe" / "00_Sheet1.csv"
+            dlc_belong_file = self._resolve_prefixed_file(dlc_text / "belong_dlc17.mbe" / "000_Sheet1.csv")
             
             if dlc_belong_file.exists():
                 rows = self.load_csv(dlc_belong_file)
@@ -1192,10 +1211,10 @@ class MBELoader:
             # Load from DLC
             dlc_exporter = DLCExporter(self)
             dlc_data = dlc_exporter.get_dlc_path(dlc_name) / "data" / "mbe"
-            status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            status_file = self._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
         else:
             # Load from base game
-            status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+            status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         
         if not status_file.exists():
             return []
@@ -1211,7 +1230,7 @@ class MBELoader:
     
     def get_all_digimon_ids(self) -> List[int]:
         """Get all digimon IDs from the digimon status file"""
-        status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+        status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
         if not status_file.exists():
             return []
         
@@ -1231,8 +1250,8 @@ class MBELoader:
         """Save Digimon data back to CSV files"""
         import csv
         try:
-            # Save to digimon_status.mbe/00_digimon_status_data.csv
-            status_file = self.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+            # Save to digimon_status.mbe/000_digimon_status_data.csv
+            status_file = self._resolve_prefixed_file(self.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
             if not status_file.exists():
                 print(f"Error: {status_file} not found")
                 return False
@@ -1465,8 +1484,8 @@ class MBELoader:
             print(f"Error creating new Digimon entries: {e}")
     
     def _add_to_char_name_file(self, digimon: DigimonData):
-        """Add new Digimon to char_name.mbe/00_Sheet1.csv"""
-        char_name_file = self.text_path / "char_name.mbe" / "00_Sheet1.csv"
+        """Add new Digimon to char_name.mbe/000_Sheet1.csv"""
+        char_name_file = self._resolve_prefixed_file(self.text_path / "char_name.mbe" / "000_Sheet1.csv")
         if not char_name_file.exists():
             return
         
@@ -1481,8 +1500,8 @@ class MBELoader:
                 f.write(','.join(row) + '\n')
     
     def _update_char_name_file(self, digimon: DigimonData):
-        """Update existing Digimon name in char_name.mbe/00_Sheet1.csv"""
-        char_name_file = self.text_path / "char_name.mbe" / "00_Sheet1.csv"
+        """Update existing Digimon name in char_name.mbe/000_Sheet1.csv"""
+        char_name_file = self._resolve_prefixed_file(self.text_path / "char_name.mbe" / "000_Sheet1.csv")
         if not char_name_file.exists():
             return
         
@@ -1505,8 +1524,8 @@ class MBELoader:
                 f.write(','.join(row) + '\n')
     
     def _update_digimon_profile_file(self, digimon: DigimonData):
-        """Update existing Digimon profile in digimon_profile.mbe/00_Sheet1.csv"""
-        profile_file = self.text_path / "digimon_profile.mbe" / "00_Sheet1.csv"
+        """Update existing Digimon profile in digimon_profile.mbe/000_Sheet1.csv"""
+        profile_file = self._resolve_prefixed_file(self.text_path / "digimon_profile.mbe" / "000_Sheet1.csv")
         if not profile_file.exists():
             return
         
@@ -1533,8 +1552,8 @@ class MBELoader:
                     f.write(','.join(row) + '\n')
     
     def _add_to_char_info_file(self, digimon: DigimonData):
-        """Add new Digimon to char_info.mbe/00_char_info.csv"""
-        char_info_file = self.data_path / "char_info.mbe" / "00_char_info.csv"
+        """Add new Digimon to char_info.mbe/000_char_info.csv"""
+        char_info_file = self._resolve_prefixed_file(self.data_path / "char_info.mbe" / "000_char_info.csv")
         if not char_info_file.exists():
             return
         
@@ -1554,8 +1573,8 @@ class MBELoader:
                 f.write(','.join(row) + '\n')
     
     def _add_to_model_setting_file(self, digimon: DigimonData):
-        """Add new Digimon to model_setting.mbe/00_model_setting.csv"""
-        model_setting_file = self.data_path / "model_setting.mbe" / "00_model_setting.csv"
+        """Add new Digimon to model_setting.mbe/000_model_setting.csv"""
+        model_setting_file = self._resolve_prefixed_file(self.data_path / "model_setting.mbe" / "000_model_setting.csv")
         if not model_setting_file.exists():
             return
         
@@ -1579,8 +1598,8 @@ class MBELoader:
     
     def _add_to_model_locator_files(self, digimon: DigimonData):
         """Add new Digimon to model_locator files"""
-        # Add to 00_model_locator.csv
-        locator_file = self.data_path / "model_locator.mbe" / "00_model_locator.csv"
+        # Add to 000_model_locator.csv
+        locator_file = self._resolve_prefixed_file(self.data_path / "model_locator.mbe" / "000_model_locator.csv")
         if locator_file.exists():
             rows = self.load_csv(locator_file)
             # Find template from chr805
@@ -1602,7 +1621,7 @@ class MBELoader:
                         f.write(','.join(row) + '\n')
         
         # Add to 01_model_locator_motion.csv
-        motion_file = self.data_path / "model_locator.mbe" / "01_model_locator_motion.csv"
+        motion_file = self._resolve_prefixed_file(self.data_path / "model_locator.mbe" / "001_model_locator_motion.csv")
         if motion_file.exists():
             rows = self.load_csv(motion_file)
             # Find ALL templates from chr805 (not just the first one)
@@ -1625,8 +1644,8 @@ class MBELoader:
     
     def _add_to_lod_chara_files(self, digimon: DigimonData):
         """Add new Digimon to lod_chara files"""
-        # Add to 00_lod.csv
-        lod_file = self.data_path / "lod_chara.mbe" / "00_lod.csv"
+        # Add to 000_lod.csv
+        lod_file = self._resolve_prefixed_file(self.data_path / "lod_chara.mbe" / "000_lod.csv")
         if lod_file.exists():
             rows = self.load_csv(lod_file)
             # Find template from chr805
@@ -1648,7 +1667,7 @@ class MBELoader:
                         f.write(','.join(row) + '\n')
         
         # Add to 01_lod_model.csv
-        lod_model_file = self.data_path / "lod_chara.mbe" / "01_lod_model.csv"
+        lod_model_file = self._resolve_prefixed_file(self.data_path / "lod_chara.mbe" / "001_lod_model.csv")
         if lod_model_file.exists():
             rows = self.load_csv(lod_model_file)
             # Find template from chr805
@@ -1670,8 +1689,8 @@ class MBELoader:
                         f.write(','.join(row) + '\n')
     
     def _add_to_fix_front_of_joint_file(self, digimon: DigimonData):
-        """Add new Digimon to fix_front_of_joint.mbe/00_fix_front_of_joint.csv"""
-        joint_file = self.data_path / "fix_front_of_joint.mbe" / "00_fix_front_of_joint.csv"
+        """Add new Digimon to fix_front_of_joint.mbe/000_fix_front_of_joint.csv"""
+        joint_file = self._resolve_prefixed_file(self.data_path / "fix_front_of_joint.mbe" / "000_fix_front_of_joint.csv")
         if not joint_file.exists():
             return
         
@@ -1697,7 +1716,7 @@ class MBELoader:
     # Text Data Integration Methods
     def _load_text_file(self, filename: str) -> Dict[str, str]:
         """Load a text .mbe file and return ID->Name mapping"""
-        file_path = self.text_path / filename / "00_Sheet1.csv"
+        file_path = self._resolve_prefixed_file(self.text_path / filename / "000_Sheet1.csv")
         text_data = {}
         
         if file_path.exists():
@@ -1844,7 +1863,7 @@ class MBELoader:
             # Profile file uses special keys like "digimon_0002_profile"
             # and profiles span multiple rows
             self._digimon_profiles_cache = {}
-            file_path = self.text_path / "digimon_profile.mbe" / "00_Sheet1.csv"
+            file_path = self._resolve_prefixed_file(self.text_path / "digimon_profile.mbe" / "000_Sheet1.csv")
             
             if file_path.exists():
                 try:
@@ -1926,10 +1945,8 @@ class MBELoader:
             # Also load DLC profiles
             dlc_exporter = DLCExporter(self)
             dlc_text = dlc_exporter.get_dlc_text_path("addcont_17_text01") / "text" / "mbe"
-            # Try both 00_ and 000_ prefixes
-            dlc_profile_file = dlc_text / "digimon_profile_dlc17.mbe" / "00_Sheet1.csv"
-            if not dlc_profile_file.exists():
-                dlc_profile_file = dlc_text / "digimon_profile_dlc17.mbe" / "000_Sheet1.csv"
+            # Use resolver to find correct prefix
+            dlc_profile_file = self._resolve_prefixed_file(dlc_text / "digimon_profile_dlc17.mbe" / "000_Sheet1.csv")
             
             if dlc_profile_file.exists():
                 try:
@@ -1979,7 +1996,8 @@ class MBELoader:
     
     def load_skill_data(self, skill_id: int) -> Dict[str, Any]:
         """Load skill data from battle_skill.mbe"""
-        skill_file = self.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+        skill_file = self.data_path / "battle_skill.mbe" / "000_battle_skill_list.csv"
+        skill_file = self._resolve_prefixed_file(skill_file)
         if skill_file.exists():
             rows = self.load_csv(skill_file)
             for row in rows[1:]:  # Skip header
@@ -1988,8 +2006,11 @@ class MBELoader:
                         "skill_id": int(row[0]) if row[0] else 0,
                         "name_id": int(row[4]) if len(row) > 4 and row[4] else 0,
                         "description_id": int(row[5]) if len(row) > 5 and row[5] else 0,
+                        "animation_id": int(row[10]) if len(row) > 10 and row[10] else 0,
+                        "effect_id": int(row[12]) if len(row) > 12 and row[12] else 0,
                         "power": int(row[23]) if len(row) > 23 and row[23] else 0,
                         "sp_cost": int(row[36]) if len(row) > 36 and row[36] else 0,
+                        "cp_cost": int(row[38]) if len(row) > 38 and row[38] else 0,
                         "accuracy": int(row[40]) if len(row) > 40 and row[40] else 0,
                         "crit_rate": int(row[42]) if len(row) > 42 and row[42] else 0,
                         "damage_type": int(row[22]) if len(row) > 22 and row[22] else 0,
@@ -2010,13 +2031,18 @@ class MBELoader:
                         "buff_set_2": int(row[56]) if len(row) > 56 and row[56] else 0,
                         "buff_set_3": int(row[58]) if len(row) > 58 and row[58] else 0,
                         "buff_set_4": int(row[60]) if len(row) > 60 and row[60] else 0,
+                        "mode_change_id": int(row[61]) if len(row) > 61 and row[61] else 0,
+                        "jogress_skill_id": int(row[63]) if len(row) > 63 and row[63] else 0,
+                        "jogress_partner_1": int(row[64]) if len(row) > 64 and row[64] else 0,
+                        "jogress_partner_2": int(row[66]) if len(row) > 66 and row[66] else 0,
                         "raw_data": row
                     }
         return {}
     
     def save_skill_data(self, skill_data: Dict[str, Any]) -> bool:
         """Save skill data back to battle_skill.mbe"""
-        skill_file = self.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+        skill_file = self.data_path / "battle_skill.mbe" / "000_battle_skill_list.csv"
+        skill_file = self._resolve_prefixed_file(skill_file)
         if not skill_file.exists():
             return False
         
@@ -2030,6 +2056,8 @@ class MBELoader:
                 # Update the row with new data
                 if len(row) > 4: row[4] = str(skill_data.get("name_id", skill_id))  # Use skill_id as name_id if not specified
                 if len(row) > 5: row[5] = str(skill_data.get("description_id", 0))
+                if len(row) > 10: row[10] = str(skill_data.get("animation_id", 0))
+                if len(row) > 12: row[12] = str(skill_data.get("effect_id", 0))
                 if len(row) > 33: row[33] = str(skill_data.get("target_type", 1))  # Save target_type (column 33)
                 if len(row) > 22: row[22] = str(skill_data.get("damage_type", 0))
                 if len(row) > 23: row[23] = str(skill_data.get("power", 0))
@@ -2039,6 +2067,7 @@ class MBELoader:
                 if len(row) > 34: row[34] = str(skill_data.get("min_hits", 1))
                 if len(row) > 35: row[35] = str(skill_data.get("max_hits", 1))
                 if len(row) > 36: row[36] = str(skill_data.get("sp_cost", 0))
+                if len(row) > 38: row[38] = str(skill_data.get("cp_cost", 0))
                 if len(row) > 39: row[39] = str(1 if skill_data.get("always_hits", False) else 0)
                 if len(row) > 40: row[40] = str(skill_data.get("accuracy", 0))
                 if len(row) > 42: row[42] = str(skill_data.get("crit_rate", 0))
@@ -2053,6 +2082,10 @@ class MBELoader:
                 if len(row) > 56: row[56] = str(skill_data.get("buff_set_2", 0))
                 if len(row) > 58: row[58] = str(skill_data.get("buff_set_3", 0))
                 if len(row) > 60: row[60] = str(skill_data.get("buff_set_4", 0))
+                if len(row) > 61: row[61] = str(skill_data.get("mode_change_id", 0))
+                if len(row) > 63: row[63] = str(skill_data.get("jogress_skill_id", 0))
+                if len(row) > 64: row[64] = str(skill_data.get("jogress_partner_1", 0))
+                if len(row) > 66: row[66] = str(skill_data.get("jogress_partner_2", 0))
                 break
         
         # Write back to file (preserve exact CSV format with quotes)
@@ -2090,7 +2123,7 @@ class MBELoader:
         
         try:
             # Save to English text file (patch_text01)
-            skill_name_file = self.text_path / "skill_name.mbe" / "00_Sheet1.csv"
+            skill_name_file = self._resolve_prefixed_file(self.text_path / "skill_name.mbe" / "000_Sheet1.csv")
             
             # Create directory if it doesn't exist
             skill_name_file.parent.mkdir(parents=True, exist_ok=True)
@@ -2530,7 +2563,7 @@ class DLCExporter:
             removed_count = 0
             
             # 1. Remove from char_info_dlc17
-            file_path = dlc_data / "char_info_dlc17.mbe" / "00_char_info.csv"
+            file_path = self.loader._resolve_prefixed_file(dlc_data / "char_info_dlc17.mbe" / "000_char_info.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2550,7 +2583,7 @@ class DLCExporter:
                     print(f"✅ Removed from char_info_dlc17.mbe")
             
             # 2. Remove from digimon_status_dlc17
-            file_path = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            file_path = self.loader._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2566,8 +2599,8 @@ class DLCExporter:
                     print(f"✅ Removed from digimon_status_dlc17.mbe")
             
             # 3. Remove from evolution_dlc17 (both files)
-            # Remove from 00_evolution_condition.csv
-            file_path = dlc_data / "evolution_dlc17.mbe" / "00_evolution_condition.csv"
+            # Remove from 000_evolution_condition.csv
+            file_path = self.loader._resolve_prefixed_file(dlc_data / "evolution_dlc17.mbe" / "000_evolution_condition.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2582,8 +2615,8 @@ class DLCExporter:
                     removed_count += 1
                     print(f"✅ Removed from evolution_condition")
             
-            # Remove from 01_evolution_to.csv (remove paths where this Digimon is source or target)
-            file_path = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            # Remove from 001_evolution_to.csv (remove paths where this Digimon is source or target)
+            file_path = self.loader._resolve_prefixed_file(dlc_data / "evolution_dlc17.mbe" / "001_evolution_to.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2601,7 +2634,7 @@ class DLCExporter:
                     print(f"✅ Removed evolution paths from evolution_to")
             
             # 4. Remove from char_name_dlc17
-            file_path = dlc_text / "char_name_dlc17.mbe" / "00_Sheet1.csv"
+            file_path = self.loader._resolve_prefixed_file(dlc_text / "char_name_dlc17.mbe" / "000_Sheet1.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2619,7 +2652,7 @@ class DLCExporter:
                     print(f"✅ Removed from char_name_dlc17.mbe")
             
             # 5. Remove from digimon_profile_dlc17
-            file_path = dlc_text / "digimon_profile_dlc17.mbe" / "00_Sheet1.csv"
+            file_path = self.loader._resolve_prefixed_file(dlc_text / "digimon_profile_dlc17.mbe" / "000_Sheet1.csv")
             if file_path.exists():
                 rows = self.loader.load_csv(file_path)
                 original_count = len(rows)
@@ -2639,7 +2672,7 @@ class DLCExporter:
             
             # 6. Remove from anim_setting_dlc17 (by chr_id)
             if chr_id:
-                file_path = dlc_data / "anim_setting_dlc17.mbe" / "00_anim_setting.csv"
+                file_path = self.loader._resolve_prefixed_file(dlc_data / "anim_setting_dlc17.mbe" / "000_anim_setting.csv")
                 if file_path.exists():
                     rows = self.loader.load_csv(file_path)
                     original_count = len(rows)
@@ -2659,7 +2692,7 @@ class DLCExporter:
             
             # 7. Remove from model_setting_dlc17 (by chr_id)
             if chr_id:
-                file_path = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+                file_path = self.loader._resolve_prefixed_file(dlc_data / "model_setting_dlc17.mbe" / "000_model_setting.csv")
                 if file_path.exists():
                     rows = self.loader.load_csv(file_path)
                     original_count = len(rows)
@@ -2679,7 +2712,7 @@ class DLCExporter:
             
             # 8. Remove from model_outline_dlc17 (by chr_id)
             if chr_id:
-                file_path = dlc_data / "model_outline_dlc17.mbe" / "00_model_outline.csv"
+                file_path = self.loader._resolve_prefixed_file(dlc_data / "model_outline_dlc17.mbe" / "000_model_outline.csv")
                 if file_path.exists():
                     rows = self.loader.load_csv(file_path)
                     original_count = len(rows)
@@ -2699,8 +2732,8 @@ class DLCExporter:
             
             # 9. Remove from lod_chara_dlc17 (both files)
             if chr_id:
-                # 00_lod.csv
-                file_path = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+                # 000_lod.csv
+                file_path = self.loader._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "000_lod.csv")
                 if file_path.exists():
                     rows = self.loader.load_csv(file_path)
                     original_count = len(rows)
@@ -2719,7 +2752,7 @@ class DLCExporter:
                         print(f"✅ Removed from lod_chara_dlc17.mbe (00_lod.csv)")
                 
                 # 01_lod_model.csv
-                file_path = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+                file_path = self.loader._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "001_lod_model.csv")
                 if file_path.exists():
                     rows = self.loader.load_csv(file_path)
                     original_count = len(rows)
@@ -2851,7 +2884,7 @@ class DLCExporter:
                 rows = self.loader.load_csv(file_path)
             else:
                 # Get header from base game file
-                base_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
                 base_rows = self.loader.load_csv(base_file)
                 rows = [base_rows[0]]  # Just the header
             
@@ -3078,7 +3111,7 @@ class DLCExporter:
                 evo_to_rows = self.loader.load_csv(evo_to_file_path)
             else:
                 # Create header - need to check format from base game
-                base_evo_to = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+                base_evo_to = self.loader._resolve_prefixed_file(self.loader.data_path / "evolution.mbe" / "001_evolution_to.csv")
                 if base_evo_to.exists():
                     base_rows = self.loader.load_csv(base_evo_to)
                     evo_to_rows = [base_rows[0]]  # Copy header from base game
@@ -3362,7 +3395,7 @@ class DLCExporter:
                 rows = self.loader.load_csv(file_path)
             else:
                 # Get header from base game file
-                base_file = self.loader.data_path / "model_setting.mbe" / "00_model_setting.csv"
+                base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "model_setting.mbe" / "000_model_setting.csv")
                 base_rows = self.loader.load_csv(base_file)
                 rows = [base_rows[0]]  # Just the header
             
@@ -3409,7 +3442,7 @@ class DLCExporter:
                 template_chr_id = animation_ref_chr_id.strip('"') if animation_ref_chr_id else digimon.chr_id.strip('"')
                 
                 # First check base game file
-                base_file = self.loader.data_path / "model_setting.mbe" / "00_model_setting.csv"
+                base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "model_setting.mbe" / "000_model_setting.csv")
                 if base_file.exists():
                     base_rows = self.loader.load_csv(base_file)
                     for row in base_rows[1:]:
@@ -3419,7 +3452,7 @@ class DLCExporter:
                 
                 # Also check DLC files if not found in base game
                 if not template_row:
-                    dlc_file = dlc_data / "model_setting_dlc17.mbe" / "00_model_setting.csv"
+                    dlc_file = self.loader._resolve_prefixed_file(dlc_data / "model_setting_dlc17.mbe" / "000_model_setting.csv")
                     if dlc_file.exists():
                         dlc_rows = self.loader.load_csv(dlc_file)
                         for row in dlc_rows[1:]:
@@ -3481,7 +3514,7 @@ class DLCExporter:
                 rows = [['string2 0', 'float 1', 'float 2']]
             
             # Find the template chr_id entry in base game file
-            base_file = self.loader.data_path / "model_outline.mbe" / "00_model_outline_battle.csv"
+            base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "model_outline.mbe" / "000_model_outline_battle.csv")
             base_rows = self.loader.load_csv(base_file)
             
             template_row = None
@@ -3545,7 +3578,7 @@ class DLCExporter:
                 ]
             else:
                 # Fallback: Find template entry in base game or DLC
-                base_file = self.loader.data_path / "lod_chara.mbe" / "00_lod.csv"
+                base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "lod_chara.mbe" / "000_lod.csv")
                 if base_file.exists():
                     base_rows = self.loader.load_csv(base_file)
                     template_chr_id = digimon.chr_id
@@ -3556,7 +3589,7 @@ class DLCExporter:
                 
                 # Also check DLC files
                 if not template_row:
-                    dlc_file = dlc_data / "lod_chara_dlc17.mbe" / "00_lod.csv"
+                    dlc_file = self.loader._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "000_lod.csv")
                     if dlc_file.exists():
                         dlc_rows = self.loader.load_csv(dlc_file)
                         template_chr_id = digimon.chr_id
@@ -3617,7 +3650,7 @@ class DLCExporter:
                 ]
             else:
                 # Fallback: Find template in base game or DLC
-                base_file = self.loader.data_path / "lod_chara.mbe" / "01_lod_model.csv"
+                base_file = self.loader._resolve_prefixed_file(self.loader.data_path / "lod_chara.mbe" / "001_lod_model.csv")
                 if base_file.exists():
                     base_rows = self.loader.load_csv(base_file)
                     template_chr_id = digimon.chr_id
@@ -3628,7 +3661,7 @@ class DLCExporter:
                 
                 # Also check DLC files
                 if not template_row:
-                    dlc_file = dlc_data / "lod_chara_dlc17.mbe" / "01_lod_model.csv"
+                    dlc_file = self.loader._resolve_prefixed_file(dlc_data / "lod_chara_dlc17.mbe" / "001_lod_model.csv")
                     if dlc_file.exists():
                         dlc_rows = self.loader.load_csv(dlc_file)
                         template_chr_id = digimon.chr_id

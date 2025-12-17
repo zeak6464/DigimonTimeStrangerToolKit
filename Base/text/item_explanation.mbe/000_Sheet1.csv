@@ -1,0 +1,1443 @@
+string2 0,string 1
+"40","Increases a Digimon's EXP by 5000."
+"41","Increases a Digimon's EXP by 10000."
+"42","Increases a Digimon's EXP by 25000."
+"43","Increases a Digimon's EXP by 50000."
+"44","Increases a Digimon's EXP by 100000."
+"45","Increases a Digimon's Bond by 3%."
+"46","Increases a Digimon's Bond by 5%."
+"47","Increases a Digimon's Bond by 1%."
+"48",""
+"49",""
+"50",""
+"51",""
+"52",""
+"53",""
+"54",""
+"55",""
+"56",""
+"57",""
+"58",""
+"59","Increases a Digimon's Talent by 2."
+"60","Increases a Digimon's Talent by 5."
+"61","Increases a Digimon's cumulative Max HP by 50."
+"62","Increases a Digimon's cumulative Max HP by 150."
+"63","Increases a Digimon's cumulative Max HP by 300."
+"64","Increases a Digimon's cumulative Max SP by 50."
+"65","Increases a Digimon's cumulative Max SP by 150."
+"66","Increases a Digimon's cumulative Max SP by 300."
+"67","Increases a Digimon's cumulative ATK by 30."
+"68","Increases a Digimon's cumulative ATK by 50."
+"69","Increases a Digimon's cumulative ATK by 100."
+"70","Increases a Digimon's cumulative DEF by 30."
+"71","Increases a Digimon's cumulative DEF by 50."
+"72","Increases a Digimon's cumulative DEF by 100."
+"73","Increases a Digimon's cumulative INT by 30."
+"74","Increases a Digimon's cumulative INT by 50."
+"75","Increases a Digimon's cumulative INT by 100."
+"76","Increases a Digimon's cumulative SPI by 30."
+"77","Increases a Digimon's cumulative SPI by 50."
+"78","Increases a Digimon's cumulative SPI by 100."
+"79","Increases a Digimon's cumulative SPD by 30."
+"80","Increases a Digimon's cumulative SPD by 50."
+"81","Increases a Digimon's cumulative SPD by 100."
+"82","A gem symbolizing prosperity.
+Can be sold for a high price."
+"83","A gem harvested from shellfish. Not to be confused with black
+pearls produced by Syakomon.
+Can be sold for a high price."
+"84","A translucent, sky-blue gem of the beryl family.
+Can be sold for a high price."
+"85","A gem that is said to bring about rebirth.
+Can be sold for a high price."
+"86","A gem which changes color to blue-green in sunlight and red
+under artificial light.
+Can be sold for a high price."
+"87","A scarlet gem of hardness rivaled only by diamond.
+Can be sold for a high price."
+"88","A gem that comes in all colors other than red, of hardness
+rivaled only by diamond.
+Can be sold for a high price."
+"89","A vividly green gem of the beryl family.
+Can be sold for a high price."
+"90","A dreary old killjoy would say it's made of the same stuff as
+what's in an ordinary pencil.
+Can be sold for a high price."
+"91","An incredibly rare and mysterious gem.
+Can be sold for a high price."
+"99",""
+"105","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"106","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"107","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"108","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"109","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"110","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"111",""
+"112",""
+"201",""
+"202",""
+"203","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"204",""
+"205",""
+"206",""
+"207",""
+"208",""
+"209",""
+"210","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"211","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"212",""
+"213","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"214",""
+"215",""
+"216",""
+"217",""
+"218",""
+"219",""
+"220",""
+"221",""
+"222","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"223","Food for Digimon.
+Give it to Digimon on the Digifarm to increase their Bond
+bit by bit."
+"301","Synthesis material for farm items.
+Rarity: ★"
+"302","Synthesis material for farm items.
+Rarity: ★★"
+"303","Synthesis material for farm items.
+Rarity: ★★★"
+"311","Synthesis material for farm items.
+Rarity: ★"
+"312","Synthesis material for farm items.
+Rarity: ★★"
+"313","Synthesis material for farm items.
+Rarity: ★★★"
+"321","Synthesis material for farm items.
+Rarity: ★"
+"322","Synthesis material for farm items.
+Rarity: ★★"
+"323","Synthesis material for farm items.
+Rarity: ★★★"
+"331","Synthesis material for farm items.
+Rarity: ★"
+"332","Synthesis material for farm items.
+Rarity: ★★"
+"333","Synthesis material for farm items.
+Rarity: ★★★"
+"341","Synthesis material for farm items.
+Rarity: ★"
+"342","Synthesis material for farm items.
+Rarity: ★★"
+"343","Synthesis material for farm items.
+Rarity: ★★★"
+"351","Synthesis material for farm items.
+Rarity: ★"
+"352","Synthesis material for farm items.
+Rarity: ★★"
+"353","Synthesis material for farm items.
+Rarity: ★★★"
+"354","A highly precious and mysterious egg."
+"361","A token of Merukimon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"362","A token of Vulcanusmon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"363","A token of Neptunemon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"364","A token of Venusmon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"365","A token of Bacchusmon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"366","A token of Ceresmon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"367","A token of Marsmon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"368","A token of Junomon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"369","A token of Plutomon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"370","A token of Apollomon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"371","A token of Dianamon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"372","A token of Minervamon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"373","A token of Jupitermon's trust.
+Vulcanusmon may be able to create valuable equipment with it."
+"501",""
+"502",""
+"503",""
+"504",""
+"505",""
+"506",""
+"507",""
+"508",""
+"509",""
+"520",""
+"521",""
+"522",""
+"523",""
+"524",""
+"525",""
+"526",""
+"527",""
+"528",""
+"529",""
+"530",""
+"531",""
+"532",""
+"533",""
+"534",""
+"535",""
+"536",""
+"537",""
+"538",""
+"539",""
+"701",""
+"702",""
+"703",""
+"704",""
+"705",""
+"706",""
+"707",""
+"708",""
+"709",""
+"710",""
+"711",""
+"712",""
+"713",""
+"714",""
+"715",""
+"716",""
+"717",""
+"718",""
+"719",""
+"720",""
+"721",""
+"723","Boosts CRT damage by 20%.
+Equip on guest party member Aegiomon to begin battles as
+Aegiochusmon."
+"724","Boosts effects of HP recovery by 50% when in battle.
+Equip on guest party member Aegiomon to begin battles as
+Aegiochusmon: Green."
+"725","Consumes double the SP to deal 1.5x damage.
+Equip on guest party member Aegiomon to begin battles as
+Aegiochusmon: Blue."
+"726","Recovers SP equal to 5% of magic damage taken.
+Equip on guest party member Aegiomon to begin battles as
+Aegiochusmon: Holy."
+"727","A depleted battery.
+The standard type commonly found in the factory."
+"728","A type of seaweed often called the ""medicinal herb of the sea.""
+Can be used as a salve."
+"729","A large shell received from Shellmon.
+Used for summoning Whamon."
+"730","A precious gift from Kamemon.
+Can be used as a medicinal ingredient."
+"731","Fruit from Karpos Hulē, a forest famed for producing the sweetest
+fruit in the Digital World."
+"732","A ticket for Kokuwamon Park, good for everything from entry to
+attractions and guidance from Guardromon!"
+"733","A lifetime passport ticket for everything in Kokuwamon Park.
+An endless world of fun awaits!"
+"734","A special repair tool for the electromagnetic net generator."
+"750","A fuse used in the Digital World.
+Use it to fix Kokuwamon."
+"759","A small bottle from MarineAngemon, adorned with fancy hearts
+and ribbons. The cap is surprisingly secure, and no liquid would
+ever leak out."
+"760",""
+"761",""
+"762","A ring handmade by Neptunemon. It is made of a hard metal native
+to the ocean floor and features a stone of Blue Chrondigizoit Metal."
+"763","A medicine that is the culmination of Venusmon's research. Its
+strong recovery effect sometimes even promotes growth. Its
+ingredients are difficult to collect, and it cannot be mass-produced."
+"764",""
+"765","A feather that fell off of Parrotmon.
+This battered plume conjures up images of fierce battles."
+"766","A keycard that opens the doors of the factory."
+"767","Precious jewelry that is one of PlatinumNumemon's most splendid
+accessories. It carries this jewelry inside its own body with great
+care."
+"768","A common aquatic plant that is often found in the sea."
+"769","A somewhat uncommon aquatic plant. Rumor has it that finding
+this plant may bring good luck with love."
+"770","A somewhat uncommon aquatic plant. Rumor has it that finding
+this plant may bring good luck with money."
+"771","A rare aquatic plant that reacts to the quality of water. Originally
+blue, it turns purple when the quality of the surrounding water
+deteriorates."
+"772",""
+"773","A fruit long rumored to energize those who eat it. No evidence to
+support these claims of medicinal proprties exists, but some
+say its effects are subjective."
+"774","The smelted product of Chrondigizoit ore obtained from mining."
+"775",""
+"776",""
+"777",""
+"778",""
+"779","An industrial cooler for powerful space cooling.
+It can withstand harsh environments such as blast furnaces."
+"780","Heats a space with warm air. Although it's a slightly older model,
+it boasts one of the best heating capabilities for home use."
+"781","A large amount of mixed metals of varying composition.
+It is strong and can be used as a material as is."
+"782","Parts from the elbow to the fingertips of some action figure.
+The fingers are shaped as though they are picking something up,
+and, if you look closely, there are snack crumbs stuck to them."
+"783",""
+"784","An action figure with fully movable joints. All the typical poses
+from the Sayori the Cutie Magician series can be reproduced."
+"785",""
+"786",""
+"787",""
+"788",""
+"789","A scarf received as a keepsake from Neptunemon."
+"790","A bottle of wine received as a keepsake from Venusmon."
+"791","An odd variety of seed that gives off heat."
+"792","An odd variety of seed that gives off a chill."
+"793","A storage device containing a recovery supervisor ID."
+"794","A laboratory ID received from Dr. Simmons."
+"795","A special battery devised by Vulcanusmon."
+"796","A special battery devised by Vulcanusmon."
+"797","An item dropped by something that resembles Hiroko."
+"798","An item dropped by Etemon."
+"799","An item dropped by Kuramon."
+"800","A rare Jogmon card with nothing on it.
+Something may happen if you give it to someone familiar with
+cards."
+"801","Costume.
+The regular outfit."
+"802","Costume.
+An outfit with a plain white T-shirt."
+"803","Costume.
+An outfit with a white and turquoise blue T-shirt."
+"804","Costume.
+An outfit with a T-shirt sporting pixel art."
+"805","Costume.
+The school uniform for Inori and Hiroko's school."
+"806","Costume.
+The uniform worn by public safety officers."
+"807","Costume.
+An outfit with a T-shirt sporting pixel art."
+"808","Costume.
+An outfit with a T-shirt sporting pixel art."
+"809","Costume.
+An outfit with a T-shirt sporting pixel art."
+"810","Costume.
+An outfit with a T-shirt sporting pixel art."
+"811","Costume.
+An outfit with a T-shirt sporting pixel art."
+"812","Costume.
+An outfit with a T-shirt sporting pixel art."
+"813","Costume.
+An outfit with a T-shirt sporting pixel art."
+"814","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"815","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"816","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"817","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"818","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"819","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"820","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"821","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"822","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"823","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"825","Costume.
+An outfit taking inspiration from Digimon Adventure."
+"826","Costume.
+An outfit styled around swimwear."
+"827","Costume.
+A Digimon-inspired costume."
+"828","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"829","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"830","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"831","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"832","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"833","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"834","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"835","Costume.
+An outfit with a T-shirt sporting a graphic print."
+"901","A Digi-Egg engraved with the Crest of Courage."
+"902","A Digi-Egg engraved with the Crest of Friendship."
+"903","A Digi-Egg engraved with the Crest of Love."
+"904","A Digi-Egg engraved with the Crest of Sincerity."
+"905","A Digi-Egg engraved with the Crest of Knowledge."
+"906","A Digi-Egg engraved with the Crest of Reliability."
+"907","A Digi-Egg engraved with the Crest of Hope."
+"908","A Digi-Egg engraved with the Crest of Light."
+"909","A Digi-Egg engraved with the Crest of Miracles."
+"910","A Digi-Egg engraved with the Crest of Destiny."
+"911","A Digi-Egg engraved with the Crest of Kindness."
+"912","A human spirit containing the spirit of the Fire Warrior, one of
+the Ten Legendary Warriors."
+"913","A beast spirit containing the spirit of the Fire Warrior, one of the
+Ten Legendary Warriors."
+"914","A human spirit containing the spirit of the Light Warrior, one of
+the Ten Legendary Warriors."
+"915","A beast spirit containing the spirit of the Light Warrior, one of the
+Ten Legendary Warriors."
+"916","Data of the holy sword possessed by Imperialdramon PM."
+"1001",""
+"1002",""
+"1003",""
+"1004",""
+"1005",""
+"1006",""
+"1007",""
+"1008",""
+"1009",""
+"1010",""
+"1011",""
+"1012",""
+"1013",""
+"1014",""
+"1015",""
+"1016",""
+"1017",""
+"1018",""
+"1019",""
+"1020",""
+"1021",""
+"1022",""
+"1023",""
+"1024",""
+"1025",""
+"1026",""
+"1027",""
+"1028",""
+"1029",""
+"1030",""
+"1031",""
+"1032",""
+"1033",""
+"1034",""
+"1035",""
+"1036",""
+"1037",""
+"1038",""
+"1039",""
+"1040",""
+"1041",""
+"1042",""
+"1043",""
+"1044",""
+"1045",""
+"1046",""
+"1047",""
+"1048",""
+"1049",""
+"1050",""
+"1051",""
+"1052",""
+"1053",""
+"1054",""
+"1055",""
+"1056",""
+"1057",""
+"1058",""
+"1059",""
+"1060",""
+"1061",""
+"1062",""
+"1063",""
+"1064",""
+"1065",""
+"1066",""
+"1067",""
+"1068",""
+"1069",""
+"1070","Boosts {is28}{image(ui_icon_skill_001)} Fire & {is28}{image(ui_icon_skill_003)} Plant resistance."
+"1071","Boosts {is28}{image(ui_icon_skill_004)} Water & {is28}{image(ui_icon_skill_002)} Ice resistance."
+"1072","Boosts {is28}{image(ui_icon_skill_005)} Electricity & {is28}{image(ui_icon_skill_007)} Wind Resistance."
+"1073","Boosts {is28}{image(ui_icon_skill_008)} Earth & {is28}{image(ui_icon_skill_006)} Steel Resistance."
+"1074","Boosts {is28}{image(ui_icon_skill_009)} Light & {is28}{image(ui_icon_skill_010)} Dark resistance."
+"1075",""
+"1076",""
+"1077",""
+"1078",""
+"1079",""
+"1080",""
+"1081",""
+"1082",""
+"1083",""
+"1084",""
+"1085",""
+"1086",""
+"1087",""
+"1088",""
+"1089",""
+"1090",""
+"1091","Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison."
+"1092","Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion."
+"1093","Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis."
+"1094","Nullifies {is28}{image(ui_icon_btlStatus_004)} Sleep."
+"1095",""
+"1096",""
+"1097",""
+"1098","Nullifies stat debuffs."
+"1099","Nullifies all status abnormalities."
+"1100",""
+"1101",""
+"1102",""
+"1103",""
+"1104",""
+"1105",""
+"1106",""
+"1107",""
+"1108",""
+"1109",""
+"1110",""
+"1111",""
+"1112",""
+"1113",""
+"1114",""
+"1115",""
+"1116",""
+"1117",""
+"1118",""
+"1119",""
+"1120",""
+"1121",""
+"1122",""
+"1123",""
+"1124",""
+"1125",""
+"1126",""
+"1127",""
+"1128",""
+"1129",""
+"1130",""
+"1131",""
+"1132",""
+"1133",""
+"1134",""
+"1135",""
+"1136",""
+"1137",""
+"1138",""
+"1139",""
+"1140",""
+"1141",""
+"1142",""
+"1143","Reduces damage from {is28}{image(ui_icon_type_040)} Virus Attribute Digimon by 30%."
+"1144","Nullifies stat debuffs.
+Attacking deals magic damage."
+"1145","INT +300. SPI +300.
+Recovers SP equal to 5% of physical damage taken."
+"1151","SPD +300.
+Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison/{is28}{image(ui_icon_btlStatus_005)} Deadly Poison.
+Boosts {is28}{image(ui_icon_skill_007)} Wind resistance."
+"1152","CRT Rate +20%.
+Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison/{is28}{image(ui_icon_btlStatus_005)} Deadly Poison.
+Boosts {is28}{image(ui_icon_skill_006)} Steel resistance."
+"1153","ATK +300.
+Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis/{is28}{image(ui_icon_btlStatus_008)} Immobilization.
+Boosts {is28}{image(ui_icon_skill_004)} Water resistance."
+"1154","Max HP +1000.
+Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion/{is28}{image(ui_icon_btlStatus_007)} Chaos.
+Boosts {is28}{image(ui_icon_skill_000)} Null resistance."
+"1155","EVA +20%.
+Nullifies {is28}{image(ui_icon_btlStatus_010)} Crystallization.
+Boosts {is28}{image(ui_icon_skill_004)} Water resistance."
+"1156","DEF +300.
+Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison/{is28}{image(ui_icon_btlStatus_005)} Deadly Poison.
+Boosts {is28}{image(ui_icon_skill_003)} Plant resistance."
+"1157","ACU +20%.
+Nullifies Instant Death.
+Boosts {is28}{image(ui_icon_skill_001)} Fire resistance."
+"1158","INT +300.
+Nullifies stat debuffs.
+Boosts {is28}{image(ui_icon_skill_009)} Light resistance."
+"1159","SPI +300.
+Nullifies Instant Death.
+Boosts {is28}{image(ui_icon_skill_010)} Dark resistance."
+"1160","ATK +300.
+Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis/{is28}{image(ui_icon_btlStatus_008)} Immobilization.
+Boosts {is28}{image(ui_icon_skill_001)} Fire resistance."
+"1161","Max SP +500.
+Nullifies {is28}{image(ui_icon_btlStatus_004)} Sleep/{is28}{image(ui_icon_btlStatus_009)} Deep Slumber.
+Boosts {is28}{image(ui_icon_skill_002)} Ice resistance."
+"1162","Max HP +1000.
+Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion/{is28}{image(ui_icon_btlStatus_007)} Chaos.
+Boosts {is28}{image(ui_icon_skill_008)} Earth resistance."
+"1163","ATK +500. CRT Rate +30%. 
+Nullifies all status abnormalities.
+Boosts {is28}{image(ui_icon_skill_005)} Electricity resistance."
+"1171","Nullifies {is28}{image(ui_icon_btlStatus_000)} Poison/{is28}{image(ui_icon_btlStatus_005)} Deadly Poison."
+"1172","Nullifies {is28}{image(ui_icon_btlStatus_002)} Confusion/{is28}{image(ui_icon_btlStatus_007)} Chaos."
+"1173","Nullifies {is28}{image(ui_icon_btlStatus_003)} Paralysis/{is28}{image(ui_icon_btlStatus_008)} Immobilization."
+"1174","Nullifies {is28}{image(ui_icon_btlStatus_004)} Sleep/{is28}{image(ui_icon_btlStatus_009)} Deep Slumber."
+"10001","A card with a Digimon printed on it."
+"10002","A card with a Digimon printed on it."
+"10003","A card with a Digimon printed on it."
+"10004","A card with a Digimon printed on it."
+"10005","A card with a Digimon printed on it."
+"10006","A card with a Digimon printed on it."
+"10009","A card with a Digimon printed on it."
+"10010","A card with a Digimon printed on it."
+"10011","A card with a Digimon printed on it."
+"10012","A card with a Digimon printed on it."
+"10013","A card with a Digimon printed on it."
+"10014","A card with a Digimon printed on it."
+"10015","A card with a Digimon printed on it."
+"10016","A card with a Digimon printed on it."
+"10017","A card with a Digimon printed on it."
+"10019","A card with a Digimon printed on it."
+"10020","A card with a Digimon printed on it."
+"10021","A card with a Digimon printed on it."
+"10023","A card with a Digimon printed on it."
+"10024","A card with a Digimon printed on it."
+"10025","A card with a Digimon printed on it."
+"10026","A card with a Digimon printed on it."
+"10027","A card with a Digimon printed on it."
+"10028","A card with a Digimon printed on it."
+"10030","A card with a Digimon printed on it."
+"10031","A card with a Digimon printed on it."
+"10032","A card with a Digimon printed on it."
+"10033","A card with a Digimon printed on it."
+"10034","A card with a Digimon printed on it."
+"10035","A card with a Digimon printed on it."
+"10036","A card with a Digimon printed on it."
+"10037","A card with a Digimon printed on it."
+"10038","A card with a Digimon printed on it."
+"10039","A card with a Digimon printed on it."
+"10040","A card with a Digimon printed on it."
+"10041","A card with a Digimon printed on it."
+"10042","A card with a Digimon printed on it."
+"10043","A card with a Digimon printed on it."
+"10044","A card with a Digimon printed on it."
+"10045","A card with a Digimon printed on it."
+"10046","A card with a Digimon printed on it."
+"10047","A card with a Digimon printed on it."
+"10048","A card with a Digimon printed on it."
+"10049","A card with a Digimon printed on it."
+"10050","A card with a Digimon printed on it."
+"10051","A card with a Digimon printed on it."
+"10052","A card with a Digimon printed on it."
+"10053","A card with a Digimon printed on it."
+"10054","A card with a Digimon printed on it."
+"10055","A card with a Digimon printed on it."
+"10056","A card with a Digimon printed on it."
+"10057","A card with a Digimon printed on it."
+"10058","A card with a Digimon printed on it."
+"10059","A card with a Digimon printed on it."
+"10060","A card with a Digimon printed on it."
+"10061","A card with a Digimon printed on it."
+"10068","A card with a Digimon printed on it."
+"10069","A card with a Digimon printed on it."
+"10070","A card with a Digimon printed on it."
+"10071","A card with a Digimon printed on it."
+"10072","A card with a Digimon printed on it."
+"10073","A card with a Digimon printed on it."
+"10074","A card with a Digimon printed on it."
+"10075","A card with a Digimon printed on it."
+"10076","A card with a Digimon printed on it."
+"10077","A card with a Digimon printed on it."
+"10078","A card with a Digimon printed on it."
+"10079","A card with a Digimon printed on it."
+"10080","A card with a Digimon printed on it."
+"10081","A card with a Digimon printed on it."
+"10082","A card with a Digimon printed on it."
+"10083","A card with a Digimon printed on it."
+"10084","A card with a Digimon printed on it."
+"10085","A card with a Digimon printed on it."
+"10086","A card with a Digimon printed on it."
+"10087","A card with a Digimon printed on it."
+"10088","A card with a Digimon printed on it."
+"10090","A card with a Digimon printed on it."
+"10091","A card with a Digimon printed on it."
+"10092","A card with a Digimon printed on it."
+"10093","A card with a Digimon printed on it."
+"10094","A card with a Digimon printed on it."
+"10095","A card with a Digimon printed on it."
+"10096","A card with a Digimon printed on it."
+"10097","A card with a Digimon printed on it."
+"10098","A card with a Digimon printed on it."
+"10100","A card with a Digimon printed on it."
+"10101","A card with a Digimon printed on it."
+"10102","A card with a Digimon printed on it."
+"10103","A card with a Digimon printed on it."
+"10104","A card with a Digimon printed on it."
+"10105","A card with a Digimon printed on it."
+"10106","A card with a Digimon printed on it."
+"10107","A card with a Digimon printed on it."
+"10111","A card with a Digimon printed on it."
+"10112","A card with a Digimon printed on it."
+"10113","A card with a Digimon printed on it."
+"10114","A card with a Digimon printed on it."
+"10115","A card with a Digimon printed on it."
+"10116","A card with a Digimon printed on it."
+"10117","A card with a Digimon printed on it."
+"10118","A card with a Digimon printed on it."
+"10126","A card with a Digimon printed on it."
+"10127","A card with a Digimon printed on it."
+"10128","A card with a Digimon printed on it."
+"10129","A card with a Digimon printed on it."
+"10130","A card with a Digimon printed on it."
+"10132","A card with a Digimon printed on it."
+"10133","A card with a Digimon printed on it."
+"10134","A card with a Digimon printed on it."
+"10135","A card with a Digimon printed on it."
+"10136","A card with a Digimon printed on it."
+"10137","A card with a Digimon printed on it."
+"10138","A card with a Digimon printed on it."
+"10139","A card with a Digimon printed on it."
+"10140","A card with a Digimon printed on it."
+"10141","A card with a Digimon printed on it."
+"10142","A card with a Digimon printed on it."
+"10143","A card with a Digimon printed on it."
+"10144","A card with a Digimon printed on it."
+"10145","A card with a Digimon printed on it."
+"10146","A card with a Digimon printed on it."
+"10147","A card with a Digimon printed on it."
+"10148","A card with a Digimon printed on it."
+"10149","A card with a Digimon printed on it."
+"10150","A card with a Digimon printed on it."
+"10151","A card with a Digimon printed on it."
+"10162","A card with a Digimon printed on it."
+"10163","A card with a Digimon printed on it."
+"10168","A card with a Digimon printed on it."
+"10169","A card with a Digimon printed on it."
+"10170","A card with a Digimon printed on it."
+"10171","A card with a Digimon printed on it."
+"10172","A card with a Digimon printed on it."
+"10173","A card with a Digimon printed on it."
+"10174","A card with a Digimon printed on it."
+"10175","A card with a Digimon printed on it."
+"10176","A card with a Digimon printed on it."
+"10177","A card with a Digimon printed on it."
+"10178","A card with a Digimon printed on it."
+"10179","A card with a Digimon printed on it."
+"10180","A card with a Digimon printed on it."
+"10181","A card with a Digimon printed on it."
+"10182","A card with a Digimon printed on it."
+"10183","A card with a Digimon printed on it."
+"10184","A card with a Digimon printed on it."
+"10185","A card with a Digimon printed on it."
+"10186","A card with a Digimon printed on it."
+"10187","A card with a Digimon printed on it."
+"10188","A card with a Digimon printed on it."
+"10189","A card with a Digimon printed on it."
+"10190","A card with a Digimon printed on it."
+"10191","A card with a Digimon printed on it."
+"10192","A card with a Digimon printed on it."
+"10193","A card with a Digimon printed on it."
+"10194","A card with a Digimon printed on it."
+"10195","A card with a Digimon printed on it."
+"10196","A card with a Digimon printed on it."
+"10197","A card with a Digimon printed on it."
+"10198","A card with a Digimon printed on it."
+"10199","A card with a Digimon printed on it."
+"10208","A card with a Digimon printed on it."
+"10209","A card with a Digimon printed on it."
+"10210","A card with a Digimon printed on it."
+"10211","A card with a Digimon printed on it."
+"10213","A card with a Digimon printed on it."
+"10214","A card with a Digimon printed on it."
+"10215","A card with a Digimon printed on it."
+"10217","A card with a Digimon printed on it."
+"10218","A card with a Digimon printed on it."
+"10219","A card with a Digimon printed on it."
+"10220","A card with a Digimon printed on it."
+"10222","A card with a Digimon printed on it."
+"10223","A card with a Digimon printed on it."
+"10224","A card with a Digimon printed on it."
+"10225","A card with a Digimon printed on it."
+"10226","A card with a Digimon printed on it."
+"10227","A card with a Digimon printed on it."
+"10228","A card with a Digimon printed on it."
+"10229","A card with a Digimon printed on it."
+"10230","A card with a Digimon printed on it."
+"10231","A card with a Digimon printed on it."
+"10232","A card with a Digimon printed on it."
+"10233","A card with a Digimon printed on it."
+"10234","A card with a Digimon printed on it."
+"10235","A card with a Digimon printed on it."
+"10237","A card with a Digimon printed on it."
+"10239","A card with a Digimon printed on it."
+"10240","A card with a Digimon printed on it."
+"10241","A card with a Digimon printed on it."
+"10242","A card with a Digimon printed on it."
+"10301","A card with a Digimon printed on it."
+"10302","A card with a Digimon printed on it."
+"10303","A card with a Digimon printed on it."
+"10304","A card with a Digimon printed on it."
+"10305","A card with a Digimon printed on it."
+"10306","A card with a Digimon printed on it."
+"10307","A card with a Digimon printed on it."
+"10308","A card with a Digimon printed on it."
+"10309","A card with a Digimon printed on it."
+"10310","A card with a Digimon printed on it."
+"10311","A card with a Digimon printed on it."
+"10312","A card with a Digimon printed on it."
+"10313","A card with a Digimon printed on it."
+"10314","A card with a Digimon printed on it."
+"10315","A card with a Digimon printed on it."
+"10316","A card with a Digimon printed on it."
+"10317","A card with a Digimon printed on it."
+"10320","A card with a Digimon printed on it."
+"10321","A card with a Digimon printed on it."
+"10322","A card with a Digimon printed on it."
+"10325","A card with a Digimon printed on it."
+"10326","A card with a Digimon printed on it."
+"10327","A card with a Digimon printed on it."
+"10328","A card with a Digimon printed on it."
+"10338","A card with a Digimon printed on it."
+"10341","A card with a Digimon printed on it."
+"10342","A card with a Digimon printed on it."
+"10343","A card with a Digimon printed on it."
+"10344","A card with a Digimon printed on it."
+"10345","A card with a Digimon printed on it."
+"10346","A card with a Digimon printed on it."
+"10347","A card with a Digimon printed on it."
+"10348","A card with a Digimon printed on it."
+"10349","A card with a Digimon printed on it."
+"10359","A card with a Digimon printed on it."
+"10361","A card with a Digimon printed on it."
+"10363","A card with a Digimon printed on it."
+"10364","A card with a Digimon printed on it."
+"10365","A card with a Digimon printed on it."
+"10367","A card with a Digimon printed on it."
+"10368","A card with a Digimon printed on it."
+"10369","A card with a Digimon printed on it."
+"10370","A card with a Digimon printed on it."
+"10371","A card with a Digimon printed on it."
+"10372","A card with a Digimon printed on it."
+"10373","A card with a Digimon printed on it."
+"10374","A card with a Digimon printed on it."
+"10375","A card with a Digimon printed on it."
+"10376","A card with a Digimon printed on it."
+"10377","A card with a Digimon printed on it."
+"10378","A card with a Digimon printed on it."
+"10379","A card with a Digimon printed on it."
+"10380","A card with a Digimon printed on it."
+"10382","A card with a Digimon printed on it."
+"10383","A card with a Digimon printed on it."
+"10385","A card with a Digimon printed on it."
+"10387","A card with a Digimon printed on it."
+"10388","A card with a Digimon printed on it."
+"10389","A card with a Digimon printed on it."
+"10390","A card with a Digimon printed on it."
+"10391","A card with a Digimon printed on it."
+"10392","A card with a Digimon printed on it."
+"10393","A card with a Digimon printed on it."
+"10394","A card with a Digimon printed on it."
+"10395","A card with a Digimon printed on it."
+"10396","A card with a Digimon printed on it."
+"10397","A card with a Digimon printed on it."
+"10398","A card with a Digimon printed on it."
+"10399","A card with a Digimon printed on it."
+"10400","A card with a Digimon printed on it."
+"10401","A card with a Digimon printed on it."
+"10402","A card with a Digimon printed on it."
+"10403","A card with a Digimon printed on it."
+"10404","A card with a Digimon printed on it."
+"10405","A card with a Digimon printed on it."
+"10406","A card with a Digimon printed on it."
+"10407","A card with a Digimon printed on it."
+"10408","A card with a Digimon printed on it."
+"10409","A card with a Digimon printed on it."
+"10410","A card with a Digimon printed on it."
+"10411","A card with a Digimon printed on it."
+"10412","A card with a Digimon printed on it."
+"10413","A card with a Digimon printed on it."
+"10414","A card with a Digimon printed on it."
+"10416","A card with a Digimon printed on it."
+"10417","A card with a Digimon printed on it."
+"10419","A card with a Digimon printed on it."
+"10420","A card with a Digimon printed on it."
+"10421","A card with a Digimon printed on it."
+"10422","A card with a Digimon printed on it."
+"10423","A card with a Digimon printed on it."
+"10424","A card with a Digimon printed on it."
+"10425","A card with a Digimon printed on it."
+"10426","A card with a Digimon printed on it."
+"10427","A card with a Digimon printed on it."
+"10428","A card with a Digimon printed on it."
+"10429","A card with a Digimon printed on it."
+"10431","A card with a Digimon printed on it."
+"10434","A card with a Digimon printed on it."
+"10435","A card with a Digimon printed on it."
+"10437","A card with a Digimon printed on it."
+"10438","A card with a Digimon printed on it."
+"10439","A card with a Digimon printed on it."
+"10440","A card with a Digimon printed on it."
+"10450","A card with a Digimon printed on it."
+"10451","A card with a Digimon printed on it."
+"10452","A card with a Digimon printed on it."
+"10453","A card with a Digimon printed on it."
+"10454","A card with a Digimon printed on it."
+"10455","A card with a Digimon printed on it."
+"10456","A card with a Digimon printed on it."
+"10457","A card with a Digimon printed on it."
+"10458","A card with a Digimon printed on it."
+"10461","A card with a Digimon printed on it."
+"10463","A card with a Digimon printed on it."
+"10465","A card with a Digimon printed on it."
+"10466","A card with a Digimon printed on it."
+"10474","A card with a Digimon printed on it."
+"10479","A card with a Digimon printed on it."
+"10484","A card with a Digimon printed on it."
+"10489","A card with a Digimon printed on it."
+"10490","A card with a Digimon printed on it."
+"10491","A card with a Digimon printed on it."
+"10492","A card with a Digimon printed on it."
+"10510","A card with a Digimon printed on it."
+"10512","A card with a Digimon printed on it."
+"10514","A card with a Digimon printed on it."
+"10515","A card with a Digimon printed on it."
+"10548","A card with a Digimon printed on it."
+"10564","A card with a Digimon printed on it."
+"10567","A card with a Digimon printed on it."
+"10569","A card with a Digimon printed on it."
+"10573","A card with a Digimon printed on it."
+"10574","A card with a Digimon printed on it."
+"10575","A card with a Digimon printed on it."
+"10576","A card with a Digimon printed on it."
+"10577","A card with a Digimon printed on it."
+"10578","A card with a Digimon printed on it."
+"10579","A card with a Digimon printed on it."
+"10580","A card with a Digimon printed on it."
+"10582","A card with a Digimon printed on it."
+"10584","A card with a Digimon printed on it."
+"10586","A card with a Digimon printed on it."
+"10588","A card with a Digimon printed on it."
+"10590","A card with a Digimon printed on it."
+"10592","A card with a Digimon printed on it."
+"10594","A card with a Digimon printed on it."
+"10595","A card with a Digimon printed on it."
+"10596","A card with a Digimon printed on it."
+"10597","A card with a Digimon printed on it."
+"10598","A card with a Digimon printed on it."
+"10600","A card with a Digimon printed on it."
+"10601","A card with a Digimon printed on it."
+"10602","A card with a Digimon printed on it."
+"10603","A card with a Digimon printed on it."
+"10604","A card with a Digimon printed on it."
+"10605","A card with a Digimon printed on it."
+"10606","A card with a Digimon printed on it."
+"10607","A card with a Digimon printed on it."
+"10609","A card with a Digimon printed on it."
+"10610","A card with a Digimon printed on it."
+"10611","A card with a Digimon printed on it."
+"10613","A card with a Digimon printed on it."
+"10614","A card with a Digimon printed on it."
+"10615","A card with a Digimon printed on it."
+"10616","A card with a Digimon printed on it."
+"10617","A card with a Digimon printed on it."
+"10621","A card with a Digimon printed on it."
+"10622","A card with a Digimon printed on it."
+"10623","A card with a Digimon printed on it."
+"10626","A card with a Digimon printed on it."
+"10627","A card with a Digimon printed on it."
+"10629","A card with a Digimon printed on it."
+"10630","A card with a Digimon printed on it."
+"10631","A card with a Digimon printed on it."
+"10632","A card with a Digimon printed on it."
+"10669","A card with a Digimon printed on it."
+"10670","A card with a Digimon printed on it."
+"10676","A card with a Digimon printed on it."
+"10677","A card with a Digimon printed on it."
+"10678","A card with a Digimon printed on it."
+"10679","A card with a Digimon printed on it."
+"10680","A card with a Digimon printed on it."
+"10681","A card with a Digimon printed on it."
+"10682","A card with a Digimon printed on it."
+"10683","A card with a Digimon printed on it."
+"10687","A card with a Digimon printed on it."
+"10688","A card with a Digimon printed on it."
+"10697","A card with a Digimon printed on it."
+"10698","A card with a Digimon printed on it."
+"10699","A card with a Digimon printed on it."
+"10700","A card with a Digimon printed on it."
+"10701","A card with a Digimon printed on it."
+"10702","A card with a Digimon printed on it."
+"10703","A card with a Digimon printed on it."
+"10704","A card with a Digimon printed on it."
+"10705","A card with a Digimon printed on it."
+"10706","A card with a Digimon printed on it."
+"10707","A card with a Digimon printed on it."
+"10708","A card with a Digimon printed on it."
+"10709","A card with a Digimon printed on it."
+"10710","A card with a Digimon printed on it."
+"10711","A card with a Digimon printed on it."
+"10712","A card with a Digimon printed on it."
+"10713","A card with a Digimon printed on it."
+"10714","A card with a Digimon printed on it."
+"10715","A card with a Digimon printed on it."
+"10716","A card with a Digimon printed on it."
+"10718","A card with a Digimon printed on it."
+"10719","A card with a Digimon printed on it."
+"10720","A card with a Digimon printed on it."
+"10721","A card with a Digimon printed on it."
+"10722","A card with a Digimon printed on it."
+"10723","A card with a Digimon printed on it."
+"10724","A card with a Digimon printed on it."
+"10725","A card with a Digimon printed on it."
+"10726","A card with a Digimon printed on it."
+"10727","A card with a Digimon printed on it."
+"10728","A card with a Digimon printed on it."
+"10729","A card with a Digimon printed on it."
+"10730","A card with a Digimon printed on it."
+"10731","A card with a Digimon printed on it."
+"10732","A card with a Digimon printed on it."
+"10733","A card with a Digimon printed on it."
+"10734","A card with a Digimon printed on it."
+"10735","A card with a Digimon printed on it."
+"10737","A card with a Digimon printed on it."
+"10738","A card with a Digimon printed on it."
+"10739","A card with a Digimon printed on it."
+"10740","A card with a Digimon printed on it."
+"10741","A card with a Digimon printed on it."
+"10742","A card with a Digimon printed on it."
+"10743","A card with a Digimon printed on it."
+"10744","A card with a Digimon printed on it."
+"10745","A card with a Digimon printed on it."
+"10747","A card with a Digimon printed on it."
+"10748","A card with a Digimon printed on it."
+"10749","A card with a Digimon printed on it."
+"10750","A card with a Digimon printed on it."
+"10751","A card with a Digimon printed on it."
+"10752","A card with a Digimon printed on it."
+"10753","A card with a Digimon printed on it."
+"10754","A card with a Digimon printed on it."
+"10755","A card with a Digimon printed on it."
+"10756","A card with a Digimon printed on it."
+"10757","A card with a Digimon printed on it."
+"10758","A card with a Digimon printed on it."
+"10759","A card with a Digimon printed on it."
+"10760","A card with a Digimon printed on it."
+"10766","A card with a Digimon printed on it."
+"10767","A card with a Digimon printed on it."
+"10770","A card with a Digimon printed on it."
+"10771","A card with a Digimon printed on it."
+"10772","A card with a Digimon printed on it."
+"10773","A card with a Digimon printed on it."
+"10774","A card with a Digimon printed on it."
+"10775","A card with a Digimon printed on it."
+"10776","A card with a Digimon printed on it."
+"10777","A card with a Digimon printed on it."
+"10778","A card with a Digimon printed on it."
+"10779","A card with a Digimon printed on it."
+"10907","A card with a Digimon printed on it."
+"10908","A card with a Digimon printed on it."
+"10912","A card with a Digimon printed on it."
+"10915","A card with a Digimon printed on it."
+"10920","A card with a Digimon printed on it."
+"10921","A card with a Digimon printed on it."
+"10844","A card with a Digimon printed on it."
+"20001","A farm item.
+Use this to customize your Digifarm to your liking."
+"20002","A farm item.
+Use this to customize your Digifarm to your liking."
+"20003","A farm item.
+Use this to customize your Digifarm to your liking."
+"20004","A farm item.
+Use this to customize your Digifarm to your liking."
+"20005","A farm item.
+Use this to customize your Digifarm to your liking."
+"20006","A farm item.
+Use this to customize your Digifarm to your liking."
+"20007","A farm item.
+Use this to customize your Digifarm to your liking."
+"20008","A farm item.
+Use this to customize your Digifarm to your liking."
+"20009","A farm item.
+Use this to customize your Digifarm to your liking."
+"20010","A farm item.
+Use this to customize your Digifarm to your liking."
+"20011","A farm item.
+Use this to customize your Digifarm to your liking."
+"20012","A farm item.
+Use this to customize your Digifarm to your liking."
+"20013","A farm item.
+Use this to customize your Digifarm to your liking."
+"20014","A farm item.
+Use this to customize your Digifarm to your liking."
+"20015","A farm item.
+Use this to customize your Digifarm to your liking."
+"20100","A farm item.
+Use this to customize your Digifarm to your liking."
+"20101","A farm item.
+Use this to customize your Digifarm to your liking."
+"20102","A farm item.
+Use this to customize your Digifarm to your liking."
+"20103","A farm item.
+Use this to customize your Digifarm to your liking."
+"20104","A farm item.
+Use this to customize your Digifarm to your liking."
+"20105","A farm item.
+Use this to customize your Digifarm to your liking."
+"20106","A farm item.
+Use this to customize your Digifarm to your liking."
+"20107","A farm item.
+Use this to customize your Digifarm to your liking."
+"20108","A farm item.
+Use this to customize your Digifarm to your liking."
+"20109","A farm item.
+Use this to customize your Digifarm to your liking."
+"20110","A farm item.
+Use this to customize your Digifarm to your liking."
+"20111","A farm item.
+Use this to customize your Digifarm to your liking."
+"20112","A farm item.
+Use this to customize your Digifarm to your liking."
+"20113","A farm item.
+Use this to customize your Digifarm to your liking."
+"20114","A farm item.
+Use this to customize your Digifarm to your liking."
+"20115","A farm item.
+Use this to customize your Digifarm to your liking."
+"20116","A farm item.
+Use this to customize your Digifarm to your liking."
+"20300","A farm item.
+Use this to customize your Digifarm to your liking."
+"20301","A farm item.
+Use this to customize your Digifarm to your liking."
+"20500","A farm item.
+Use this to customize your Digifarm to your liking."
+"20502","A farm item.
+Use this to customize your Digifarm to your liking."
+"20503","A farm item.
+Use this to customize your Digifarm to your liking."
+"20504","A farm item.
+Use this to customize your Digifarm to your liking."
+"20505","A farm item.
+Use this to customize your Digifarm to your liking."
+"20506","A farm item.
+Use this to customize your Digifarm to your liking."
+"20507","A farm item.
+Use this to customize your Digifarm to your liking."
+"20508","A farm item.
+Use this to customize your Digifarm to your liking."
+"20509","A farm item.
+Use this to customize your Digifarm to your liking."
+"20510","A farm item.
+Use this to customize your Digifarm to your liking."
+"20511","A farm item.
+Use this to customize your Digifarm to your liking."
+"20512","A farm item.
+Use this to customize your Digifarm to your liking."
+"20513","A farm item.
+Use this to customize your Digifarm to your liking."
+"20514","A farm item.
+Use this to customize your Digifarm to your liking."
+"20515","A farm item.
+Use this to customize your Digifarm to your liking."
+"20516","A farm item.
+Use this to customize your Digifarm to your liking."
+"20517","A farm item.
+Use this to customize your Digifarm to your liking."
+"20518","A farm item.
+Use this to customize your Digifarm to your liking."
+"20519","A farm item.
+Use this to customize your Digifarm to your liking."
+"20520","A farm item.
+Use this to customize your Digifarm to your liking."
+"20521","A farm item.
+Use this to customize your Digifarm to your liking."
+"20522","A farm item.
+Use this to customize your Digifarm to your liking."
+"20523","A farm item.
+Use this to customize your Digifarm to your liking."
+"20524","A farm item.
+Use this to customize your Digifarm to your liking."
+"20525","A farm item.
+Use this to customize your Digifarm to your liking."
+"20526","A farm item.
+Use this to customize your Digifarm to your liking."
+"20527","A farm item.
+Use this to customize your Digifarm to your liking."
+"20528","A farm item.
+Use this to customize your Digifarm to your liking."
+"20532","A farm item.
+Use this to customize your Digifarm to your liking."
+"20533","A farm item.
+Use this to customize your Digifarm to your liking."
+"20534","A farm item.
+Use this to customize your Digifarm to your liking."
+"20535","A farm item.
+Use this to customize your Digifarm to your liking."
+"20536","A farm item.
+Use this to customize your Digifarm to your liking."
+"20537","A farm item.
+Use this to customize your Digifarm to your liking."
+"20538","A farm item.
+Use this to customize your Digifarm to your liking."
+"20539","A farm item.
+Use this to customize your Digifarm to your liking."
+"20540","A farm item.
+Use this to customize your Digifarm to your liking."
+"20541","A farm item.
+Use this to customize your Digifarm to your liking."
+"20542","A farm item.
+Use this to customize your Digifarm to your liking."
+"20543","A farm item.
+Use this to customize your Digifarm to your liking."
+"20544","A farm item.
+Use this to customize your Digifarm to your liking."
+"20545","A farm item.
+Use this to customize your Digifarm to your liking."
+"20546","A farm item.
+Use this to customize your Digifarm to your liking."
+"20547","A farm item.
+Use this to customize your Digifarm to your liking."
+"20548","A farm item.
+Use this to customize your Digifarm to your liking."
+"20549","A farm item.
+Use this to customize your Digifarm to your liking."
+"20605","A farm item.
+Use this to customize your Digifarm to your liking."
+"20606","A farm item.
+Use this to customize your Digifarm to your liking."
+"20607","A farm item.
+Use this to customize your Digifarm to your liking."
+"20608","A farm item.
+Use this to customize your Digifarm to your liking."
+"20609","A farm item.
+Use this to customize your Digifarm to your liking."
+"20610","A farm item.
+Use this to customize your Digifarm to your liking."
+"20611","A farm item.
+Use this to customize your Digifarm to your liking."
+"20612","A farm item.
+Use this to customize your Digifarm to your liking."
+"20613","A farm item.
+Use this to customize your Digifarm to your liking."
+"20614","A farm item.
+Use this to customize your Digifarm to your liking."
+"20615","A farm item.
+Use this to customize your Digifarm to your liking."
+"20616","A farm item.
+Use this to customize your Digifarm to your liking."
+"20617","A farm item.
+Use this to customize your Digifarm to your liking."
+"20618","A farm item.
+Use this to customize your Digifarm to your liking."
+"20619","A farm item.
+Use this to customize your Digifarm to your liking."
+"20620","A farm item.
+Use this to customize your Digifarm to your liking."
+"20621","A farm item.
+Use this to customize your Digifarm to your liking."
+"20622","A farm item.
+Use this to customize your Digifarm to your liking."
+"22001","A farm item.
+Use this to customize your Digifarm to your liking."
+"22002","A farm item.
+Use this to customize your Digifarm to your liking."
+"22003","A farm item.
+Use this to customize your Digifarm to your liking."
+"22004","A farm item.
+Use this to customize your Digifarm to your liking."
+"22005","A farm item.
+Use this to customize your Digifarm to your liking."
+"22010","An access key required to participate in Peckmon Races.
+Self-destructs upon use."
+"22101","Proof you defeated Ultimate Collection Member Number 1,
+MirageGaogamon BM, in the Outer Dungeons."
+"22102","Proof you defeated Ultimate Collection Member Number 2,
+Susanomon, in the Outer Dungeons."
+"22103","Proof you defeated Ultimate Collection Member Number 3,
+Armageddemon, in the Outer Dungeons."
+"22104","Proof you defeated Ultimate Collection Member Number 4,
+Slayerdramon, in the Outer Dungeons."
+"22105","Proof you defeated Ultimate Collection Member Number 5,
+Beelzemon, in the Outer Dungeons."
+"22106","Proof you defeated Ultimate Collection Member Number 6,
+BeelStarmon, in the Outer Dungeons."
+"22107","Proof you defeated Ultimate Collection Member Number 7,
+Valkyrimon, in the Outer Dungeons."
+"22108","Proof you defeated Ultimate Collection Member Number 8,
+MetalSeadramon, in the Outer Dungeons."
+"22109","Proof you defeated Ultimate Collection Member Number 9,
+Taomon, in the Outer Dungeons."
+"22110","Proof you defeated Ultimate Collection Member Number 10,
+GreatGrizzlymon, in the Outer Dungeons."
+"22111","Proof you defeated Ultimate Collection Member Number 11,
+Mistymon, in the Outer Dungeons."
+"22112","Proof you defeated Ultimate Collection Member Number 12,
+Astamon, in the Outer Dungeons."
+"22113","Proof you defeated Ultimate Collection Member Number 13,
+DoruGreymon, in the Outer Dungeons."
+"22114","Proof you defeated Ultimate Collection Member Number 14,
+RizeGreymon, in the Outer Dungeons."
+"22115","Proof you defeated Ultimate Collection Member Number 15,
+Rosemon, in the Outer Dungeons."
+"22116","Proof you defeated Ultimate Collection Member Number 16,
+CatchMamemon, in the Outer Dungeons."
+"22117","Proof you defeated Ultimate Collection Member Number 17,
+Hisyaryumon, in the Outer Dungeons."
+"22118","Proof you defeated Ultimate Collection Member Number 18,
+Arukenimon, in the Outer Dungeons."
+"22119","Proof you defeated Ultimate Collection Member Number 19,
+Angewomon, in the Outer Dungeons."
+"22120","Proof you defeated Ultimate Collection Member Number 20,
+Groundramon, in the Outer Dungeons."
+"22121","Proof you defeated Ultimate Collection Member Number 21,
+Mummymon, in the Outer Dungeons."
+"22122","Proof you defeated Ultimate Collection Member Number 22,
+Wingdramon, in the Outer Dungeons."
+"22123","Proof you defeated Ultimate Collection Member Number 23,
+Ginryumon, in the Outer Dungeons."
+"22124","Proof you defeated Ultimate Collection Member Number 24,
+Deltamon, in the Outer Dungeons."
+"22125","Proof you defeated Ultimate Collection Member Number 25,
+Centarumon, in the Outer Dungeons."
+"22126","Proof you defeated Ultimate Collection Member Number 26,
+Tankmon, in the Outer Dungeons."
+"22127","Proof you defeated Ultimate Collection Member Number 27,
+Salamon, in the Outer Dungeons."
+"22128","Proof you defeated Ultimate Collection Member Number 28,
+Chuumon, in the Outer Dungeons."
+"22129","Proof you defeated Ultimate Collection Member Number 29,
+Piedmon, in the Outer Dungeons."
+"22130","Proof you defeated Ultimate Collection Member Number 30,
+Andromon, in the Outer Dungeons."
+"22131","Proof you defeated Ultimate Collection Member Number 31,
+Shakkoumon, in the Outer Dungeons."
+"22132","Proof you defeated Ultimate Collection Member Number 32,
+Pandamon, in the Outer Dungeons."
+"22133","Proof you defeated Ultimate Collection Member Number 33,
+ExTyrannomon, in the Outer Dungeons."
+"22134","Proof you defeated Ultimate Collection Member Number 34,
+Zudomon, in the Outer Dungeons."
+"22135","Proof you defeated Ultimate Collection Member Number 35,
+Dragomon, in the Outer Dungeons."
+"22136","Proof you defeated Ultimate Collection Member Number 36,
+Vademon, in the Outer Dungeons."
+"22137","Proof you defeated Ultimate Collection Member Number 37,
+Raptordramon, in the Outer Dungeons."
+"22138","Proof you defeated Ultimate Collection Member Number 38,
+Gatomon, in the Outer Dungeons."
+"22139","Proof you defeated Ultimate Collection Member Number 39,
+Guardromon, in the Outer Dungeons."
+"22140","Proof you defeated Ultimate Collection Member Number 40,
+Bakemon, in the Outer Dungeons."
+"22141","Proof you defeated Ultimate Collection Member Number 41,
+Lalamon, in the Outer Dungeons."
+"22142","Proof you defeated Ultimate Collection Member Number 42,
+Syakomon, in the Outer Dungeons."
+"22143","Proof you defeated Ultimate Collection Member Number 43,
+SlashAngemon, in the Outer Dungeons."
+"22144","Proof you defeated Ultimate Collection Member Number 44,
+Pabumon, in the Outer Dungeons."
+"22145","Proof you defeated Ultimate Collection Member Number 45,
+MetalTyrannomon, in the Outer Dungeons."
+"22146","Proof you defeated Ultimate Collection Member Number 46,
+Matadormon, in the Outer Dungeons."
+"22147","Proof you defeated Ultimate Collection Member Number 47,
+BigMamemon, in the Outer Dungeons."
+"22148","Proof you defeated Ultimate Collection Member Number 48,
+Rapidmon, in the Outer Dungeons."
+"22149","Proof you defeated Ultimate Collection Member Number 49,
+Mamemon, in the Outer Dungeons."
+"22150","Proof you defeated Ultimate Collection Member Number 50,
+Datamon, in the Outer Dungeons."
+"22151","Proof you defeated Ultimate Collection Member Number 51,
+IceDevimon, in the Outer Dungeons."
+"22152","Proof you defeated Ultimate Collection Member Number 52,
+Tuskmon, in the Outer Dungeons."
+"22153","Proof you defeated Ultimate Collection Member Number 53,
+Deputymon, in the Outer Dungeons."
+"22154","Proof you defeated Ultimate Collection Member Number 54,
+Drimogemon, in the Outer Dungeons."
+"22155","Proof you defeated Ultimate Collection Member Number 55,
+Falcomon, in the Outer Dungeons."
+"22156","Proof you defeated Ultimate Collection Member Number 56,
+Armadillomon, in the Outer Dungeons."
+"29001","A Digifarm training item.
+Boosts HP.
+Shifts Personality toward Heart."
+"29002","A Digifarm training item.
+Boosts SP.
+Shifts Personality toward Understanding."
+"29003","A Digifarm training item.
+Boosts ATK.
+Shifts Personality toward Heart and Affection."
+"29004","A Digifarm training item.
+Greatly boosts ATK.
+Shifts Personality toward Heart and Affection."
+"29005","A Digifarm training item.
+Boosts DEF.
+Shifts Personality toward Heart and Companionship."
+"29006","A Digifarm training item.
+Boosts INT.
+Shifts Personality toward Understanding and Companionship."
+"29007","A Digifarm training item.
+Boosts SPI.
+Shifts Personality toward Understanding and Affection."
+"29008","A Digifarm training item.
+Boosts SPD.
+Shifts Personality toward Heart and Companionship."
+"29009","A Digifarm training item.
+Greatly boosts HP.
+Shifts Personality toward Heart."
+"29010","A Digifarm training item.
+Greatly boosts SP.
+Shifts Personality toward Understanding."
+"29011","A Digifarm training item.
+Greatly boosts DEF.
+Shifts Personality toward Heart and Companionship."
+"29012","A Digifarm training item.
+Greatly boosts INT.
+Shifts Personality toward Understanding and Companionship."
+"29013","A Digifarm training item.
+Greatly boosts SPI.
+Shifts Personality toward Understanding and Affection."
+"29014","A Digifarm training item.
+Greatly boosts SPD.
+Shifts Personality toward Heart and Companionship."
+"29015","A Digifarm training item.
+Vastly boosts HP."
+"29016","A Digifarm training item.
+Vastly boosts SP."
+"29017","A Digifarm training item.
+Vastly boosts ATK."
+"29018","A Digifarm training item.
+Vastly boosts DEF."
+"29019","A Digifarm training item.
+Vastly boosts INT."
+"29020","A Digifarm training item.
+Vastly boosts SPI."
+"29021","A Digifarm training item.
+Vastly boosts SPD."
+"30000",""

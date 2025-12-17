@@ -10,7 +10,7 @@ from PyQt6.QtWidgets import (
     QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout,
     QLabel, QLineEdit, QSpinBox, QComboBox, QPushButton, QTabWidget,
     QScrollArea, QGroupBox, QGridLayout, QCheckBox, QTextEdit,
-    QMessageBox, QFileDialog, QTableWidget, QTableWidgetItem,
+    QMessageBox, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit,
     QHeaderView, QSplitter, QListWidget, QListWidgetItem, QDoubleSpinBox, QFormLayout,
     QDialog, QDialogButtonBox, QWizard, QWizardPage
 )
@@ -1099,7 +1099,7 @@ class BasicInfoPage(QWizardPage):
             from data_loader import DLCExporter
             dlc_exporter = DLCExporter(wizard.loader)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            dlc_status_file = wizard.loader._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             if dlc_status_file.exists():
                 dlc_rows = wizard.loader.load_csv(dlc_status_file)
                 for row in dlc_rows[1:]:  # Skip header
@@ -1242,10 +1242,10 @@ class ClassificationPage(QWizardPage):
         unique_tribes = set()
         try:
             # Try to load from backup folder first (most complete)
-            belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
+            belong_file = wizard.loader._resolve_prefixed_file(Path("backup") / "text" / "belong.mbe" / "000_Sheet1.csv")
             if not belong_file.exists():
                 # Try loader's text path
-                belong_file = wizard.loader.text_path / "belong.mbe" / "00_Sheet1.csv"
+                belong_file = wizard.loader._resolve_prefixed_file(wizard.loader.text_path / "belong.mbe" / "000_Sheet1.csv")
             
             if belong_file.exists():
                 rows = wizard.loader.load_csv(belong_file)
@@ -1586,7 +1586,8 @@ class SkillsPage(QWizardPage):
     def populate_skill_list(self, skill_list: QListWidget):
         """Populate skill list with all available skills"""
         try:
-            skills_file = self.wizard.loader.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+            skills_file = self.wizard.loader.data_path / "battle_skill.mbe" / "000_battle_skill_list.csv"
+            skills_file = self.wizard.loader._resolve_prefixed_file(skills_file)
             if not skills_file.exists():
                 return
             
@@ -2026,7 +2027,7 @@ class EvolutionPage(QWizardPage):
         
         # Check base game evolution_to.csv
         try:
-            evolution_to_file = self.wizard.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            evolution_to_file = self.wizard.loader._resolve_prefixed_file(self.wizard.loader.data_path / "evolution.mbe" / "001_evolution_to.csv")
             if evolution_to_file.exists():
                 rows = self.wizard.loader.load_csv(evolution_to_file)
                 for row in rows[1:]:  # Skip header
@@ -2034,7 +2035,7 @@ class EvolutionPage(QWizardPage):
                         count += 1
             
             # Also check DLC files
-            dlc_path = self.wizard.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            dlc_path = self.wizard.loader._resolve_prefixed_file(self.wizard.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "001_evolution_to.csv")
             if dlc_path.exists():
                 rows = self.wizard.loader.load_csv(dlc_path)
                 for row in rows[1:]:
@@ -2174,7 +2175,7 @@ class EvolutionPage(QWizardPage):
             id_cache = {}
             try:
                 # Load base game IDs
-                status_file = self.wizard.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                status_file = self.wizard.loader._resolve_prefixed_file(self.wizard.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
                 if status_file.exists():
                     rows = self.wizard.loader.load_csv(status_file)
                     for row in rows[1:]:
@@ -2190,7 +2191,7 @@ class EvolutionPage(QWizardPage):
                 # Load DLC IDs
                 dlc_exporter = DLCExporter(self.wizard.loader)
                 dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-                dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+                dlc_status_file = self.wizard.loader._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
                 if dlc_status_file.exists():
                     rows = self.wizard.loader.load_csv(dlc_status_file)
                     for row in rows[1:]:
@@ -2263,7 +2264,7 @@ class EvolutionPage(QWizardPage):
             # Cache status file data
             id_cache = {}
             try:
-                status_file = self.wizard.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                status_file = self.wizard.loader._resolve_prefixed_file(self.wizard.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
                 if status_file.exists():
                     rows = self.wizard.loader.load_csv(status_file)
                     for row in rows[1:]:
@@ -2279,7 +2280,7 @@ class EvolutionPage(QWizardPage):
                 # Load DLC IDs
                 dlc_exporter = DLCExporter(self.wizard.loader)
                 dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-                dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+                dlc_status_file = self.wizard.loader._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
                 if dlc_status_file.exists():
                     rows = self.wizard.loader.load_csv(dlc_status_file)
                     for row in rows[1:]:
@@ -2297,7 +2298,7 @@ class EvolutionPage(QWizardPage):
             # Count evolutions for each Digimon
             evo_counts = {}
             try:
-                evolution_to_file = self.wizard.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+                evolution_to_file = self.wizard.loader._resolve_prefixed_file(self.wizard.loader.data_path / "evolution.mbe" / "001_evolution_to.csv")
                 if evolution_to_file.exists():
                     rows = self.wizard.loader.load_csv(evolution_to_file)
                     for row in rows[1:]:
@@ -2309,7 +2310,7 @@ class EvolutionPage(QWizardPage):
                                 pass
                 
                 # Also count DLC evolutions
-                dlc_evo_file = dlc_data / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+                dlc_evo_file = self.wizard.loader._resolve_prefixed_file(dlc_data / "evolution_dlc17.mbe" / "001_evolution_to.csv")
                 if dlc_evo_file.exists():
                     rows = self.wizard.loader.load_csv(dlc_evo_file)
                     for row in rows[1:]:
@@ -3902,7 +3903,8 @@ class DigimonEditor(QMainWindow):
     def _populate_skill_list(self, skill_list: QListWidget):
         """Populate skill list with all available skills"""
         try:
-            skills_file = self.loader.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+            skills_file = self.loader.data_path / "battle_skill.mbe" / "000_battle_skill_list.csv"
+            skills_file = self._resolve_prefixed_file(skills_file)
             if not skills_file.exists():
                 return
             
@@ -4165,6 +4167,34 @@ class DigimonEditor(QMainWindow):
         skill_selection_layout.addStretch()
         layout.addWidget(skill_selection_group)
         
+        # Skill description preview (read-only)
+        desc_group = QGroupBox("🧾 Skill Description (read-only)")
+        desc_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #c9d6ff;
+                border-radius: 8px;
+                margin-top: 8px;
+                padding-top: 12px;
+                background-color: white;
+                font-size: 10pt;
+            }
+            QGroupBox::title {
+                color: #667eea;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 8px;
+                background-color: white;
+            }
+        """)
+        desc_layout = QVBoxLayout(desc_group)
+        self.advanced_skill_desc = QPlainTextEdit()
+        self.advanced_skill_desc.setReadOnly(True)
+        self.advanced_skill_desc.setPlaceholderText("No description for this skill")
+        self.advanced_skill_desc.setMaximumHeight(90)
+        desc_layout.addWidget(self.advanced_skill_desc)
+        layout.addWidget(desc_group)
+        
         # Skill Browser
         browser_group = QGroupBox("📚 Skill Browser")
         browser_group.setStyleSheet("""
@@ -4286,6 +4316,30 @@ class DigimonEditor(QMainWindow):
         self.skill_sp_cost_edit.setMinimumWidth(150)
         basic_layout.addRow(sp_label, self.skill_sp_cost_edit)
         
+        cp_label = QLabel("⚙️ CP Cost:")
+        cp_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        cp_label.setMinimumWidth(180)
+        self.skill_cp_cost_edit = QSpinBox()
+        self.skill_cp_cost_edit.setRange(0, 9999)
+        self.skill_cp_cost_edit.setMinimumWidth(150)
+        basic_layout.addRow(cp_label, self.skill_cp_cost_edit)
+        
+        anim_label = QLabel("🎞️ Animation/Action ID:")
+        anim_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        anim_label.setMinimumWidth(180)
+        self.skill_animation_id_edit = QSpinBox()
+        self.skill_animation_id_edit.setRange(0, 999999)
+        self.skill_animation_id_edit.setMinimumWidth(150)
+        basic_layout.addRow(anim_label, self.skill_animation_id_edit)
+        
+        effect_label = QLabel("✨ Effect ID:")
+        effect_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        effect_label.setMinimumWidth(180)
+        self.skill_effect_id_edit = QSpinBox()
+        self.skill_effect_id_edit.setRange(0, 999999)
+        self.skill_effect_id_edit.setMinimumWidth(150)
+        basic_layout.addRow(effect_label, self.skill_effect_id_edit)
+        
         accuracy_label = QLabel("🎯 Accuracy:")
         accuracy_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
         accuracy_label.setMinimumWidth(180)
@@ -4366,6 +4420,64 @@ class DigimonEditor(QMainWindow):
         damage_layout.addRow(max_hits_label, self.skill_max_hits_edit)
         
         layout.addWidget(damage_group)
+        
+        # Mode change / Jogress
+        mode_group = QGroupBox("🔀 Mode Change & Jogress")
+        mode_group.setStyleSheet("""
+            QGroupBox {
+                font-weight: bold;
+                border: 2px solid #ffd166;
+                border-radius: 8px;
+                margin-top: 12px;
+                padding-top: 15px;
+                background-color: white;
+                font-size: 11pt;
+            }
+            QGroupBox::title {
+                color: #c77d00;
+                subcontrol-origin: margin;
+                left: 10px;
+                padding: 0 8px;
+                background-color: white;
+            }
+        """)
+        mode_layout = QFormLayout(mode_group)
+        mode_layout.setSpacing(10)
+        mode_layout.setLabelAlignment(Qt.AlignmentFlag.AlignRight)
+        
+        mode_change_label = QLabel("🔁 Mode Change ID:")
+        mode_change_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        mode_change_label.setMinimumWidth(180)
+        self.skill_mode_change_edit = QSpinBox()
+        self.skill_mode_change_edit.setRange(0, 999999)
+        self.skill_mode_change_edit.setMinimumWidth(150)
+        mode_layout.addRow(mode_change_label, self.skill_mode_change_edit)
+        
+        jogress_skill_label = QLabel("🧬 Jogress Skill ID:")
+        jogress_skill_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        jogress_skill_label.setMinimumWidth(180)
+        self.skill_jogress_skill_edit = QSpinBox()
+        self.skill_jogress_skill_edit.setRange(0, 999999)
+        self.skill_jogress_skill_edit.setMinimumWidth(150)
+        mode_layout.addRow(jogress_skill_label, self.skill_jogress_skill_edit)
+        
+        jogress_p1_label = QLabel("🤝 Jogress Partner 1 ID:")
+        jogress_p1_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        jogress_p1_label.setMinimumWidth(180)
+        self.skill_jogress_p1_edit = QSpinBox()
+        self.skill_jogress_p1_edit.setRange(0, 999999)
+        self.skill_jogress_p1_edit.setMinimumWidth(150)
+        mode_layout.addRow(jogress_p1_label, self.skill_jogress_p1_edit)
+        
+        jogress_p2_label = QLabel("🤝 Jogress Partner 2 ID:")
+        jogress_p2_label.setFont(QFont("Segoe UI", 10, QFont.Weight.Bold))
+        jogress_p2_label.setMinimumWidth(180)
+        self.skill_jogress_p2_edit = QSpinBox()
+        self.skill_jogress_p2_edit.setRange(0, 999999)
+        self.skill_jogress_p2_edit.setMinimumWidth(150)
+        mode_layout.addRow(jogress_p2_label, self.skill_jogress_p2_edit)
+        
+        layout.addWidget(mode_group)
         
         # Advanced properties
         advanced_group = QGroupBox("⚙️ Advanced Properties")
@@ -6413,11 +6525,18 @@ class DigimonEditor(QMainWindow):
                 continue
         return {}
     
+    def _resolve_prefixed_file(self, file_path: Path) -> Path:
+        """
+        Resolve file path with flexible numeric prefix (e.g., 000_, 01_, 1_).
+        Wraps the loader's method for use in DigimonEditor.
+        """
+        return self.loader._resolve_prefixed_file(file_path)
+    
     def _load_lod_from_csv(self, base_path: Path, chr_id: str) -> dict:
         """Load LOD data from CSV files"""
         import csv
         
-        lod_file = base_path / "000_lod.ap.csv"
+        lod_file = self._resolve_prefixed_file(base_path / "000_lod.ap.csv")
         if lod_file.exists():
             try:
                 with open(lod_file, 'r', encoding='utf-8') as f:
@@ -6443,7 +6562,7 @@ class DigimonEditor(QMainWindow):
         evolution_conditions = []
         
         # Load evolution paths from 001_evolution_to.ap.csv
-        evo_file = base_path / "001_evolution_to.ap.csv"
+        evo_file = self._resolve_prefixed_file(base_path / "001_evolution_to.ap.csv")
         if evo_file.exists():
             try:
                 with open(evo_file, 'r', encoding='utf-8') as f:
@@ -6463,8 +6582,8 @@ class DigimonEditor(QMainWindow):
             except Exception as e:
                 print(f"Error loading evolution paths: {e}")
         
-        # Load evolution conditions from 00_evolution_condition.ap.csv
-        cond_file = base_path / "00_evolution_condition.ap.csv"
+        # Load evolution conditions from 000_evolution_condition.ap.csv
+        cond_file = self._resolve_prefixed_file(base_path / "000_evolution_condition.ap.csv")
         if cond_file.exists():
             try:
                 with open(cond_file, 'r', encoding='utf-8') as f:
@@ -6513,7 +6632,7 @@ class DigimonEditor(QMainWindow):
         
         preevolution_sources = []
         
-        evo_file = base_path / "001_evolution_to.ap.csv"
+        evo_file = self._resolve_prefixed_file(base_path / "001_evolution_to.ap.csv")
         if evo_file.exists():
             try:
                 with open(evo_file, 'r', encoding='utf-8') as f:
@@ -6540,7 +6659,7 @@ class DigimonEditor(QMainWindow):
         """Load tribe/belong data from CSV"""
         import csv
         
-        tribe_file = base_path / "000_Sheet1.ap.csv"
+        tribe_file = self._resolve_prefixed_file(base_path / "000_Sheet1.ap.csv")
         if tribe_file.exists():
             try:
                 with open(tribe_file, 'r', encoding='utf-8') as f:
@@ -6641,7 +6760,7 @@ class DigimonEditor(QMainWindow):
         try:
             dlc_exporter = DLCExporter(self.loader)
             dlc_data = dlc_exporter.get_dlc_path("addcont_17") / "data" / "mbe"
-            dlc_status_file = dlc_data / "digimon_status_dlc17.mbe" / "00_digimon_status_data.csv"
+            dlc_status_file = self.loader._resolve_prefixed_file(dlc_data / "digimon_status_dlc17.mbe" / "000_digimon_status_data.csv")
             if dlc_status_file.exists():
                 dlc_rows = self.loader.load_csv(dlc_status_file)
                 for row in dlc_rows[1:]:  # Skip header
@@ -6933,7 +7052,8 @@ class DigimonEditor(QMainWindow):
         has_existing = False
         if patch_data_dir.exists():
             status_file = patch_data_dir / "digimon_status.mbe" / "000_digimon_status_data.ap.csv"
-            if status_file.exists():
+            resolved_status_file = self._resolve_prefixed_file(status_file)
+            if resolved_status_file.exists():
                 has_existing = True
         
         # Always use merge mode to preserve other Digimon data
@@ -7166,8 +7286,8 @@ class DigimonEditor(QMainWindow):
                     chr_match = re.search(r'\(chr\d+\)', item_text)
                     if chr_match:
                         target_chr_id = chr_match.group(0)[1:-1]  # Remove parentheses
-                        target_digimon = self.loader.get_digimon_by_chr_id(target_chr_id)
-                        if target_digimon:
+            target_digimon = self.loader.get_digimon_by_chr_id(target_chr_id)
+            if target_digimon:
                             target_digimon_id = target_digimon.id
             else:
                 # Custom tab selected
@@ -7223,7 +7343,7 @@ class DigimonEditor(QMainWindow):
                             target_digimon_id = int(custom_text)
                             # Try to find chr_id from ID
                             try:
-                                status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                                status_file = self.loader._resolve_prefixed_file(self.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
                                 if status_file.exists():
                                     rows = self.loader.load_csv(status_file)
                                     for row in rows[1:]:
@@ -7604,7 +7724,7 @@ class DigimonEditor(QMainWindow):
         
         try:
             # Check base game evolution_to.csv
-            evolution_to_file = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            evolution_to_file = self.loader._resolve_prefixed_file(self.loader.data_path / "evolution.mbe" / "001_evolution_to.csv")
             if evolution_to_file.exists():
                 rows = self.loader.load_csv(evolution_to_file)
                 for row in rows[1:]:
@@ -7612,7 +7732,7 @@ class DigimonEditor(QMainWindow):
                         count += 1
             
             # Also check DLC files
-            dlc_path = self.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "01_evolution_to.csv"
+            dlc_path = self.loader._resolve_prefixed_file(self.loader.data_path.parent / "addcont_17" / "data" / "mbe" / "evolution_dlc17.mbe" / "001_evolution_to.csv")
             if dlc_path.exists():
                 rows = self.loader.load_csv(dlc_path)
                 for row in rows[1:]:
@@ -7704,7 +7824,7 @@ class DigimonEditor(QMainWindow):
         # Build ID cache
         id_cache = {}
         try:
-            status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+            status_file = self.loader._resolve_prefixed_file(self.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
             if status_file.exists():
                 rows = self.loader.load_csv(status_file)
                 for row in rows[1:]:
@@ -7721,7 +7841,7 @@ class DigimonEditor(QMainWindow):
         # Count evolutions for each Digimon
         evo_counts = {}
         try:
-            evolution_to_file = self.loader.data_path / "evolution.mbe" / "01_evolution_to.csv"
+            evolution_to_file = self.loader._resolve_prefixed_file(self.loader.data_path / "evolution.mbe" / "001_evolution_to.csv")
             if evolution_to_file.exists():
                 rows = self.loader.load_csv(evolution_to_file)
                 for row in rows[1:]:
@@ -7860,7 +7980,7 @@ class DigimonEditor(QMainWindow):
                             from_id = int(custom_text)
                             # Try to find chr_id from ID
                             try:
-                                status_file = self.loader.data_path / "digimon_status.mbe" / "00_digimon_status_data.csv"
+                                status_file = self.loader._resolve_prefixed_file(self.loader.data_path / "digimon_status.mbe" / "000_digimon_status_data.csv")
                                 if status_file.exists():
                                     rows = self.loader.load_csv(status_file)
                                     for row in rows[1:]:
@@ -7898,15 +8018,15 @@ class DigimonEditor(QMainWindow):
                     if deevo.get('from_id') == from_id:
                         QMessageBox.information(self, "Already Added", "This pre-evolution already exists.")
                         return
-                
-                # Add pre-evolution
-                self.current_digimon.deevolution_sources.append({
-                    'from_id': from_id,
+                    
+                    # Add pre-evolution
+                    self.current_digimon.deevolution_sources.append({
+                        'from_id': from_id,
                     'from_chr_id': from_chr_id or f"chr{from_id:03d}",
-                    'evolution_type': 0
-                })
-                
-                self.update_evolution_tab(self.current_digimon)
+                        'evolution_type': 0
+                    })
+                    
+                    self.update_evolution_tab(self.current_digimon)
                 display_name = from_chr_id if from_chr_id else f"ID {from_id}"
                 QMessageBox.information(self, "Success", f"Pre-evolution added! {display_name} now evolves into {self.current_digimon.name}")
             else:
@@ -8145,6 +8265,7 @@ class DigimonEditor(QMainWindow):
             # Merge anim_setting - need to handle special signature
             anim_ref = digimon.chr_id  # Use chr_id as animation reference by default
             anim_file = patch_data / "anim_setting.mbe" / "001_same_animation_data.ap.csv"
+            resolved_anim_file = self._resolve_prefixed_file(anim_file)
             import tempfile
             temp_anim = tempfile.NamedTemporaryFile(mode='w', delete=False, suffix='.csv', encoding='utf-8')
             temp_anim.close()
@@ -8158,8 +8279,8 @@ class DigimonEditor(QMainWindow):
                 
                 # Merge anim file
                 anim_existing_rows = []
-                if anim_file.exists():
-                    with open(anim_file, 'r', encoding='utf-8') as f:
+                if resolved_anim_file.exists():
+                    with open(resolved_anim_file, 'r', encoding='utf-8') as f:
                         reader = csv.reader(f)
                         anim_existing_header = next(reader, None)
                         if anim_existing_header:
@@ -8176,7 +8297,7 @@ class DigimonEditor(QMainWindow):
                 if not found_anim and anim_new_rows:
                     anim_existing_rows.extend(anim_new_rows)
                 
-                with open(anim_file, 'w', encoding='utf-8', newline='') as f:
+                with open(resolved_anim_file, 'w', encoding='utf-8', newline='') as f:
                     writer = csv.writer(f)
                     writer.writerow(anim_header)
                     for row in anim_existing_rows:
@@ -8300,11 +8421,14 @@ class DigimonEditor(QMainWindow):
                     new_rows.extend(reader)
             temp_file.unlink()
             
-            # Read existing file
+            # Resolve filepath to handle any numeric prefix variation
+            resolved_filepath = self._resolve_prefixed_file(filepath)
+            
+            # Read existing file (use resolved path)
             existing_rows = []
             header_to_use = header_str
-            if filepath.exists():
-                    with open(filepath, 'r', encoding='utf-8') as f:
+            if resolved_filepath.exists():
+                    with open(resolved_filepath, 'r', encoding='utf-8') as f:
                         existing_header = f.readline().rstrip('\n\r')
                         if existing_header:
                             header_to_use = existing_header
@@ -8324,8 +8448,8 @@ class DigimonEditor(QMainWindow):
             # Add new rows
             filtered_rows.extend(new_rows)
             
-            # Write back preserving format
-            with open(filepath, 'w', encoding='utf-8', newline='') as f:
+            # Write back preserving format (use resolved path to maintain existing prefix)
+            with open(resolved_filepath, 'w', encoding='utf-8', newline='') as f:
                 # Write header (as raw string to preserve format)
                 f.write(header_to_use + '\n')
                 # Write rows
@@ -8337,7 +8461,7 @@ class DigimonEditor(QMainWindow):
             print(f"Error merging evolution file {filepath.name}: {e}")
             if temp_file.exists():
                 temp_file.unlink()
-    
+
     def _is_dsts_loader_directory(self, path: Path) -> bool:
         """Check if the selected export path appears to be a dsts-loader directory."""
         try:
@@ -8443,10 +8567,10 @@ class DigimonEditor(QMainWindow):
         unique_tribes = set()
         try:
             # Try to load from backup folder first (most complete)
-            belong_file = Path("backup") / "text" / "belong.mbe" / "00_Sheet1.csv"
+            belong_file = self.loader._resolve_prefixed_file(Path("backup") / "text" / "belong.mbe" / "000_Sheet1.csv")
             if not belong_file.exists():
                 # Try loader's text path
-                belong_file = self.loader.text_path / "belong.mbe" / "00_Sheet1.csv"
+                belong_file = self.loader._resolve_prefixed_file(self.loader.text_path / "belong.mbe" / "000_Sheet1.csv")
             
             if belong_file.exists():
                 rows = self.loader.load_csv(belong_file)
@@ -8468,7 +8592,8 @@ class DigimonEditor(QMainWindow):
         """Populate the skill browser list with all available skills"""
         try:
             # Get all skills from the loader
-            skills_file = self.loader.data_path / "battle_skill.mbe" / "00_battle_skill_list.csv"
+            skills_file = self.loader.data_path / "battle_skill.mbe" / "000_battle_skill_list.csv"
+            skills_file = self._resolve_prefixed_file(skills_file)
             if not skills_file.exists():
                 print(f"Skill file not found: {skills_file}")
                 return
@@ -8521,7 +8646,7 @@ class DigimonEditor(QMainWindow):
             if buff_set_id > 0:
                 # Try to load buff set and display first buff effect
                 try:
-                    buff_set_file = self.loader.data_path / "battle_skill.mbe" / "02_buff_set.csv"
+                    buff_set_file = self.loader._resolve_prefixed_file(self.loader.data_path / "battle_skill.mbe" / "002_buff_set.csv")
                     if buff_set_file.exists():
                         rows = self.loader.load_csv(buff_set_file)
                         # Find the buff set row
@@ -8557,9 +8682,23 @@ class DigimonEditor(QMainWindow):
                 clean_name = self.loader.clean_ui_text(skill_name)
                 self.advanced_skill_name_edit.setText(clean_name if clean_name else "")
                 
+                # Show description (from skill_explanation.mbe if available)
+                description_text = self.loader.get_skill_explanation(skill_id)
+                if description_text:
+                    self.advanced_skill_desc.setPlainText(description_text)
+                else:
+                    self.advanced_skill_desc.setPlainText("No description found for this skill.")
+                
                 # Update all form fields with loaded data
                 self.skill_power_edit.setValue(skill_data.get("power", 0))
                 self.skill_sp_cost_edit.setValue(skill_data.get("sp_cost", 0))
+                self.skill_cp_cost_edit.setValue(skill_data.get("cp_cost", 0))
+                self.skill_animation_id_edit.setValue(skill_data.get("animation_id", 0))
+                self.skill_effect_id_edit.setValue(skill_data.get("effect_id", 0))
+                self.skill_mode_change_edit.setValue(skill_data.get("mode_change_id", 0))
+                self.skill_jogress_skill_edit.setValue(skill_data.get("jogress_skill_id", 0))
+                self.skill_jogress_p1_edit.setValue(skill_data.get("jogress_partner_1", 0))
+                self.skill_jogress_p2_edit.setValue(skill_data.get("jogress_partner_2", 0))
                 self.skill_accuracy_edit.setValue(skill_data.get("accuracy", 0))
                 self.skill_crit_rate_edit.setValue(skill_data.get("crit_rate", 0))
                 
@@ -8610,8 +8749,10 @@ class DigimonEditor(QMainWindow):
                 self.skill_always_hits_check.setChecked(skill_data.get("always_hits", False))
             else:
                 self.advanced_skill_name_edit.setText("Skill not found")
+                self.advanced_skill_desc.setPlainText("")
         else:
             self.advanced_skill_name_edit.setText("")
+            self.advanced_skill_desc.setPlainText("")
     
     def save_advanced_skill(self):
         """Save the current skill data"""
@@ -8625,6 +8766,13 @@ class DigimonEditor(QMainWindow):
             "skill_id": skill_id,
             "power": self.skill_power_edit.value(),
             "sp_cost": self.skill_sp_cost_edit.value(),
+            "cp_cost": self.skill_cp_cost_edit.value(),
+            "animation_id": self.skill_animation_id_edit.value(),
+            "effect_id": self.skill_effect_id_edit.value(),
+            "mode_change_id": self.skill_mode_change_edit.value(),
+            "jogress_skill_id": self.skill_jogress_skill_edit.value(),
+            "jogress_partner_1": self.skill_jogress_p1_edit.value(),
+            "jogress_partner_2": self.skill_jogress_p2_edit.value(),
             "accuracy": self.skill_accuracy_edit.value(),
             "crit_rate": self.skill_crit_rate_edit.value(),
             "damage_type": self.skill_damage_type_combo.currentIndex(),

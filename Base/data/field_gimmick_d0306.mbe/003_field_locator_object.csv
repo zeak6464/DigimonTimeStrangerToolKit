@@ -1,0 +1,7 @@
+int32 0,string3 1,int32 2,string2 3,bool 4,string2 5,int32 6,int32 7,string2 8,string2 9,string2 10,string2 11,string2 12,float 13,float 14,string2 15,float 16,float 17,float 18,float 19,float 20
+10306001,"",-1,"elv_0001",false,"d0306elv00",1,0,"","","","","",0,0,"",0,0,0,0,0
+10306002,"",-1,"gim_0001",false,"d0306elvdoor00",1,0,"","","","","",0,0,"",0,0,0,0,0
+10306003,"",-1,"gim_0002",false,"d0306elvdoor01",1,0,"","","","","",0,0,"",0,0,0,0,0
+10306400,"",99,"theater_0001",false,"f00theaterdoor00",1,0,"","","","","",0,0,"",0,0,0,0,0
+10306401,"",99,"change_0001",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0
+10306402,"",-1,"start_50",false,"f00iconobj00",1,0,"","","","","",0,0,"",0,0,0,0,0

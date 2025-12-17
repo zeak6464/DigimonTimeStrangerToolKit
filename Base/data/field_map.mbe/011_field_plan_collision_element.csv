@@ -1,0 +1,12 @@
+string3 0,bool 1,bool 2,bool 3,bool 4,bool 5,bool 6,bool 7,bool 8
+"plan",false,false,true,false,false,false,false,false
+"evt",true,true,false,false,false,false,false,false
+"cliff_cl",false,false,true,true,false,false,false,false
+"wall_cl",false,false,true,true,true,true,true,true
+"sybl_cl",false,false,false,false,false,false,true,true
+"sybl_grd_cl",false,false,false,false,false,false,true,false
+"sybl_fly_cl",false,false,false,false,false,false,false,true
+"invisible",false,false,false,false,false,true,false,false
+"invisible_wall",false,false,true,true,false,true,true,false
+"cam_cl",false,false,true,true,true,false,false,false
+"hazama_wall",false,false,true,false,false,true,false,false

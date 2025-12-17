@@ -1,0 +1,10 @@
+int32 0,int32 1,string2 2,string2 3,bool 4,bool 5,bool 6,string2 7,string2 8,float 9,float 10,string2 11,string2 12,string2 13,float 14
+101,0,"AREA_OPEN_COSMIC","AREA_CLOSE_COSMIC",true,true,true,"d01digistar","d01digistar",180,15,"w01d1digistarp","gim_0010","gim_0020",10
+102,1,"AREA_OPEN_CENTRAL","AREA_CLOSE_CENTRAL",true,true,true,"d02digistar","d02digistar",0,15,"w01d2digistarp","gim_0010","gim_0020",10
+103,2,"AREA_OPEN_OCEANUS","AREA_CLOSE_OCEANUS",true,true,true,"d03digistar","d03digistar",0,15,"w01d3digistarp","gim_0010","gim_0020",10
+104,3,"AREA_OPEN_MAKEDONIA","AREA_CLOSE_MAKEDONIA",true,true,true,"d04digistar","d04digistar",0,15,"w01d4digistarp","gim_0010","gim_0020",10
+105,4,"AREA_OPEN_FACTREA","AREA_CLOSE_FACTREA",true,true,true,"d05digistar","d05digistar",0,15,"w01d5digistarp","gim_0010","gim_0020",10
+106,5,"AREA_OPEN_ILIAS","AREA_CLOSE_ILIAS",true,true,true,"d06digistar","d06digistar",0,15,"w01d6digistarp","gim_0010","gim_0030",10
+107,6,"AREA_OPEN_PLUTO","AREA_CLOSE_PLUTO",true,true,true,"d07digistar","d07digistar",0,15,"w01d7digistarp","gim_0010","gim_0020",10
+108,7,"AREA_OPEN_DEBUG","AREA_CLOSE_DEBUG",true,true,true,"","",0,15,"","","",15
+999,8,"AREA_OPEN_DEBUG","AREA_CLOSE_DEBUG",false,true,false,"","",0,15,"","","",15
