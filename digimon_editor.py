@@ -2134,10 +2134,13 @@ class EvolutionPage(QWizardPage):
             if dialog.exec() == QDialog.DialogCode.Accepted:
                 selected_item = digimon_list.currentItem()
                 if selected_item:
-                    digimon_id = selected_item.data(Qt.ItemDataRole.UserRole)
-                    chr_id = selected_item.data(Qt.ItemDataRole.UserRole + 1)
-                    if digimon_id and chr_id:
-                        self.add_pre_evolution_source(digimon_id, chr_id)
+                    # Data is stored as a dictionary at role 100
+                    data = selected_item.data(100)
+                    if data:
+                        digimon_id = data.get('id')
+                        chr_id = data.get('chr_id')
+                        if digimon_id and chr_id:
+                            self.add_pre_evolution_source(digimon_id, chr_id)
                 else:
                     # No selection in list - use custom ID
                     custom_id = custom_id_spin.value()
