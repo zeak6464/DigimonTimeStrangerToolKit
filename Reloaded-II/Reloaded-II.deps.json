@@ -6,7 +6,7 @@
   "compilationOptions": {},
   "targets": {
     ".NETCoreApp,Version=v9.0": {
-      "Reloaded-II/1.29.5": {
+      "Reloaded-II/1.29.6": {
         "dependencies": {
           "HandyControl": "3.2.0-reloaded-1.1.0",
           "HandyControl.Lang.en": "3.5.1",
@@ -1233,7 +1233,7 @@
     }
   },
   "libraries": {
-    "Reloaded-II/1.29.5": {
+    "Reloaded-II/1.29.6": {
       "type": "project",
       "serviceable": false,
       "sha512": ""

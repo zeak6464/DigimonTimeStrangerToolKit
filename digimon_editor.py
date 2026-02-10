@@ -12,10 +12,10 @@ from PyQt6.QtWidgets import (
     QScrollArea, QGroupBox, QGridLayout, QCheckBox, QTextEdit,
     QMessageBox, QFileDialog, QTableWidget, QTableWidgetItem, QPlainTextEdit,
     QHeaderView, QSplitter, QListWidget, QListWidgetItem, QDoubleSpinBox, QFormLayout,
-    QDialog, QDialogButtonBox, QWizard, QWizardPage
+    QDialog, QDialogButtonBox, QWizard, QWizardPage, QFrame
 )
 from PyQt6.QtCore import Qt, pyqtSignal
-from PyQt6.QtGui import QFont, QPixmap, QIcon
+from PyQt6.QtGui import QFont, QPixmap, QIcon, QPalette, QColor
 
 from data_loader import MBELoader, DigimonData, DLCExporter
 from csv_exporter import CSVExporter, repack_mbe_files, repack_dlc_mbe_files
@@ -3292,7 +3292,7 @@ class DigimonEditor(QMainWindow):
                 border-radius: 6px;
                 padding: 6px 10px;
                 font-size: 10pt;
-                color: #495057;
+                color: #333333;
             }
             QComboBox:hover {
                 background: #e7f5ff;
@@ -3300,7 +3300,23 @@ class DigimonEditor(QMainWindow):
             QComboBox::drop-down {
                 border: none;
             }
+            QComboBox QAbstractItemView {
+                background: white;
+                color: #333333;
+                selection-background-color: #667eea;
+                selection-color: white;
+            }
+            QComboBox QAbstractItemView::item {
+                color: #333333;
+                padding: 5px;
+            }
         """)
+        # Fix for Windows 11 - explicitly set view palette
+        source_view = self.source_combo.view()
+        source_palette = source_view.palette()
+        source_palette.setColor(QPalette.ColorRole.Text, QColor("#333333"))
+        source_palette.setColor(QPalette.ColorRole.Base, QColor("white"))
+        source_view.setPalette(source_palette)
         source_layout.addWidget(self.source_combo)
         layout.addWidget(source_container)
         
@@ -3350,7 +3366,7 @@ class DigimonEditor(QMainWindow):
                 border-radius: 8px;
                 padding: 10px;
                 font-size: 11pt;
-                color: #495057;
+                color: #333333;
             }
             QComboBox:hover {
                 border-color: #667eea;
@@ -3363,7 +3379,35 @@ class DigimonEditor(QMainWindow):
                 border: none;
                 padding-right: 10px;
             }
+            QComboBox QAbstractItemView {
+                background: white;
+                color: #333333;
+                selection-background-color: #667eea;
+                selection-color: white;
+                border: 1px solid #dee2e6;
+                padding: 5px;
+            }
+            QComboBox QAbstractItemView::item {
+                padding: 8px;
+                color: #333333;
+            }
+            QComboBox QAbstractItemView::item:hover {
+                background-color: #e9ecef;
+                color: #333333;
+            }
+            QComboBox QAbstractItemView::item:selected {
+                background-color: #667eea;
+                color: white;
+            }
         """)
+        # Fix for Windows 11 - explicitly set view palette to ensure text is visible
+        view = self.digimon_list.view()
+        palette = view.palette()
+        palette.setColor(QPalette.ColorRole.Text, QColor("#333333"))
+        palette.setColor(QPalette.ColorRole.Base, QColor("white"))
+        palette.setColor(QPalette.ColorRole.Highlight, QColor("#667eea"))
+        palette.setColor(QPalette.ColorRole.HighlightedText, QColor("white"))
+        view.setPalette(palette)
         layout.addWidget(self.digimon_list)
         
         # Buttons with modern styling
@@ -3951,7 +3995,14 @@ class DigimonEditor(QMainWindow):
     def create_model_tab(self) -> QWidget:
         """Create model and animation tab"""
         tab = QWidget()
-        layout = QVBoxLayout(tab)
+        
+        # Use scroll area for the tab content
+        scroll = QScrollArea()
+        scroll.setWidgetResizable(True)
+        scroll.setFrameShape(QFrame.Shape.NoFrame)
+        
+        scroll_content = QWidget()
+        layout = QVBoxLayout(scroll_content)
         
         # Model Info Group
         model_group = QGroupBox("Model Information")
@@ -3980,6 +4031,93 @@ class DigimonEditor(QMainWindow):
         model_layout.addWidget(anim_note, 3, 0, 1, 2)
         
         layout.addWidget(model_group)
+        
+        # Model Settings Group (from model_setting.mbe)
+        settings_group = QGroupBox("Model Settings (model_setting.mbe)")
+        settings_layout = QGridLayout(settings_group)
+        
+        # Scale settings
+        settings_layout.addWidget(QLabel("<b>Scale Settings</b>"), 0, 0, 1, 4)
+        
+        settings_layout.addWidget(QLabel("Battle Scale:"), 1, 0)
+        self.battle_scale_spin = QDoubleSpinBox()
+        self.battle_scale_spin.setRange(0.0, 100.0)
+        self.battle_scale_spin.setDecimals(3)
+        self.battle_scale_spin.setSingleStep(0.1)
+        self.battle_scale_spin.setValue(1.0)
+        settings_layout.addWidget(self.battle_scale_spin, 1, 1)
+        
+        settings_layout.addWidget(QLabel("Menu Scale:"), 1, 2)
+        self.menu_scale_spin = QDoubleSpinBox()
+        self.menu_scale_spin.setRange(0.0, 100.0)
+        self.menu_scale_spin.setDecimals(3)
+        self.menu_scale_spin.setSingleStep(0.1)
+        self.menu_scale_spin.setValue(1.0)
+        settings_layout.addWidget(self.menu_scale_spin, 1, 3)
+        
+        settings_layout.addWidget(QLabel("Field Scale:"), 2, 0)
+        self.field_scale_spin = QDoubleSpinBox()
+        self.field_scale_spin.setRange(0.0, 100.0)
+        self.field_scale_spin.setDecimals(3)
+        self.field_scale_spin.setSingleStep(0.1)
+        self.field_scale_spin.setValue(1.0)
+        settings_layout.addWidget(self.field_scale_spin, 2, 1)
+        
+        # Collision and Shield
+        settings_layout.addWidget(QLabel("<b>Collision & Shield</b>"), 3, 0, 1, 4)
+        
+        settings_layout.addWidget(QLabel("NPC Collision:"), 4, 0)
+        self.npc_collision_spin = QDoubleSpinBox()
+        self.npc_collision_spin.setRange(0.0, 1000.0)
+        self.npc_collision_spin.setDecimals(3)
+        self.npc_collision_spin.setSingleStep(0.1)
+        settings_layout.addWidget(self.npc_collision_spin, 4, 1)
+        
+        settings_layout.addWidget(QLabel("Shield Size:"), 4, 2)
+        self.shield_size_spin = QDoubleSpinBox()
+        self.shield_size_spin.setRange(0.0, 1000.0)
+        self.shield_size_spin.setDecimals(3)
+        self.shield_size_spin.setSingleStep(0.1)
+        settings_layout.addWidget(self.shield_size_spin, 4, 3)
+        
+        # Distance settings
+        settings_layout.addWidget(QLabel("<b>Distance Settings</b>"), 5, 0, 1, 4)
+        
+        settings_layout.addWidget(QLabel("Agent Distance:"), 6, 0)
+        self.agent_distance_spin = QSpinBox()
+        self.agent_distance_spin.setRange(0, 99999)
+        settings_layout.addWidget(self.agent_distance_spin, 6, 1)
+        
+        settings_layout.addWidget(QLabel("Agent Distance 2:"), 6, 2)
+        self.agent_distance_2_spin = QDoubleSpinBox()
+        self.agent_distance_2_spin.setRange(0.0, 1000.0)
+        self.agent_distance_2_spin.setDecimals(3)
+        self.agent_distance_2_spin.setSingleStep(0.1)
+        settings_layout.addWidget(self.agent_distance_2_spin, 6, 3)
+        
+        settings_layout.addWidget(QLabel("Digimon Distance from Agent:"), 7, 0)
+        self.digimon_distance_spin = QDoubleSpinBox()
+        self.digimon_distance_spin.setRange(0.0, 1000.0)
+        self.digimon_distance_spin.setDecimals(3)
+        self.digimon_distance_spin.setSingleStep(0.1)
+        settings_layout.addWidget(self.digimon_distance_spin, 7, 1)
+        
+        settings_layout.addWidget(QLabel("Camera Distance (Skill):"), 7, 2)
+        self.camera_distance_skill_spin = QDoubleSpinBox()
+        self.camera_distance_skill_spin.setRange(0.0, 1000.0)
+        self.camera_distance_skill_spin.setDecimals(3)
+        self.camera_distance_skill_spin.setSingleStep(0.1)
+        self.camera_distance_skill_spin.setToolTip("Camera distance when selecting a skill (camera faces front of digimon)")
+        settings_layout.addWidget(self.camera_distance_skill_spin, 7, 3)
+        
+        # Rideable checkbox
+        settings_layout.addWidget(QLabel("<b>Other Settings</b>"), 8, 0, 1, 4)
+        
+        self.rideable_checkbox = QCheckBox("Rideable")
+        self.rideable_checkbox.setToolTip("Enable/disable if this Digimon can be ridden")
+        settings_layout.addWidget(self.rideable_checkbox, 9, 0, 1, 2)
+        
+        layout.addWidget(settings_group)
         
         # LOD Data Group
         lod_group = QGroupBox("LOD (Level of Detail) Data")
@@ -4016,6 +4154,13 @@ class DigimonEditor(QMainWindow):
         
         layout.addWidget(ref_group)
         layout.addStretch()
+        
+        scroll.setWidget(scroll_content)
+        
+        # Main tab layout
+        tab_layout = QVBoxLayout(tab)
+        tab_layout.setContentsMargins(0, 0, 0, 0)
+        tab_layout.addWidget(scroll)
         
         return tab
     
@@ -4253,14 +4398,17 @@ class DigimonEditor(QMainWindow):
                 padding: 5px;
                 background-color: white;
                 font-size: 10pt;
+                color: #333333;
             }
             QListWidget::item {
                 padding: 8px;
                 margin: 2px;
                 border-radius: 4px;
+                color: #333333;
             }
             QListWidget::item:hover {
                 background-color: #e7f5ff;
+                color: #333333;
             }
             QListWidget::item:selected {
                 background: qlineargradient(x1:0, y1:0, x2:1, y2:0,
@@ -6104,6 +6252,31 @@ class DigimonEditor(QMainWindow):
         for key, widget in self.lod_widgets.items():
             widget.setValue(int(digimon.lod_data.get(key, 0)))
         
+        # Model settings (from model_setting.mbe)
+        if digimon.model_setting_data:
+            self.battle_scale_spin.setValue(digimon.model_setting_data.get('battle_scale', 1.0))
+            self.menu_scale_spin.setValue(digimon.model_setting_data.get('menu_scale', 1.0))
+            self.field_scale_spin.setValue(digimon.model_setting_data.get('field_scale', 1.0))
+            self.npc_collision_spin.setValue(digimon.model_setting_data.get('npc_collision', 0.0))
+            self.shield_size_spin.setValue(digimon.model_setting_data.get('shield_size', 0.0))
+            self.agent_distance_spin.setValue(digimon.model_setting_data.get('agent_distance', 0))
+            self.agent_distance_2_spin.setValue(digimon.model_setting_data.get('agent_distance_2', 0.0))
+            self.digimon_distance_spin.setValue(digimon.model_setting_data.get('digimon_distance_from_agent', 0.0))
+            self.camera_distance_skill_spin.setValue(digimon.model_setting_data.get('camera_distance_skill', 0.0))
+            self.rideable_checkbox.setChecked(digimon.model_setting_data.get('rideable', 0) != 0)
+        else:
+            # Reset to defaults if no model_setting data
+            self.battle_scale_spin.setValue(1.0)
+            self.menu_scale_spin.setValue(1.0)
+            self.field_scale_spin.setValue(1.0)
+            self.npc_collision_spin.setValue(0.0)
+            self.shield_size_spin.setValue(0.0)
+            self.agent_distance_spin.setValue(0)
+            self.agent_distance_2_spin.setValue(0.0)
+            self.digimon_distance_spin.setValue(0.0)
+            self.camera_distance_skill_spin.setValue(0.0)
+            self.rideable_checkbox.setChecked(False)
+        
         # References
         self.field_guide_id_spin.setValue(digimon.field_guide_id)
         self.script_id_spin.setValue(digimon.script_id)
@@ -6330,9 +6503,11 @@ class DigimonEditor(QMainWindow):
                     digimon.res_dark = int(row[17]) if row[17] else 0
                 
                 # Parse traits (columns 19-60)
+                # Handle multiple boolean formats: "true", "True", "1", "TRUE"
                 digimon.traits = []
                 for i in range(19, min(61, len(row))):
-                    digimon.traits.append(row[i].lower() == 'true')
+                    val = row[i].strip().lower() if row[i] else ''
+                    digimon.traits.append(val in ('true', '1', 'yes'))
                 
                 # Parse base stats (columns 64-70)
                 if len(row) > 70:
@@ -6523,7 +6698,60 @@ class DigimonEditor(QMainWindow):
                     header = next(reader)  # Skip header
                     for row in reader:
                         if len(row) >= 1 and row[0].strip('"') == chr_id:
-                            return {'raw_data': row}
+                            result = {'raw_data': row}
+                            # Parse known fields from model_setting.mbe
+                            # Column indices based on research findings
+                            if len(row) > 10:
+                                try:
+                                    result['npc_collision'] = float(row[10]) if row[10] else 0.0
+                                except (ValueError, TypeError):
+                                    result['npc_collision'] = 0.0
+                            if len(row) > 38:
+                                try:
+                                    result['digimon_distance_from_agent'] = float(row[38]) if row[38] else 0.0
+                                except (ValueError, TypeError):
+                                    result['digimon_distance_from_agent'] = 0.0
+                            if len(row) > 39:
+                                try:
+                                    result['agent_distance_2'] = float(row[39]) if row[39] else 0.0
+                                except (ValueError, TypeError):
+                                    result['agent_distance_2'] = 0.0
+                            if len(row) > 40:
+                                try:
+                                    result['agent_distance'] = int(row[40]) if row[40] else 0
+                                except (ValueError, TypeError):
+                                    result['agent_distance'] = 0
+                            if len(row) > 43:
+                                try:
+                                    result['camera_distance_skill'] = float(row[43]) if row[43] else 0.0
+                                except (ValueError, TypeError):
+                                    result['camera_distance_skill'] = 0.0
+                            if len(row) > 47:
+                                try:
+                                    result['shield_size'] = float(row[47]) if row[47] else 0.0
+                                except (ValueError, TypeError):
+                                    result['shield_size'] = 0.0
+                            if len(row) > 56:
+                                try:
+                                    result['battle_scale'] = float(row[56]) if row[56] else 1.0
+                                except (ValueError, TypeError):
+                                    result['battle_scale'] = 1.0
+                            if len(row) > 58:
+                                try:
+                                    result['menu_scale'] = float(row[58]) if row[58] else 1.0
+                                except (ValueError, TypeError):
+                                    result['menu_scale'] = 1.0
+                            if len(row) > 59:
+                                try:
+                                    result['field_scale'] = float(row[59]) if row[59] else 1.0
+                                except (ValueError, TypeError):
+                                    result['field_scale'] = 1.0
+                            if len(row) > 71:
+                                try:
+                                    result['rideable'] = int(row[71]) if row[71] else 0
+                                except (ValueError, TypeError):
+                                    result['rideable'] = 0
+                            return result
             except:
                 continue
         return {}
@@ -7173,6 +7401,47 @@ class DigimonEditor(QMainWindow):
         
         for key, widget in self.lod_widgets.items():
             self.current_digimon.lod_data[key] = widget.value()
+        
+        # Model settings (from model_setting.mbe)
+        if not hasattr(self.current_digimon, 'model_setting_data') or not self.current_digimon.model_setting_data:
+            self.current_digimon.model_setting_data = {}
+        
+        # Update parsed fields from UI
+        self.current_digimon.model_setting_data['battle_scale'] = self.battle_scale_spin.value()
+        self.current_digimon.model_setting_data['menu_scale'] = self.menu_scale_spin.value()
+        self.current_digimon.model_setting_data['field_scale'] = self.field_scale_spin.value()
+        self.current_digimon.model_setting_data['npc_collision'] = self.npc_collision_spin.value()
+        self.current_digimon.model_setting_data['shield_size'] = self.shield_size_spin.value()
+        self.current_digimon.model_setting_data['agent_distance'] = self.agent_distance_spin.value()
+        self.current_digimon.model_setting_data['agent_distance_2'] = self.agent_distance_2_spin.value()
+        self.current_digimon.model_setting_data['digimon_distance_from_agent'] = self.digimon_distance_spin.value()
+        self.current_digimon.model_setting_data['camera_distance_skill'] = self.camera_distance_skill_spin.value()
+        self.current_digimon.model_setting_data['rideable'] = 1 if self.rideable_checkbox.isChecked() else 0
+        
+        # Update raw_data array if it exists
+        if 'raw_data' in self.current_digimon.model_setting_data:
+            raw_data = self.current_digimon.model_setting_data['raw_data']
+            # Update specific columns based on research findings
+            if len(raw_data) > 10:
+                raw_data[10] = str(self.npc_collision_spin.value())
+            if len(raw_data) > 38:
+                raw_data[38] = str(self.digimon_distance_spin.value())
+            if len(raw_data) > 39:
+                raw_data[39] = str(self.agent_distance_2_spin.value())
+            if len(raw_data) > 40:
+                raw_data[40] = str(self.agent_distance_spin.value())
+            if len(raw_data) > 43:
+                raw_data[43] = str(self.camera_distance_skill_spin.value())
+            if len(raw_data) > 47:
+                raw_data[47] = str(self.shield_size_spin.value())
+            if len(raw_data) > 56:
+                raw_data[56] = str(self.battle_scale_spin.value())
+            if len(raw_data) > 58:
+                raw_data[58] = str(self.menu_scale_spin.value())
+            if len(raw_data) > 59:
+                raw_data[59] = str(self.field_scale_spin.value())
+            if len(raw_data) > 71:
+                raw_data[71] = str(1 if self.rideable_checkbox.isChecked() else 0)
         
         # Evolution data - FIX: Save evolution paths from evolution tab
         # Note: Evolution paths are managed through add_evolution/remove_evolution methods
@@ -8823,6 +9092,61 @@ def main():
     # Set application properties
     app.setApplicationName("DTS Creator")
     app.setApplicationVersion("1.0")
+    
+    # Fix for Windows 11 - Set global palette to ensure text is visible
+    palette = app.palette()
+    palette.setColor(QPalette.ColorRole.WindowText, QColor("#333333"))
+    palette.setColor(QPalette.ColorRole.Text, QColor("#333333"))
+    palette.setColor(QPalette.ColorRole.ButtonText, QColor("#333333"))
+    palette.setColor(QPalette.ColorRole.Base, QColor("white"))
+    palette.setColor(QPalette.ColorRole.Window, QColor("#f8f9fa"))
+    palette.setColor(QPalette.ColorRole.Highlight, QColor("#667eea"))
+    palette.setColor(QPalette.ColorRole.HighlightedText, QColor("white"))
+    palette.setColor(QPalette.ColorRole.PlaceholderText, QColor("#999999"))
+    app.setPalette(palette)
+    
+    # Global stylesheet to ensure text visibility on Windows 11
+    app.setStyleSheet("""
+        QComboBox, QListWidget, QLineEdit, QTextEdit, QPlainTextEdit, QSpinBox, QDoubleSpinBox {
+            color: #333333;
+            background-color: white;
+        }
+        QComboBox QAbstractItemView {
+            color: #333333;
+            background-color: white;
+            selection-background-color: #667eea;
+            selection-color: white;
+        }
+        QComboBox QAbstractItemView::item {
+            color: #333333;
+        }
+        QListWidget::item {
+            color: #333333;
+        }
+        QListWidget::item:selected {
+            color: white;
+            background-color: #667eea;
+        }
+        QTableWidget {
+            color: #333333;
+            background-color: white;
+        }
+        QTableWidget::item {
+            color: #333333;
+        }
+        QLabel {
+            color: #333333;
+        }
+        QGroupBox {
+            color: #333333;
+        }
+        QCheckBox {
+            color: #333333;
+        }
+        QRadioButton {
+            color: #333333;
+        }
+    """)
     
     # Create and show main window
     window = DigimonEditor()

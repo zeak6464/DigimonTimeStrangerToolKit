@@ -427,10 +427,12 @@ class MBELoader:
                 digimon.generic_skills.append({"id": skill_id, "level": skill_level})
         
         # Traits (boolean flags starting from traitsBaseIdx)
+        # Handle multiple boolean formats: "1", "true", "True", "TRUE"
         traits_start = headers["traitsBaseIdx"]
         for i in range(41):  # 41 trait flags
             if traits_start + i < len(digimon_row):
-                trait_value = digimon_row[traits_start + i] == "1"
+                val = digimon_row[traits_start + i].strip().lower() if digimon_row[traits_start + i] else ''
+                trait_value = val in ('1', 'true', 'yes')
                 digimon.traits.append(trait_value)
         
         # Field guide and script IDs
@@ -649,6 +651,69 @@ class MBELoader:
                     digimon.model_id = row[10].strip('"') if len(row) > 10 else ""
                     break
     
+    def _parse_model_setting_row(self, row: list) -> dict:
+        """Parse a model_setting.mbe row into a dictionary with known fields"""
+        result = {
+            "chr_id": row[0] if len(row) > 0 else "",
+            "raw_data": row  # Store full row for export
+        }
+        # Parse known fields from model_setting.mbe based on research findings
+        # Column indices: float 10 = NPC collision, float 38 = digimon distance from agent,
+        # float 39 = agent distance 2, int32 40 = agent distance, float 43 = camera distance skill,
+        # float 47 = shield size, float 56 = battle scale, float 58 = menu scale,
+        # float 59 = field scale, int32 71 = rideable
+        if len(row) > 10:
+            try:
+                result['npc_collision'] = float(row[10]) if row[10] else 0.0
+            except (ValueError, TypeError):
+                result['npc_collision'] = 0.0
+        if len(row) > 38:
+            try:
+                result['digimon_distance_from_agent'] = float(row[38]) if row[38] else 0.0
+            except (ValueError, TypeError):
+                result['digimon_distance_from_agent'] = 0.0
+        if len(row) > 39:
+            try:
+                result['agent_distance_2'] = float(row[39]) if row[39] else 0.0
+            except (ValueError, TypeError):
+                result['agent_distance_2'] = 0.0
+        if len(row) > 40:
+            try:
+                result['agent_distance'] = int(row[40]) if row[40] else 0
+            except (ValueError, TypeError):
+                result['agent_distance'] = 0
+        if len(row) > 43:
+            try:
+                result['camera_distance_skill'] = float(row[43]) if row[43] else 0.0
+            except (ValueError, TypeError):
+                result['camera_distance_skill'] = 0.0
+        if len(row) > 47:
+            try:
+                result['shield_size'] = float(row[47]) if row[47] else 0.0
+            except (ValueError, TypeError):
+                result['shield_size'] = 0.0
+        if len(row) > 56:
+            try:
+                result['battle_scale'] = float(row[56]) if row[56] else 1.0
+            except (ValueError, TypeError):
+                result['battle_scale'] = 1.0
+        if len(row) > 58:
+            try:
+                result['menu_scale'] = float(row[58]) if row[58] else 1.0
+            except (ValueError, TypeError):
+                result['menu_scale'] = 1.0
+        if len(row) > 59:
+            try:
+                result['field_scale'] = float(row[59]) if row[59] else 1.0
+            except (ValueError, TypeError):
+                result['field_scale'] = 1.0
+        if len(row) > 71:
+            try:
+                result['rideable'] = int(row[71]) if row[71] else 0
+            except (ValueError, TypeError):
+                result['rideable'] = 0
+        return result
+    
     def _load_model_setting_data(self, digimon: DigimonData):
         """Load model setting data - checks both base game and DLC"""
         # Check base game first
@@ -658,11 +723,8 @@ class MBELoader:
             for row in model_rows[1:]:  # Skip header
                 if len(row) > 0 and (row[0].strip('"') == digimon.chr_id.strip('"')):
                     digimon.model_id = row[0]
-                    # Store full model setting data
-                    digimon.model_setting_data = {
-                        "chr_id": row[0] if len(row) > 0 else "",
-                        "raw_data": row  # Store full row for export
-                    }
+                    # Store full model setting data with parsed fields
+                    digimon.model_setting_data = self._parse_model_setting_row(row)
                     return
         
         # Check DLC files if not found in base game
@@ -674,10 +736,7 @@ class MBELoader:
             for row in model_rows[1:]:  # Skip header
                 if len(row) > 0 and (row[0].strip('"') == digimon.chr_id.strip('"')):
                     digimon.model_id = row[0]
-                    digimon.model_setting_data = {
-                        "chr_id": row[0] if len(row) > 0 else "",
-                        "raw_data": row
-                    }
+                    digimon.model_setting_data = self._parse_model_setting_row(row)
                     break
     
     def _load_model_locator_data(self, digimon: DigimonData):
@@ -1446,6 +1505,7 @@ class MBELoader:
             # Also update name and profile files for existing Digimon
             self._update_char_name_file(digimon)
             self._update_digimon_profile_file(digimon)
+            self._update_model_setting_file(digimon)
             
             # Invalidate cache after saving
             self._invalidate_digimon_status_cache()
@@ -1550,6 +1610,37 @@ class MBELoader:
             with open(profile_file, 'w', encoding='utf-8') as f:
                 for row in rows:
                     f.write(','.join(row) + '\n')
+    
+    def _update_model_setting_file(self, digimon: DigimonData):
+        """Update existing Digimon in model_setting.mbe/000_model_setting.csv"""
+        model_setting_file = self._resolve_prefixed_file(self.data_path / "model_setting.mbe" / "000_model_setting.csv")
+        if not model_setting_file.exists():
+            return
+        
+        # Skip if no model_setting_data with raw_data
+        if not digimon.model_setting_data or not digimon.model_setting_data.get('raw_data'):
+            return
+        
+        rows = self.load_csv(model_setting_file)
+        chr_id_clean = digimon.chr_id.strip('"')
+        
+        # Find and update existing entry
+        entry_found = False
+        for i, row in enumerate(rows[1:], 1):  # Skip header
+            if len(row) > 0 and row[0].strip('"') == chr_id_clean:
+                # Use the raw_data which has been updated with the new values
+                rows[i] = digimon.model_setting_data['raw_data'].copy()
+                # Ensure chr_id is properly quoted
+                rows[i][0] = f'"{chr_id_clean}"'
+                entry_found = True
+                break
+        
+        # Write back to file if updated
+        if entry_found:
+            with open(model_setting_file, 'w', encoding='utf-8') as f:
+                for row in rows:
+                    f.write(','.join(row) + '\n')
+            print(f"Updated model_setting for {digimon.chr_id}")
     
     def _add_to_char_info_file(self, digimon: DigimonData):
         """Add new Digimon to char_info.mbe/000_char_info.csv"""
@@ -3402,16 +3493,14 @@ class DLCExporter:
             # Use digimon's loaded model_setting_data if available
             template_row = None
             if digimon.model_setting_data and digimon.model_setting_data.get('raw_data'):
-                # Use raw_data directly if available (preserves all columns)
+                # Use raw_data directly if available (preserves all columns including user-edited fields)
                 template_row = digimon.model_setting_data['raw_data'].copy()
-                # Update chr_id
+                # Update chr_id (column 0)
                 if len(template_row) > 0:
                     template_row[0] = f'"{digimon.chr_id}"'
-                # Update model_id and motion_id if they were changed in the UI
-                if len(template_row) > 8:
-                    template_row[8] = f'"{digimon.motion_id}"' if digimon.motion_id else '""'
-                if len(template_row) > 10:
-                    template_row[10] = f'"{digimon.model_id}"' if digimon.model_id else '""'
+                # Note: Columns 8 and 10 are float values (NOT model_id/motion_id)
+                # model_id and motion_id are stored in char_info.mbe, not model_setting.mbe
+                # The raw_data already contains the correct values from update_digimon_from_form
             elif digimon.model_setting_data and digimon.model_setting_data.get('chr_id'):
                 # Reconstruct row from loaded data
                 model_data = digimon.model_setting_data
